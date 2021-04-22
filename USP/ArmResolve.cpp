@@ -110,15 +110,15 @@ theta_deg_pack MechnicalArm::match_solve()
 	return solve;
 }
 
-bool MechnicalArm::IKP_Input(Matrix& Mat, double* a[6], double* d[6],double* interval[6][2])
+bool MechnicalArm::IKP_Input(Matrix& Mat, double a[6], double d[6],double interval[6][2])
 {
 	T0_6 = Mat;
 	for (int i = 0; i < 6; i++)
 	{
-		dh_model[i].a = *a[i];
-		dh_model[i].d = *d[i];
-		dh_model[i].min_deg = *interval[i][0];
-		dh_model[i].max_deg = *interval[i][1];
+		dh_model[i].a = a[i];
+		dh_model[i].d = d[i];
+		dh_model[i].min_deg = interval[i][0];
+		dh_model[i].max_deg = interval[i][1];
 	}
 	return true;
 }
