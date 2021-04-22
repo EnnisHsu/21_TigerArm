@@ -30,7 +30,7 @@ class MechnicalArm
 
 		~MechnicalArm();
 
-		bool IKP_Input(Matrix& Mat,double* a[6],double* d[6]);
+		bool IKP_Input(Matrix& Mat,double* a[6],double* d[6],double* interval[6][2]);
 		int cal();
 		theta_deg_pack match_solve();
 	private:

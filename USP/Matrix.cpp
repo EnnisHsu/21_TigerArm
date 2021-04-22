@@ -89,7 +89,7 @@ Matrix& Matrix::operator += (const Matrix& A) //overloading +=
         if ( (this->rows != A.rows) || (this->columns != A.columns))
 	{
 		//cerr << "Size mismatch in matrix addition" << endl;
-		throw logic_error ("Size mismatch in matrix addition");
+//		throw logic_error ("Size mismatch in matrix addition");
 	}
         for(int i=0;i<A.columns*A.rows;i++)
             this->buf[i]+=A.buf[i];
@@ -102,7 +102,7 @@ Matrix& Matrix::operator -=(const Matrix& A) //overloading -=
         if ( (this->rows != A.rows) || (this->columns != A.columns))
 	{
 		//cerr << "Size mismatch in matrix addition" << endl;
-		throw logic_error ("Size mismatch in matrix addition");
+//		throw logic_error ("Size mismatch in matrix addition");
 	}
         for(int i=0;i<A.columns*A.rows;i++)
             this->buf[i]-=A.buf[i];
@@ -110,9 +110,9 @@ Matrix& Matrix::operator -=(const Matrix& A) //overloading -=
 }
 Matrix& Matrix::operator *=(const Matrix& A) //overloading *=
 {
-        if(!A.buf)    throw logic_error (" You are Multipling Empty Matrix");
-        if(this->columns!=A.rows)    throw logic_error ("Size Mismatch!");
-        if(A.columns==0||A.rows==0||this->columns==0||this->rows==0)  throw logic_error ("go check your weried matrix first");
+     //   if(!A.buf)    throw logic_error (" You are Multipling Empty Matrix");
+     //   if(this->columns!=A.rows)    throw logic_error ("Size Mismatch!");
+     //   if(A.columns==0||A.rows==0||this->columns==0||this->rows==0)  throw logic_error ("go check your weried matrix first");
        // Matrix tmp(*this);
         //delete[] this->buf;
         //this->buf= new double[this->rows*A.columns];
@@ -131,7 +131,7 @@ Matrix& Matrix::operator *=(const Matrix& A) //overloading *=
 }
 Matrix& Matrix::operator *=(double a) //overloading *=
 {
-      	if(!this->buf)	throw logic_error ("please Check your empty Matrix first");
+    //  	if(!this->buf)	throw logic_error ("please Check your empty Matrix first");
         for(int i=0;i<columns*rows;i++)
             {
              this->buf[i]*=a;
@@ -146,7 +146,7 @@ Matrix Matrix::operator - () //unary -
 {
 	if ((this->rows == 0) || (this->columns == 0) )
 	{
-		throw invalid_argument ("Missing matrix data");
+		//throw invalid_argument ("Missing matrix data");
 	}
 	Matrix tmp(this->rows, this->columns);
 	for (int i=0; i<rows*columns; ++i)
@@ -157,8 +157,8 @@ Matrix Matrix::operator - () //unary -
 }
 double& Matrix::operator ()( int i,  int j)// access (i,j)
 {
-        if(i>this->rows||j>this->columns)   throw logic_error ("Matrix is not this big");
-        if(i<=0||j<=0)	throw logic_error ("can not access, your index is wrong");
+    //    if(i>this->rows||j>this->columns)   throw logic_error ("Matrix is not this big");
+     //   if(i<=0||j<=0)	throw logic_error ("can not access, your index is wrong");
 	return buf[(i-1)*columns+(j-1)]; // is this correct? Unsafe
 }
 double& Matrix::operator()( int i,  int j) const //read only
@@ -232,14 +232,14 @@ double Matrix::Cofactor(int i, int j) //cofactor Cij
 {
         double tmp;
         tmp=this->Minor(i,j);
-        tmp=pow(-1,(i+j))*tmp;
+    //    tmp=pow(-1,(i+j))*tmp;
 //	double tmp;
 	return tmp;
 }
 Matrix Matrix::Cofactor()//matrix of cofactors
 {
 
-	if(!this->buf)    throw logic_error (" Empty Matrix ");
+	//if(!this->buf)    throw logic_error (" Empty Matrix ");
 	Matrix tmp(this->rows, this->columns); 
         for (int i=1;i<=this->rows;i++)
               {
@@ -297,7 +297,7 @@ Matrix Matrix::Transpose()  //transpose
 	if ((this->GetRows() == 0) || (this->GetColumns() == 0) )
 	{
 		//cerr << "Missing matrix data" << endl;
-		throw invalid_argument ("Missing matrix data");
+		//throw invalid_argument ("Missing matrix data");
 	}
 	
 	Matrix tmp(this->GetColumns(), this->GetRows());
@@ -312,12 +312,13 @@ Matrix Matrix::Inverse()//Inverse Matrix
 {
 	Matrix tmp;
         if((*this).GetRows()!=(*this).GetColumns())
-           {throw logic_error ("Solving for Inverse fail: Not a square    matrix!");
+           {
+						 //throw logic_error ("Solving for Inverse fail: Not a square    matrix!");
             //return (*this);
            }
         if(fabs(this->det()-0)<0.000000001)
            {
-             throw logic_error ("determinant equal to zero, can not do inverse");
+     //        throw logic_error ("determinant equal to zero, can not do inverse");
            }
         Matrix A;
         A=this->Adjugate();   
@@ -361,8 +362,8 @@ Matrix Matrix::Identity( int n)//make a nxn identity matrix,change "this"
 {
        // if(n==0) return false;
 
-        if(n<=0)
-	     throw invalid_argument ("argument has to be larger than 0");
+     //   if(n<=0)
+	  //   throw invalid_argument ("argument has to be larger than 0");
 
 	this->rows=n;
 	this->columns=n;
@@ -383,8 +384,8 @@ Matrix Matrix::Identity( int n)//make a nxn identity matrix,change "this"
 }
 Matrix Matrix::Identity()//make a identity matrix, does not change the dimentsion, change "this"
 {
-	if(this->GetRows()!=this->GetColumns() || this->GetRows()==0)
-	   	     throw logic_error ("Check your matrix . Matrix has to be squre ");
+	//if(this->GetRows()!=this->GetColumns() || this->GetRows()==0)
+	//   	     throw logic_error ("Check your matrix . Matrix has to be squre ");
 	int a;
 	int b;
 	for(a=0;a<this->GetRows();a++)
@@ -760,8 +761,8 @@ bool Matrix::QR(Matrix& Q, Matrix& R)
 }
 double Matrix::det()//determinant(Matrix)
 {
-        if(this->rows!=this->columns)
-       	     throw logic_error ("Matrix has to be square to find det");
+  //      if(this->rows!=this->columns)
+  //     	     throw logic_error ("Matrix has to be square to find det");
 	int r=this->GetRows();	
 	double tmp=1;
 	Matrix L,U;
@@ -801,8 +802,8 @@ double Matrix::det()//determinant(Matrix)
 }
 Matrix Matrix::Eigenvalues()//find the eigen values and store them in a vector (mx1 Matrix)
 {
-	if(this->IsSingular() || this->rows!=this->columns)  
-		throw logic_error ("Matrix has to be square and not singular");
+	//if(this->IsSingular() || this->rows!=this->columns)  
+	//	throw logic_error ("Matrix has to be square and not singular");
 	Matrix tmp,B,Q,R;
 	int i,j,m=0;
 	B=*this;
@@ -834,8 +835,8 @@ Matrix Matrix::Eigenvalues()//find the eigen values and store them in a vector (
 }
 Matrix Matrix::Root(const Matrix& b)//solving linear system of equations. b is actually a vector (mx1 Matrix) 
 {
-        if(b.rows!=this->GetRows() || this->det()==0)  
-		throw logic_error ("two matrices should have same rows and cannot be Singular");	
+  //      if(b.rows!=this->GetRows() || this->det()==0)  
+	//	throw logic_error ("two matrices should have same rows and cannot be Singular");	
 	Matrix tmp;
 	tmp=(this->Inverse());
 	tmp=tmp*b;
