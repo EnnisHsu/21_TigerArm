@@ -24,7 +24,59 @@ void convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis,Matrix& Matrix_ans)
 	Matrix_ans(4, 4) = 1;
 }*/
 
-int MechnicalArm::cal()
+/**
+*input Tw_c,T6_g
+*/
+int MechanicalArm::Init(Matrix Tw_c,Matrix T6_g)
+{
+	this->Tw_c = Tw_c;
+	this->T6_g = T6_g;
+	return 1;
+}
+
+/**
+* 
+*/
+int MechanicalArm::getVision(Matrix Tc_g)
+{
+	this->Tc_g = Tc_g;
+	return 1;
+}
+/** 
+* input dh numbuer (T0_6)
+*填写dhtable的参数(alpha不需要 )(T0_6)
+*/ 
+bool MechanicalArm::IKP_Input(double a[6], double d[6],double interval[6][2])
+{
+	for (int i = 0; i < 6; i++)
+	{
+		dh_model[i].a = a[i];
+		dh_model[i].d = d[i];
+		dh_model[i].min_deg = interval[i][0];
+		dh_model[i].max_deg = interval[i][1];
+	}
+	return true;
+}
+/**
+*cal T0_6
+*计算T0_6 
+*return 1 if success
+*/
+int MechanicalArm::solveT0_6()
+{
+	Matrix Tw_g;//world_goal
+	Tw_g = Tw_c*Tc_g;
+	Matrix T6_g_I;//T6_g inverse
+	T6_g_I = T6_g.Inverse();
+	Matrix Tw_6 = Tw_g*T6_g_I;
+	T0_6 = Tw_6;//if define axis0 == axisw
+	return 1;
+}
+/**
+*PUMA machenical IK resolve
+*PUMA机械臂的逆运动学解算 
+*/
+int MechanicalArm::cal()
 {
 	double p_x = this->T0_6(1, 4), p_y = this->T0_6(2, 4), p_z = this->T0_6(3, 4);
 	double r13 = this->T0_6(1, 3), r23 = this->T0_6(2, 3), r33 = this->T0_6(3, 3);
@@ -67,14 +119,19 @@ int MechnicalArm::cal()
 				//convert to degree
 				theta[4 * i + 2 * j][0] = theta1 * 180 / PI;
 				theta[4 * i + 2 * j + 1][0] = theta1 * 180 / PI;
+				
 				theta[4 * i + 2 * j][1] = theta2 * 180 / PI;
 				theta[4 * i + 2 * j + 1][1] = theta2 * 180 / PI;
+				
 				theta[4 * i + 2 * j][2] = theta3 * 180 / PI;
 				theta[4 * i + 2 * j + 1][2] = theta3 * 180 / PI;
+				
 				theta[4 * i + 2 * j][3] = theta4 * 180 / PI;
 				theta[4 * i + 2 * j + 1][3] = theta4 * 180 / PI + 180;
+				
 				theta[4 * i + 2 * j][4] = theta5 * 180 / PI;
 				theta[4 * i + 2 * j + 1][4] = -theta5 * 180 / PI;
+				
 				theta[4 * i + 2 * j][5] = theta6 * 180 / PI;
 				theta[4 * i + 2 * j + 1][5] = theta6 * 180 / PI + 180;
 			//}
@@ -82,8 +139,11 @@ int MechnicalArm::cal()
 	}
 	return 1;
 }
-
-theta_deg_pack MechnicalArm::match_solve()
+/**
+*check the feasibility of solve
+*检查解是否超过关节限位 
+*/ 
+theta_deg_pack MechanicalArm::match_solve()
 {
 	theta_deg_pack solve;
 	bool flag;
@@ -108,17 +168,4 @@ theta_deg_pack MechnicalArm::match_solve()
 		}
 	}
 	return solve;
-}
-
-bool MechnicalArm::IKP_Input(Matrix& Mat, double a[6], double d[6],double interval[6][2])
-{
-	T0_6 = Mat;
-	for (int i = 0; i < 6; i++)
-	{
-		dh_model[i].a = a[i];
-		dh_model[i].d = d[i];
-		dh_model[i].min_deg = interval[i][0];
-		dh_model[i].max_deg = interval[i][1];
-	}
-	return true;
 }
