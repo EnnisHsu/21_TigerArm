@@ -1,5 +1,4 @@
 #include "ArmResolve.h"
-#include "Matrix.h"
 
 /*DH_MODEL_Typedef axis_1, axis_2, axis_3;
 Matrix Matrix_1(4, 4), Matrix_2(4, 4), Matrix_3(4, 4);
@@ -37,7 +36,7 @@ int MechanicalArm::Init(Matrix Tw_c,Matrix T6_g)
 /**
 * 
 */
-int MechanicalArm::getVision(Matrix Tc_g)
+int MechanicalArm::SetVision(Matrix Tc_g)
 {
 	this->Tc_g = Tc_g;
 	return 1;
@@ -46,7 +45,7 @@ int MechanicalArm::getVision(Matrix Tc_g)
 * input dh numbuer (T0_6)
 *填写dhtable的参数(alpha不需要 )(T0_6)
 */ 
-bool MechanicalArm::IKP_Input(double a[6], double d[6],double interval[6][2])
+bool MechanicalArm::Set_DHModel_Config(double a[6], double d[6],double interval[6][2])
 {
 	for (int i = 0; i < 6; i++)
 	{
@@ -76,7 +75,7 @@ int MechanicalArm::solveT0_6()
 *PUMA machenical IK resolve
 *PUMA机械臂的逆运动学解算 
 */
-int MechanicalArm::cal()
+bool MechanicalArm::IK_cal()
 {
 	double p_x = this->T0_6(1, 4), p_y = this->T0_6(2, 4), p_z = this->T0_6(3, 4);
 	double r13 = this->T0_6(1, 3), r23 = this->T0_6(2, 3), r33 = this->T0_6(3, 3);
@@ -137,15 +136,6 @@ int MechanicalArm::cal()
 			//}
 		}
 	}
-	return 1;
-}
-/**
-*check the feasibility of solve
-*检查解是否超过关节限位 
-*/ 
-theta_deg_pack MechanicalArm::match_solve()
-{
-	theta_deg_pack solve;
 	bool flag;
 	for (int i = 0; i < 8; i++)
 	{
@@ -162,10 +152,44 @@ theta_deg_pack MechanicalArm::match_solve()
 		{
 			for (int j = 0; j < 6; j++)
 			{
-				solve.deg[j] = theta[i][j];
+				target_deg.deg[j] = theta[i][j];
 			}
-			break;
+			return true;
 		}
 	}
-	return solve;
+	return false;
+}
+
+theta_deg_pack MechanicalArm::get_IK_ans()
+{
+	return target_deg;
+}
+
+theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
+{
+	double t=now_time-last_IP_time;
+	for (int i=0;i<6;i++)
+	{
+		curtarget_deg.deg[i]=joint_IP_data[i].a[0]+joint_IP_data[i].a[1]*t+joint_IP_data[i].a[2]*t*t+joint_IP_data[i].a[3]*t*t*t;
+	}
+	return curtarget_deg;
+}
+
+void MechanicalArm::Set_Cubic_IP_Config(theta_deg_pack* cur)
+{
+	this->update(cur);
+	for (int i=0;i<6;i++)
+	{
+		joint_IP_data[i].a[0]=current_deg.deg[i];
+		joint_IP_data[i].a[1]=0.0f;
+		joint_IP_data[i].a[2]=3.0f*(target_deg.deg[i]-current_deg.deg[i])/(tf*tf);
+		joint_IP_data[i].a[4]=-2.0f*(target_deg.deg[i]-current_deg.deg[i])/(tf*tf*tf);
+	}
+}
+
+void MechanicalArm::update(theta_deg_pack* cur)
+{
+	for (int i=0;i<6;i++)
+		current_deg.deg[i]=cur->deg[i];
+	return;
 }
