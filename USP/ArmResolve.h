@@ -2,6 +2,7 @@
 #define _ArmResolve_H_
 
 #include "Matrix.h"
+#include <cmath> 
 
 #define a(n) this->dh_model[n].a
 #define d(n) this->dh_model[n].d
@@ -21,23 +22,27 @@ struct theta_deg_pack
 	double deg[6];
 };
 
-class MechnicalArm
+class MechanicalArm
 {
 	public:
-		MechnicalArm();
+		MechanicalArm();
 		//MechnicalArm(int n);
+		~MechanicalArm();
 
-
-		~MechnicalArm();
-
-		bool IKP_Input(Matrix& Mat,double a[6],double d[6],double interval[6][2]);
+		int Init(Matrix Tw_c,Matrix T6_g);
+		bool IKP_Input(double a[6],double d[6],double interval[6][2]);
 		int cal();
+		int solveT0_6();
+		int getVision(Matrix Tc_g);
 		theta_deg_pack match_solve();
 	private:
 		//int n_axis;
 		DH_MODEL_Typedef dh_model[6];
 		double theta[8][6];
 		Matrix T0_6;
+		Matrix Tc_g;//camera_goal
+		Matrix Tw_c;//world_camera
+		Matrix T6_g;//6_goal
 
 };
 

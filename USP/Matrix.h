@@ -7,6 +7,7 @@
 //#include <vector>
 //#include <exception>
 using namespace std;
+
 //----------------------------Definition of a Matrix class-----------------------------------------------
 
 class Matrix 
