@@ -4,10 +4,11 @@
 #ifdef __cplusplus
 	#include "SRML.h"
 	#include "Dog_Motor.h"
+	
 	extern "C"
 {
 #endif
-
+ 
 #include "System_DataPool.h"
 	
 void Service_MotoCtrl_Init();

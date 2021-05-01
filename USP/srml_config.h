@@ -6,7 +6,7 @@ extern "C" {
 #endif
 /* Drivers ----------------------------------------------------*/
 #define USE_SRML_REFEREE                  0
-#define USE_SRML_MOTOR                    1
+#define USE_SRML_DJI_MOTOR                1
 #define USE_SRML_DR16                     1
 #define USE_SRML_BMX055                   0
 #define USE_SRML_MPU6050                  1

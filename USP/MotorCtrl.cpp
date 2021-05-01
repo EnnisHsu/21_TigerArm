@@ -1,5 +1,6 @@
 #define _MotorCtrl_CPP_
 #include "MotorCtrl.h"
+#include "Middlewares/Module/motor_ctrl.h"
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -8,7 +9,9 @@
 
 extern CAN_HandleTypeDef hcan1;
 
-AK80_V3 Motor_2(0x01,&hcan1),Motor_3(0x03,&hcan1);
+Motor_GM6020 Motor_Yaw(1),Motor_Wrist(2);
+MotorCascadeCtrl Motor_Yaw_Ctrl(Motor_Yaw),Motor_Wrist_Ctrl(Motor_Wrist);
+AK80_V3 Motor_Shoulder(0x1A,&hcan2),Motor_Elbow(0x01,&hcan1);
 
 TaskHandle_t CAN1_TaskHandle,DogMotoCtrl_TaskHandle;
 
@@ -37,6 +40,11 @@ void CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 			xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,&xHigherPriorityTaskWoken);
 		}
 	}
+}
+
+void Yaw_To(double deg)
+{
+	
 }
 
 void Task_DogMotorCtrl(void)
