@@ -1,5 +1,40 @@
-#include "ArmResolve.h"
+/**
+  ******************************************************************************
+  * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
+  * @file    ArmResolve.cpp
+  * @author  EnnisKoh (8762322@qq.com) & Hehe
+  * @brief   Code for resolve of armmodel like puma650
+  * @date    2021-05-01
+  * @version 0.4.1
+  * @par Change Log:
+  * <table>
+  * <tr><th>Date        <th>Version  <th>Author    				 <th>Description
+  * <tr><td>2021-05-01  <td> 0.4.1   <td>EnnisKoh&Hehe     <td>Creator
+  * </table>
+  *
+  ==============================================================================
+                            How to use this driver     
+  ==============================================================================
+    @note 
+		
+  ******************************************************************************
+  * @attention
+  * 
+  * if you had modified this file, please make sure your code does not have any 
+  * bugs, update the version Number, write dowm your name and the date. The most
+  * important thing is make sure the users will have clear and definite under-
+  * standing through your new brief.
+  *
+  * <h2><center>&copy; Copyright (c) 2019 - ~, SCUT-RobotLab Development Team.
+  * All rights reserved.</center></h2>
+  ******************************************************************************
+  */
 
+
+
+/* Includes ------------------------------------------------------------------*/ 
+#include "ArmResolve.h"
+/* function prototypes -------------------------------------------------------*/
 /*DH_MODEL_Typedef axis_1, axis_2, axis_3;
 Matrix Matrix_1(4, 4), Matrix_2(4, 4), Matrix_3(4, 4);
 
@@ -24,27 +59,44 @@ void convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis,Matrix& Matrix_ans)
 }*/
 
 /**
-*input Tw_c,T6_g
-*/
+    * @brief  IK Matrit init
+    * @param  Tw_c,T6_g
+    * @retval None
+    */
 int MechanicalArm::Init(Matrix Tw_c,Matrix T6_g)
 {
-	this->Tw_c = Tw_c;
+	if (goal_input_mode==Vision_Input) this->Tw_c = Tw_c;
 	this->T6_g = T6_g;
 	return 1;
 }
 
 /**
-* 
-*/
+    * @brief  Set Vision to goal Matrix
+    * @param  Tc_g
+    * @retval None
+    */
 int MechanicalArm::SetVision(Matrix Tc_g)
 {
 	this->Tc_g = Tc_g;
 	return 1;
 }
-/** 
-* input dh numbuer (T0_6)
-*填写dhtable的参数(alpha不需要 )(T0_6)
-*/ 
+
+/**
+    * @brief  Set World to Goal Matrix
+    * @param  Tw_g
+    * @retval None
+    */
+int MechanicalArm::SetWorldGoal(Matrix Tw_g)
+{
+	this->Tw_g = Tw_g;
+	return 1;
+}
+
+/**
+    * @brief  input DH-model of arm
+		* @param  a[6],d[6],interval[6][2]:config of DH-model
+    * @retval None
+    */
 bool MechanicalArm::Set_DHModel_Config(double a[6], double d[6],double interval[6][2])
 {
 	for (int i = 0; i < 6; i++)
@@ -56,15 +108,15 @@ bool MechanicalArm::Set_DHModel_Config(double a[6], double d[6],double interval[
 	}
 	return true;
 }
+
 /**
-*cal T0_6
-*计算T0_6 
-*return 1 if success
-*/
+    * @brief  cal T0_6
+    * @param  Node
+    * @retval None
+    */
 int MechanicalArm::solveT0_6()
 {
-	Matrix Tw_g;//world_goal
-	Tw_g = Tw_c*Tc_g;
+	if (goal_input_mode==Vision_Input) Tw_g = Tw_c*Tc_g;
 	Matrix T6_g_I;//T6_g inverse
 	T6_g_I = T6_g.Inverse();
 	Matrix Tw_6 = Tw_g*T6_g_I;
@@ -72,9 +124,10 @@ int MechanicalArm::solveT0_6()
 	return 1;
 }
 /**
-*PUMA machenical IK resolve
-*PUMA机械臂的逆运动学解算 
-*/
+    * @brief  IK cal of puma650 armmodel
+    * @param  None
+    * @retval None
+    */
 bool MechanicalArm::IK_cal()
 {
 	double p_x = this->T0_6(1, 4), p_y = this->T0_6(2, 4), p_z = this->T0_6(3, 4);
@@ -160,11 +213,21 @@ bool MechanicalArm::IK_cal()
 	return false;
 }
 
+/**
+    * @brief  get_IK_ans
+    * @param  Node
+    * @retval Ik_ans
+    */
 theta_deg_pack MechanicalArm::get_IK_ans()
 {
 	return target_deg;
 }
 
+/**
+    * @brief  cal current target of arm
+    * @param  uint32_t now_time
+    * @retval curtarget_deg
+    */
 theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
 {
 	double t=now_time-last_IP_time;
@@ -175,9 +238,15 @@ theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
 	return curtarget_deg;
 }
 
-void MechanicalArm::Set_Cubic_IP_Config(theta_deg_pack* cur)
+/**
+    * @brief  set and cal cubic IP config
+    * @param  cur deg & uint32_t now_time
+    * @retval None
+    */
+void MechanicalArm::Set_Cubic_IP_Config(theta_deg_pack* cur,uint32_t now_time)
 {
 	this->update(cur);
+	last_IP_time=now_time;
 	for (int i=0;i<6;i++)
 	{
 		joint_IP_data[i].a[0]=current_deg.deg[i];
@@ -187,6 +256,11 @@ void MechanicalArm::Set_Cubic_IP_Config(theta_deg_pack* cur)
 	}
 }
 
+/**
+    * @brief  update current deg
+    * @param  cur deg
+    * @retval None
+    */
 void MechanicalArm::update(theta_deg_pack* cur)
 {
 	for (int i=0;i<6;i++)

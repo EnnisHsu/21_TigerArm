@@ -49,6 +49,7 @@ class MechanicalArm
 		bool IK_cal();
 		int solveT0_6();
 		int SetVision(Matrix Tc_g);
+		int SetWorldGoal(Matrix Tw_g);
 		theta_deg_pack get_IK_ans();
 		theta_deg_pack get_curtarget_deg(uint32_t now_time);
 		void Set_Cubic_IP_Config(theta_deg_pack* cur,uint32_t now_time);
@@ -67,6 +68,7 @@ class MechanicalArm
 		Matrix Tc_g;//camera_goal
 		Matrix Tw_c;//world_camera
 		Matrix T6_g;//6_goal
+		Matrix Tw_g;//world_goal
 
 };
 
