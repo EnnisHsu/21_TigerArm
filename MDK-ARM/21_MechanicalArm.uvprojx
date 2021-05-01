@@ -388,6 +388,16 @@
               <FileType>8</FileType>
               <FilePath>..\USP\MotorCtrl.cpp</FilePath>
             </File>
+            <File>
+              <FileName>Matrix.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USP\Matrix.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ArmResolve.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USP\ArmResolve.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
