@@ -3,10 +3,10 @@
 
 #include "stdint.h"
 #include "string.h"
-#include "drv_can.h"
+#include "Drivers/Components/drv_can.h"
 
-//CAN ·¢ËÍµÄ±êÖ¾Î»   »¹ÓĞÆäËû½Ó¿Úµ«ÊÇÃ»ÓĞ¸ø³ö  ËùÒÔÇëÎğ·¢ËÍ³¬³öÏÂÃæµÄ±êÖ¾Î»
-//Èç¹û³¬³ö±êÖ¾Î» Çı¶¯Æ÷Ò²»áÖ´ĞĞ µ«ÊÇ»á²úÉúÒâÍâ´íÎó
+//CAN å‘é€çš„æ ‡å¿—ä½   è¿˜æœ‰å…¶ä»–æ¥å£ä½†æ˜¯æ²¡æœ‰ç»™å‡º  æ‰€ä»¥è¯·å‹¿å‘é€è¶…å‡ºä¸‹é¢çš„æ ‡å¿—ä½
+//å¦‚æœè¶…å‡ºæ ‡å¿—ä½ é©±åŠ¨å™¨ä¹Ÿä¼šæ‰§è¡Œ ä½†æ˜¯ä¼šäº§ç”Ÿæ„å¤–é”™è¯¯
 typedef enum {
 	CAN_PACKET_SET_DUTY = 0,
 	CAN_PACKET_SET_CURRENT,
@@ -26,10 +26,10 @@ void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index);
 
 void buffer_append_float32(uint8_t* buffer, float number, float scale, int32_t *index);
 
-/* ÉèÖÃµçÁ÷Öµ µ¥Î»A */
+/* è®¾ç½®ç”µæµå€¼ å•ä½A */
 void VSEC_Set_Current(CAN_HandleTypeDef *hcan, uint8_t controller_id, float current);
 
-/* µçµ÷»Ø´«Êı¾İ½â°ü */
+/* ç”µè°ƒå›ä¼ æ•°æ®è§£åŒ… */
 void VSEC_UnPack(CAN_RxBuffer *can_msg, float *temp_fet, float *temp_motor, float *current, float *pos);
 
 #endif

@@ -2,12 +2,12 @@
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
   * @file    dr16.h
-  * @author  Zelong.Xu 8762322@qq.com 
+  * @author  Zelong.Xu 8762322@qq.com
   * @brief   Code for DJI-DR16 driver in embedded software system.
   ******************************************************************************
   * @attention
-  * 
-  * if you had modified this file, please make sure your code does not have any 
+  *
+  * if you had modified this file, please make sure your code does not have any
   * bugs, update the version Number, write dowm your name and the date. The most
   * important thing is make sure the users will have clear and definite under-
   * standing through your new brief.
@@ -25,32 +25,35 @@
 #include <stddef.h>
 
 /* Private macros ------------------------------------------------------------*/
-/* 键位宏定义 */
-#define _W          0
-#define _S          1
-#define _A          2
-#define _D          3
-#define _SHIFT      4
-#define _CTRL       5
-#define _Q          6
-#define _E          7
-#define _R          8
-#define _F          9
-#define _G          10
-#define _Z          11
-#define _X          12
-#define _C          13
-#define _V          14
-#define _B          15
-#define _Mouse_L    16
-#define _Mouse_R    17
+/* 键位定义 */
+enum
+{
+  DR16_KEY_W = 0,
+  DR16_KEY_S,
+  DR16_KEY_A,
+  DR16_KEY_D,
+  DR16_KEY_SHIFT,
+  DR16_KEY_CTRL,
+  DR16_KEY_Q,
+  DR16_KEY_E,
+  DR16_KEY_R,
+  DR16_KEY_F,
+  DR16_KEY_G,
+  DR16_KEY_Z,
+  DR16_KEY_X,
+  DR16_KEY_C,
+  DR16_KEY_V,
+  DR16_KEY_B,
+  DR16_MOUSE_L,
+  DR16_MOUSE_R,
+};
 
 /* Private type --------------------------------------------------------------*/
 /** 
-  @brief DR16数据包内容 
+  @brief DR16数据包内容
 */
 #pragma pack(1)
-struct DR16_DataPack_Typedef 
+struct DR16_DataPack_Typedef
 {
   uint64_t ch0:11;
   uint64_t ch1:11;
@@ -67,14 +70,14 @@ struct DR16_DataPack_Typedef
 };
 #pragma pack()
 /**
-  @brief 手柄上面两挡位开关状态 
+  @brief 手柄上面两挡位开关状态
 */
 enum SW_Status_Typedef
 {
-    NONE = 0,
-    UP = 1,
-    MID = 3,
-    DOWN = 2,
+  DR16_SW_NONE = 0,
+  DR16_SW_UP = 1,
+  DR16_SW_MID = 3,
+  DR16_SW_DOWN = 2,
 };
 
 
@@ -94,8 +97,8 @@ struct Key_Typedef
 #define __LinkageStatus_DEFINED
 enum LinkageStatus_Typedef
 {
-  Connection_Lost = 0U,
-  Connection_Established,
+  DR16_LOST = 0U,
+  DR16_ESTABLISHED,
 };
 #endif
 
@@ -112,17 +115,17 @@ class DR16_Classdef
         uint8_t  detecting_flag;        /*<! 检测操作标志位*/
 		    uint32_t last_check_time;       /*<! 上一次在线检测时间*/
         DR16_DataPack_Typedef DataPack; /*<! 数据包*/
-        float RX_Norm,RY_Norm,LX_Norm,LY_Norm,MouseX_Norm,MouseY_Norm,MouseZ_Norm; 
+        float RX_Norm,RY_Norm,LX_Norm,LY_Norm,MouseX_Norm,MouseY_Norm,MouseZ_Norm;
                                         /*<! 两个摇杆四个方向与鼠标三个方向速度归一化后的值*/
         Key_Typedef Key[18];            /*<! 16个键的相关信息*/
 		    CLICK_EXCE Click_Fun[18];       /*<! 单击执行函数 */
         float MouseCoefficient;         /*<! 鼠标动作乘的系数*/
         void Key_Process(void);         /*<! 按键处理*/
-        
+
     public:
-/* Exported function declarations --------------------------------------------*/		
+/* Exported function declarations --------------------------------------------*/
         DR16_Classdef();
-        void DataCapture(DR16_DataPack_Typedef* captureData); 
+        void DataCapture(DR16_DataPack_Typedef* captureData);
 
         uint64_t GetCh0(void);
         uint64_t GetCh1(void);
@@ -153,8 +156,8 @@ class DR16_Classdef
 
         /*连接状态相关操作*/
         void Check_Link(uint32_t current_check_time);
-		    void SetStatus(LinkageStatus_Typedef para_status);  
-        LinkageStatus_Typedef GetStatus(void);              
+		    void SetStatus(LinkageStatus_Typedef para_status);
+        LinkageStatus_Typedef GetStatus(void);
 };
 
 #endif

@@ -33,6 +33,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_BMX055
+
 /* Includes ------------------------------------------------------------------*/
 #include "BMX055_Processing.h"
 
@@ -97,4 +102,7 @@ void BMX055_Solve_Data(void)
 	
 	mahony_ahrs_update(&BMX055_Sensor, &Attitude);
 }
+
+#endif /* USE_SRML_BMX055 */
+
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

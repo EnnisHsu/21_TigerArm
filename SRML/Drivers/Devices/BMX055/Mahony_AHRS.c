@@ -28,6 +28,11 @@
   * through your new brief.
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_BMX055
+
 /* Includes ------------------------------------------------------------------*/
 #include "Mahony_AHRS.h"
 #include "math.h"
@@ -274,4 +279,7 @@ float invSqrt(float x)
   y = y * (1.5f - (halfx * y * y));
   return y;
 }
+
+#endif /* USE_SRML_BMX055 */
+
 /************************ COPYRIGHT SCUT-ROBOTLAB *****END OF FILE*************/

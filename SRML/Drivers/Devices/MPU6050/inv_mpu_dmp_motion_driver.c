@@ -14,6 +14,11 @@
  *      @details    All functions are preceded by the dmp_ prefix to
  *                  differentiate among MPL and general driver function calls.
  */
+
+#include "SRML.h"
+
+#if USE_SRML_MPU6050
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -1379,3 +1384,4 @@ int dmp_register_android_orient_cb(void (*func)(unsigned char))
  *  @}
  */
 
+#endif /* USE_SRML_MPU6050 */

@@ -2,6 +2,7 @@
 #define _SWERVE_CHASSIS_H
 
 #include "System_DataPool.h"
+#include "SRML.h"
 
 extern TaskHandle_t TestSwerveChassis_Handle;
 extern CChassis  AlphaTest;

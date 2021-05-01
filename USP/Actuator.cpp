@@ -35,11 +35,11 @@
 /* Includes ------------------------------------------------------------------*/ 
 #include "Actuator.h"
 /* function prototypes -------------------------------------------------------*/
-int Actuator_Classdef::suckerAct(){
+//int Actuator_Classdef::suckerAct(){
 	//if negative pressure
 	//>threshold: 
 	//<=threshold:
 	
-}
+//}
 
 

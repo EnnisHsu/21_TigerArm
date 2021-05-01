@@ -32,11 +32,7 @@
   * @{
   */
   
-/* Drivers */
-#include "Drivers/Drivers.h"
-
-/* Middlewares */
-#include "Middlewares/Middlewares.h"
+#include "srml_config.h"
 
 /**
   * @}

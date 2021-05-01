@@ -3,7 +3,7 @@
 #include <cmath>
 #include <exception>
 #include <stdexcept>
-#include <iostream>
+//#include <iostream>
 #include <limits>
 using namespace std;
 //------------------------------ Implemenation  -----------------------------
@@ -11,7 +11,7 @@ Matrix::Matrix() //default constructor
 {
 	rows=columns=0;
 	buf=NULL;
-        cout<<"call constructor"<<endl;
+  //      cout<<"call constructor"<<endl;
 }
 Matrix::Matrix( int m,  int n)//declare an mxn matrix
 {
@@ -19,7 +19,7 @@ Matrix::Matrix( int m,  int n)//declare an mxn matrix
     this->rows=m;
     this->columns=n;
     this->buf=new double[m*n];
-    cout<<"call constructor"<<endl;
+  //  cout<<"call constructor"<<endl;
 }
 Matrix::Matrix(const Matrix& A) //copy constructor
 {
@@ -34,14 +34,14 @@ Matrix::Matrix(const Matrix& A) //copy constructor
         {
           this->buf[i]=A.buf[i];
         }
-      cout<<"call copy construcotor"<<endl;
+  //    cout<<"call copy construcotor"<<endl;
 }
 Matrix::~Matrix()//destructor
 {
   delete[] this->buf;
   this->rows=0;
   this->columns=0;
-  cout<<"call destructor"<<endl;
+ // cout<<"call destructor"<<endl;
 }
 //Assignment
 Matrix& Matrix::operator = (const Matrix& A) //overloading =
@@ -64,7 +64,7 @@ bool Matrix::operator == (const Matrix& A)//overloading ==
 	int i;
         if(!this->buf||!A.buf) 
             {
-              cout<<"Two Empty Matrix"<<endl;
+     //         cout<<"Two Empty Matrix"<<endl;
               return true;
             }
         if(this->columns!=A.columns||this->rows!=A.rows)
@@ -167,23 +167,23 @@ double& Matrix::operator()( int i,  int j) const //read only
 	return buf[(i-1)*columns+(j-1)]; // is this correct? Unsafe
 
 }
-ostream& operator << (ostream& output, const Matrix& A) 
-{
+//ostream& operator << (ostream& output, const Matrix& A) 
+//{
 
-	for ( int i = 1; i <= A.rows; i++)
-	{
-		for ( int j = 1; j <= A.columns; j++)
-			output << A(i,j) << "\t   ";
-		output << endl; 
-	}
+//	for ( int i = 1; i <= A.rows; i++)
+//	{
+//		for ( int j = 1; j <= A.columns; j++)
+//			output << A(i,j) << "\t   ";
+//		output << endl; 
+//	}
 
-	return output; 
-}
+//	return output; 
+//}
 
 
 
-istream& operator >> (istream& input, Matrix& A) 
-{
+//istream& operator >> (istream& input, Matrix& A) 
+//{
 
 
 	//if (input.fail())
@@ -216,8 +216,8 @@ istream& operator >> (istream& input, Matrix& A)
 
 	//use BypassComment to skip comments.
 
-	return input;
-}
+//	return input;
+//}
 
 
 //------------Member Functions------------------------------
@@ -636,7 +636,7 @@ double m=0;
 
 if(this->rows!=this->columns)   //LU decomposition only can be operated on square Matrix
     {
-       cout<<"Matrix A is not a square Matrix! Please check the data again."<<endl;
+      // cout<<"Matrix A is not a square Matrix! Please check the data again."<<endl;
         return false;
     }
     
@@ -655,7 +655,7 @@ if(this->rows!=this->columns)   //LU decomposition only can be operated on squar
          }
         if(bigflag==0.0)
           {
-            cout<<"No nonzero largest element in the"<<i+1<<"th rows.(The det(A)=0, which does not meet the requestment of LU decomposition.)"<<endl;
+         //   cout<<"No nonzero largest element in the"<<i+1<<"th rows.(The det(A)=0, which does not meet the requestment of LU decomposition.)"<<endl;
             //" Matrix A may be a SINGULAR Matrix, which maybe can't be decomposed. Should be check again???"
           return false;
           }  
@@ -688,7 +688,7 @@ if(this->rows!=this->columns)   //LU decomposition only can be operated on squar
         
     double sum=0.0; //temp varity used for store A[i][j] during the loop but init it to 0.0 here..
     
-    cout<<"LU decomposing.";    //if n=very large, then should to tell user I am running.
+   // cout<<"LU decomposing.";    //if n=very large, then should to tell user I am running.
     for(long n=0;n<this->rows;n++)  //n used for A[n][n]
     {
         // all L[n][n] is assumed =1.0;
@@ -707,7 +707,7 @@ if(this->rows!=this->columns)   //LU decomposition only can be operated on squar
                 sum-=(*(L.buf+i*L.rows+k))*(*(U.buf+k*U.rows+n) );
             if(*(U.buf+n*U.rows+n)==0)
                 {   //if U[n][n]==0, then it means that A can not decomposed, for if U[n][n]=0, |A|=|L|*|U|=|L[n][n]|*|U[n][n]|=0, which can not meet the prerequisite of decomposing A;
-                    cout<<"OOps, Zero in U["<<n<<"]["<<n<<"] is found, the matrix can not be decomposed. "<<endl;
+                //    cout<<"OOps, Zero in U["<<n<<"]["<<n<<"] is found, the matrix can not be decomposed. "<<endl;
                     L.rows=L.columns=0;
                     U.rows=U.columns=0;
                     delete[] L.buf;
@@ -721,7 +721,7 @@ if(this->rows!=this->columns)   //LU decomposition only can be operated on squar
                     *(L.buf+i*L.rows+n)=sum*1.0/(*(U.buf+n*U.rows+n));
                 }                
         }
-        cout<<".";
+       // cout<<".";
     }
 
 	return true;

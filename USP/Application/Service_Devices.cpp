@@ -32,7 +32,7 @@ void Device_DR16(void *arg);
 
 /* Exported devices ----------------------------------------------------------*/
 /* Motor & ESC & Other actuators*/
-//Motor_AK80_9  Test_Motor(1, 0, 0);
+Motor_AK80_9  Test_Motor(1, 0, 0);
 /* Remote control */
 
 /* IMU & NUC & Other sensors */
@@ -57,8 +57,8 @@ void Service_Devices_Init(void)
 void Device_Actuators(void *arg)
 {
   /* Cache for Task */
-  COB_TypeDef Rx_Buff;
-  COB_TypeDef Tx_Buff;
+  CAN_COB Rx_Buff;
+  CAN_COB Tx_Buff;
   
   /* Pre-Load for task */
   Tx_Buff.ID = 1;
@@ -66,8 +66,8 @@ void Device_Actuators(void *arg)
 //  Analyzer.set(30, 500, 0, 500, 3);
 //  Analyzer.start(AUTO_FREQ);
   
-//  Test_Motor.enterCtrlMode_cmd(Tx_Buff.Data);
-//  xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
+  Test_Motor.enterCtrlMode_cmd(Tx_Buff.Data);
+  xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
   
   /* Infinite loop */
   TickType_t xLastWakeTime_t;
@@ -79,12 +79,12 @@ void Device_Actuators(void *arg)
     /* Read Message */
 //    Analyzer.sample_control(0.5f*Analyzer.val_signal,0.7f);
     
-//    xQueueReceive(CAN1_TxPort, &Rx_Buff, 0);
-//    if(Rx_Buff.ID == 1) Test_Motor.unpack_reply(Rx_Buff.Data);
-//    else {}
-//    /* Send Message */
-//    Test_Motor.pack_cmd(Tx_Buff.Data, 0, 5, 0);
-//    xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
+    xQueueReceive(CAN1_TxPort, &Rx_Buff, 0);
+    if(Rx_Buff.ID == 1) Test_Motor.unpack_reply(Rx_Buff.Data);
+    else {}
+    /* Send Message */
+    Test_Motor.pack_cmd(Tx_Buff.Data, 0, 5, 0);
+    xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
     
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);

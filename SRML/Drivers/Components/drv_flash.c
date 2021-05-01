@@ -47,6 +47,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_FLASH
+
 /* Includes ------------------------------------------------------------------*/  
 #include "drv_flash.h"
 
@@ -306,5 +311,7 @@ uint32_t get_next_flash_address(uint32_t address)
     }
     return sector;
 }
+
+#endif /* USE_SRML_FLASH */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

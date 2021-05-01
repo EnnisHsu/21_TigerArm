@@ -18,6 +18,9 @@
 /
 /----------------------------------------------------------------------------*/
 
+#include "SRML.h"
+
+#if USE_SRML_FATFS
 
 #include "ff.h"			/* Declarations of FatFs API */
 #include "diskio.h"		/* Declarations of device I/O functions */
@@ -6846,3 +6849,4 @@ FRESULT f_setcp (
 }
 #endif	/* FF_CODE_PAGE == 0 */
 
+#endif /* USE_SRML_FATFS */

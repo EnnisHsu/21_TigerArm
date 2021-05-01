@@ -33,7 +33,6 @@
 #include <SRML.h>
 #include "SEGGER_SYSVIEW.h"
 #include "UpperMonitor.h"
-#include "MotorCtrl.h"
 /* Private variables ---------------------------------------------------------*/
 
 
@@ -47,10 +46,8 @@ void System_Resource_Init(void)
   /* Drivers Init ---------------------*/
   Timer_Init(&htim4, USE_HAL_DELAY);
   
-  CAN_Init(&hcan1,CAN1_RxCpltCallback);
+  CAN_Init(&hcan1,NULL);
   CAN_Init(&hcan2,NULL);
-	
-	//CAN_Filter_Mask_Config(&hcan1,CanFilter_0 | CanFifo_0 | Can_STDID | Can_DataType,0x000,0x000);
   
   Uart_Init(&huart1, Uart1_Rx_Buff, USART1_RX_BUFFER_SIZE,RecHandle);
   Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,DR16_call_back);
@@ -71,10 +68,10 @@ void System_Resource_Init(void)
   /* RTOS resources Init --------------*/
   USART_RxPort       = xQueueCreate(4,sizeof(USART_COB));
   USART_TxPort       = xQueueCreate(2,sizeof(USART_COB));
-  CAN1_TxPort        = xQueueCreate(4,sizeof(COB_TypeDef));
-  CAN2_TxPort        = xQueueCreate(4,sizeof(COB_TypeDef));
-  RMMotor_QueueHandle= xQueueCreate(10,sizeof(COB_TypeDef));
-  IMU_QueueHandle    = xQueueCreate(2,sizeof(COB_TypeDef));
+  CAN1_TxPort        = xQueueCreate(4,sizeof(CAN_COB));
+  CAN2_TxPort        = xQueueCreate(4,sizeof(CAN_COB));
+  RMMotor_QueueHandle= xQueueCreate(10,sizeof(CAN_COB));
+  IMU_QueueHandle    = xQueueCreate(2,sizeof(CAN_COB));
   NUC_QueueHandle    = xQueueCreate(2,sizeof(USART_COB));
   DR16_QueueHandle   = xQueueCreate(2,sizeof(USART_COB));
   Referee_QueueHandle = xQueueCreate(2,sizeof(USART_COB));
@@ -107,8 +104,7 @@ void System_Tasks_Init(void)
   Service_Devices_Init();
   Service_Communication_Init();
   /* Applications Init ----------------*/
-  xTaskCreate(Task_SwerveChassis, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &TestSwerveChassis_Handle);
-	Service_MotoCtrl_Init();
+  //xTaskCreate(Task_SwerveChassis, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &TestSwerveChassis_Handle);
 }
 
 

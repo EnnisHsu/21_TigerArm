@@ -11,24 +11,24 @@ enum ACTUATOR_MODE_TYPE{
 	Release
 };
 
-class Actuator_Classdef
-{
-	public:
-		Actuator_Classdef(){};
-		~Actuator_Classdef(){};
-		
-		int suckerAct();
-	private:
-		int turnMotorOn();
-		int turnMotorOff();
-		int airValveOff();
-		int airValveOn();
-		
-		ACTUATOR_MODE_TYE Mode;
-		int NegativePressure;
-		const int NPThredshold;//thredshold of negative pressure
+//class Actuator_Classdef
+//{
+//	public:
+//		Actuator_Classdef(){};
+//		~Actuator_Classdef(){};
+//		
+//		int suckerAct();
+//	private:
+//		int turnMotorOn();
+//		int turnMotorOff();
+//		int airValveOff();
+//		int airValveOn();
+//		
+//		ACTUATOR_MODE_TYE Mode;
+//		int NegativePressure;
+//		const int NPThredshold;//thredshold of negative pressure
 
-};
+//};
 
 #endif
 

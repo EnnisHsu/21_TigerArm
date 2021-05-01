@@ -54,12 +54,17 @@
   ******************************************************************************
 */
 
+#include "SRML.h"
+
+#if USE_SRML_POW_CTRL
+
 /* Includes ------------------------------------------------------------------*/
 #include "power_ctrl.h"
+#include "srml_std_lib.h"
+#include <math.h>
 #include <stddef.h>	/* 使用NULL */
 
 /* Private define ------------------------------------------------------------*/
-#define myabs(x) ((x)>0? (x):(-(x)))
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -154,15 +159,14 @@ void PowerCtrl_ClassDef::Calc_motorLimit(int *motor_out_raw)
 	}
 	
 	/* 如果不加限幅，当超功率时，limitation负大进行功率限制，scale也负大 */
-	limit_current_total = _PowerCtrl_Constrain(limit_current_total, 300, max_current_out);
+	limit_current_total = std_lib::constrain(limit_current_total, 300, max_current_out);
 	
 	float scale = 1.0f;
 	float current_sum = 0.0f;
-	float motor_current_max = 0.0f;
 	
 	/* 输出总电流 */
 	for(uint8_t i = 0; i < motor_num; i++)
-		current_sum += myabs(motor_out_raw[i]);
+		current_sum += std::abs(motor_out_raw[i]);
 	
 	/* 总电流超过限制值 */
 	if(current_sum > limit_current_total)
@@ -232,5 +236,7 @@ void PowerCtrl_ClassDef::Set_PE_Target(float _RF_power_target, float _motor_powe
 	motor_power_target = _motor_power_target;
 	remain_energy_target = _remain_energy_target;
 }
+
+#endif /* USE_SRML_POW_CTRL */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

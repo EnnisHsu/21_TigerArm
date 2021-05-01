@@ -41,6 +41,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_I2C
+
 /* Includes ------------------------------------------------------------------*/
 #include "drv_i2c.h"
 
@@ -101,7 +106,7 @@ GPIO_PinState xREAD_SDA(IIC_PIN_Typedef *iic_pin)
   */
 void IIC_Delay(uint8_t m)
 {
-  uint8_t i = 0;    
+  volatile uint8_t i = 0;
   while(m--)
   {
     i = IIC_Delay_Time;
@@ -441,5 +446,7 @@ unsigned char IIC_Device_Read_Len(IIC_PIN_Typedef *iic_pin, unsigned char addr,u
   IIC_Stop(iic_pin);	
 	return 0;
 }
+
+#endif /* USE_SRML_I2C */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

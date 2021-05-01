@@ -19,7 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include  <stdint.h>
 #include  <string.h>
-#include "../Components/drv_uart.h"
+#include "Drivers/Components/drv_uart.h"
 #ifdef __cplusplus
 /* Private define ------------------------------------------------------------*/
 

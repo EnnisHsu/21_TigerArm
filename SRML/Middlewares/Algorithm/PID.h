@@ -89,7 +89,7 @@ public:
     float P_Term = 0;			/* 比例器输出 */
     float D_Term = 0;			/* 微分器输出 */
 
-    float I_SeparThresh = 400;   /*!< 积分分离阈值，需为正数。fabs(error)大于该阈值取消积分作用。*/
+    float I_SeparThresh = 400;   /*!< 积分分离阈值，需为正数。std::abs(error)大于该阈值取消积分作用。*/
 
 
     float VarSpeed_I_A = ULONG_MAX; /*!< 变速积分 A，需为正数。*/
@@ -98,7 +98,7 @@ public:
                                      在 B<error<=A+B 的区间内，为变速积分效果， \n
                                      在 A+B<error 的区间内，不继续积分。*/
 
-    float DeadZone = 0; 		    /*!< 死区，需为整数，fabs(error)小于DeadZone时，输出为0。 */
+    float DeadZone = 0; 		    /*!< 死区，需为整数，std::abs(error)小于DeadZone时，输出为0。 */
 
     LowPassFilter LowPass_error = LowPassFilter(1);
     LowPassFilter LowPass_d_err = LowPassFilter(1); /*!< 不完全微分。 */

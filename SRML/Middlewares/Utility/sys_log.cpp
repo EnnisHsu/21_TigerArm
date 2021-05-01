@@ -43,9 +43,14 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_SYSLOG
+
 /* Includes ------------------------------------------------------------------*/
 #include "sys_log.h"
-#include "myAssert.h"
+#include "my_assert.h"
 
 /* Private define ------------------------------------------------------------*/
 using namespace std;
@@ -357,5 +362,7 @@ void Error_Handle()
 {
   while(1);
 }
+
+#endif /* USE_SRML_SYSLOG */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

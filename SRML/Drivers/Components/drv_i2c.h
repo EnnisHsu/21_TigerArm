@@ -49,10 +49,10 @@ extern "C" {
 typedef struct 
 {
 	GPIO_TypeDef * IIC_GPIO_PORT;
-	uint32_t IIC_SCL_PIN;
-	uint32_t IIC_SDA_PIN;
-	uint32_t IIC_SCL_PIN_NUM;
-	uint32_t IIC_SDA_PIN_NUM;	
+	uint16_t IIC_SCL_PIN;
+	uint16_t IIC_SDA_PIN;
+	uint16_t IIC_SCL_PIN_NUM;
+	uint16_t IIC_SDA_PIN_NUM;
 }IIC_PIN_Typedef;
 
 /* Exported macros -----------------------------------------------------------*/

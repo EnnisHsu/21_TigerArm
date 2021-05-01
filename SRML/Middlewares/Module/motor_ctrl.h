@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 
 #include "Middlewares/Algorithm/PID.h"
-#include "Drivers/Devices/motor.h"
+#include "Drivers/Devices/motor_dji.h"
 
 class MotorCtrlBase
 {
@@ -22,7 +22,7 @@ public:
     virtual void Adjust() = 0;
 };
 
-template<class myPID = PID>
+template<class AnglePIDType>
 class MotorAngleCtrl : public MotorCtrlBase
 {
 public:
@@ -41,12 +41,12 @@ public:
         AnglePID.Current = motor->getAngle();
         motor->Out = AnglePID.Adjust();
     }
-    myPID AnglePID;
+    AnglePIDType AnglePID;
     MotorBase* const motor;
 };
 
 
-template<class myPID>
+template<class SpeedPIDType>
 class MotorSpeedCtrl : public MotorCtrlBase
 {
 public:
@@ -65,12 +65,12 @@ public:
         SpeedPID.Current = motor->getSpeed();
         motor->Out = SpeedPID.Adjust();
     }
-    myPID SpeedPID;
+    SpeedPIDType SpeedPID;
     MotorSpeed* const motor;
 };
 
 
-template<class myPID>
+template<class AnglePIDType, class SpeedPIDType>
 class MotorCascadeCtrl : public MotorCtrlBase
 {
 public:
@@ -91,8 +91,8 @@ public:
         SpeedPID.Target = AnglePID.Adjust();
         motor->Out = SpeedPID.Adjust();
     }
-    myPID AnglePID;
-    myPID SpeedPID;
+    AnglePIDType AnglePID;
+    SpeedPIDType SpeedPID;
 
     MotorSpeed* const motor;
 };

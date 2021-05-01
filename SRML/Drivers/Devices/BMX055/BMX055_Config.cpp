@@ -63,8 +63,14 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_BMX055
+
 /* Includes ------------------------------------------------------------------*/
 #include "BMX055_Config.h"
+#include "srml_std_lib.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -82,87 +88,26 @@ IIC_PIN_Typedef BMX055_IIC_PIN;
   * @retval 0:success
   *         1:fail
   */
-uint8_t BMX055_Init(GPIO_TypeDef* gpiox,uint32_t scl_pinx,uint32_t sda_pinx)
+uint8_t BMX055_Init(GPIO_TypeDef* gpiox,uint16_t scl_pinx,uint16_t sda_pinx)
 {
+    if(!IS_GPIO_PIN(scl_pinx) || (scl_pinx & (scl_pinx - 1)))return 1;
+    if(!IS_GPIO_PIN(sda_pinx) || (sda_pinx & (sda_pinx - 1)))return 1;
+
     /* BMX055_IIC initialization */
     BMX055_IIC_PIN.IIC_GPIO_PORT = gpiox;
     BMX055_IIC_PIN.IIC_SCL_PIN = scl_pinx;
     BMX055_IIC_PIN.IIC_SDA_PIN = sda_pinx;
-	
-	if(scl_pinx == GPIO_PIN_0)
-        BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 0;
-	else if(scl_pinx == GPIO_PIN_1)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 1;
-	else if(scl_pinx == GPIO_PIN_2)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 2;	
-	else if(scl_pinx == GPIO_PIN_3)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 3;	
-	else if(scl_pinx == GPIO_PIN_4)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 4;	
-	else if(scl_pinx == GPIO_PIN_5)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 5;		
-	else if(scl_pinx == GPIO_PIN_6)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 6;	
-	else if(scl_pinx == GPIO_PIN_7)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 7;		
-	else if(scl_pinx == GPIO_PIN_8)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 8;		
-	else if(scl_pinx == GPIO_PIN_9)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 9;		
-	else if(scl_pinx == GPIO_PIN_10)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 10;		
-	else if(scl_pinx == GPIO_PIN_11)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 11;	
-	else if(scl_pinx == GPIO_PIN_12)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 12;		
-	else if(scl_pinx == GPIO_PIN_13)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 13;		
-	else if(scl_pinx == GPIO_PIN_14)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 14;	
-	else if(scl_pinx == GPIO_PIN_15)
-	    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = 15;	
-    else
-        return 1;
-	
-	if(sda_pinx == GPIO_PIN_0)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 0;
-	else if(sda_pinx == GPIO_PIN_1)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 1;	
-	else if(sda_pinx == GPIO_PIN_2)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 2;	
-	else if(sda_pinx == GPIO_PIN_3)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 3;	
-	else if(sda_pinx == GPIO_PIN_4)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 4;	
-	else if(sda_pinx == GPIO_PIN_5)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 5;	
-	else if(sda_pinx == GPIO_PIN_6)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 6;	
-	else if(sda_pinx == GPIO_PIN_7)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 7;	
-	else if(sda_pinx == GPIO_PIN_8)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 8;	
-	else if(sda_pinx == GPIO_PIN_9)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 9;	
-	else if(sda_pinx == GPIO_PIN_10)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 10;	
-	else if(sda_pinx == GPIO_PIN_11)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 11;	
-	else if(sda_pinx == GPIO_PIN_12)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 12;	
-	else if(sda_pinx == GPIO_PIN_13)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 13;	
-	else if(sda_pinx == GPIO_PIN_14)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 14;	
-	else if(sda_pinx == GPIO_PIN_15)
-        BMX055_IIC_PIN.IIC_SDA_PIN_NUM = 15;	
-	else
-		return 1;
-	
+
+    BMX055_IIC_PIN.IIC_SCL_PIN_NUM = std_lib::get_gpio_pin_num(scl_pinx);
+    BMX055_IIC_PIN.IIC_SDA_PIN_NUM = std_lib::get_gpio_pin_num(sda_pinx);
+
 	/* BMX055 initialization */
 	BMX_Conf(&BMX055_IIC_PIN);
 	Gyro_Offset_Init();
 	return 0;
 
 }
+
+#endif /* USE_SRML_BMX055 */
+
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

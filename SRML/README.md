@@ -1,7 +1,8 @@
-## SRML: SCUT Robotlab Middlewares Layer Library
+## SRML: ~~SCUT Robotlab Middlewares Layer Library~~ 
+## Shit Rubbish Mountain Library
 <Font><font size="5">**机器人实验室嵌入式软件中间件层库**</Font>
 
-![](https://img.shields.io/badge/当前版本-V1.0-blue.svg)
+![](https://img.shields.io/badge/当前版本-V2.2-blue.svg)
 
 ### Summary 简介 
 
@@ -25,16 +26,13 @@ SRML旨在将已有的代码解耦，模块化后封装成一个服务于组织�
 - __获取 SRML 库__
   - 参见：[添加子模块的远程仓库](#添加子模块的远程仓库)
 - __添加 SRML 库到崭新的 Stm32 工程中__
-  - __单个IDE工程__
-    - 包含 SRML.h
-    - 将本库放置于工程根目录中
+  - 包含`SRML.h`
+  - 将`srml_config_template.h`拷贝到用户代码目录，并重命名为`srml_config.h`
+  - 在`srml_config.h`中定义各模块是否参与编译
+  - __单个STM32CubeIDE工程__
+    - 将SRML目录加入源代码位置和包含路径
     - 编译
-  - __多个IDE工程（开发中）__
-    - 包含 SRML.h
   - [__MDK工程__](https://git.scutbot.cn/Embedded/20_Project_Template.git)
-    - 包含 SRML.h
-    - 在根目录中添加名为`srml_config.h`的头文件,并在项目包含目录中添加该文件所在的目录
-    - 在`srml_config.h`中定义各模块是否参与编译（内容参考[附件1](#附件1)，附件更新可能有延迟）
     - 按照文件目录结构将库文件添加到工程中
     - 编译
 
@@ -43,13 +41,14 @@ SRML旨在将已有的代码解耦，模块化后封装成一个服务于组织�
   - 添加子模块的远程仓库
 
   ```bash
-  $ git submodule add https://git.scutbot.cn/Embedded/SRML.git
+  # 以下两种方法选一种即可
+  $ git submodule add https://git.scutbot.cn/Embedded/SRML.git # http方法
+  $ git submodule add ssh://git@git.scutbot.cn:23232/Embedded/SRML.git # ssh方法
   ```
 
   - clone已有的工程时拉取SRML的代码
   ```bash
-  $ git submodule init
-  $ git submodule update
+  $ git submodule update --init --recursive
   ```
 
   - 更新 SRML 库
@@ -65,56 +64,3 @@ SRML旨在将已有的代码解耦，模块化后封装成一个服务于组织�
   $ cd SRML/
   $ git push origin dev
   ```
-
-### 附件1
-
-```c
-#ifndef __SRML_CONFIG_H__
-#define __SRML_CONFIG_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-/* Drivers ----------------------------------------------------*/
-#define USE_SRML_REFEREE                  0
-#define USE_SRML_DJI_MOTOR                1
-#define USE_SRML_OTHER_MOTOR              0
-#define USE_SRML_DR16                     1
-#define USE_SRML_BMX055                   1
-#define USE_SRML_MPU6050                  1
-#define USE_SRML_W25Qx                    1
-#define USE_SRML_W25Qx                    1
-#define USE_SRML_FATFS                    1 
-  
-#define USE_SRML_I2C                      1
-#define USE_SRML_SPI                      1
-#define USE_SRML_CAN                      1
-#define USE_SRML_UART                     1
-#define USE_SRML_TIMER                    1
-
-/* Middlewares -----------------------------------------------*/
-#define USE_SRML_PID                      1
-#define USE_SRML_FILTER                   1
-#define USE_SRML_MYMAT                    0
-#define USE_SRML_KALMAN                   0
-#define USE_SRML_TRACK_GENERATOR          0
-
-#define USE_SRML_SERIAL_LINE_IP           1
-  
-#define USE_SRML_MYASSERT                 0
-#define USE_SRML_LIST                     1
-#define USE_SRML_SYSLOG                   1
-#define USE_SRML_SYSANALYSIS         	    1
-
-#define USE_SRML_GIMBAL                   0
-#define USE_SRML_CHASSIS                  1
-#define USE_SRML_POW_CTRL                 1
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
-```
-

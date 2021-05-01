@@ -89,6 +89,14 @@ typedef struct CAN_RxMessage
   uint8_t             data[8];
 }CAN_RxBuffer;
 
+/* CAN message data type(Communication Object/标准数据帧) */
+typedef struct
+{
+  uint16_t ID;
+  uint8_t DLC;
+  uint8_t Data[8];
+}CAN_COB;
+
 /* Exported variables ---------------------------------------------------------*/
 /* Exported function declarations ---------------------------------------------*/
 uint8_t CAN_Init(CAN_HandleTypeDef* hcan, void (*pFunc)(CAN_RxBuffer*));

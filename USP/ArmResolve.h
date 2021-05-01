@@ -2,7 +2,7 @@
 #define _ArmResolve_H_
 
 #include "Matrix.h"
-#include <cmath> 
+#include <math.h> 
 #include <stdint.h>
 #define a(n) this->dh_model[n].a
 #define d(n) this->dh_model[n].d

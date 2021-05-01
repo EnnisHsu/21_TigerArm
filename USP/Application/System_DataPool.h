@@ -85,25 +85,25 @@ extern CLogger SysLog;
 extern LogFilter_t Filter_List[2];
 extern CAnalyzer Analyzer;
 //暂时被遗忘在这,统一标准接口制定后再集中回收
-#ifndef __UUCOBTypeDef_DEFINED
-#define __UUCOBTypeDef_DEFINED
-typedef struct
-{
-  uint8_t  port_num;
-  int16_t  len;
-  void*    address;
-}USART_COB;
-#endif
+//#ifndef __UUCOBTypeDef_DEFINED
+//#define __UUCOBTypeDef_DEFINED
+//typedef struct
+//{
+//  uint8_t  port_num;
+//  int16_t  len;
+//  void*    address;
+//}USART_COB;
+//#endif
 
-#ifndef __CCOBTypeDef_DEFINED
-#define __CCOBTypeDef_DEFINED
-/* CAN message data type(Communication Object/标准数据帧) */
-typedef struct{
-  uint16_t  ID;
-  uint8_t   DLC;
-  uint8_t   Data[8];
-}COB_TypeDef;
-#endif
+//#ifndef __CCOBTypeDef_DEFINED
+//#define __CCOBTypeDef_DEFINED
+///* CAN message data type(Communication Object/标准数据帧) */
+//typedef struct{
+//  uint16_t  ID;
+//  uint8_t   DLC;
+//  uint8_t   Data[8];
+//}COB_TypeDef;
+//#endif
 
 #endif
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

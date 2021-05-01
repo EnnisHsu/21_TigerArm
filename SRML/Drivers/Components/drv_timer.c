@@ -2,18 +2,19 @@
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
   * @file    drv_timer.c
-  * @author  Mentos_Seetoo 1356046979@qq.com
+  * @author  Mentos_Seetoo 1356046979@qq.com M3chD09 rinngo17@foxmail.com
   * @brief   Code for Timer Management in STM32 series MCU, supported packaged:
   *          - STM32Cube_FW_F4_V1.24.0.
   *          - STM32Cube_FW_F1_V1.8.0.
   *          - STM32Cube_FW_H7_V1.5.0.
   * @date    2019-06-12
-  * @version 2.0
+  * @version 3.0
   * @par Change Log：
   * <table>
   * <tr><th>Date        <th>Version  <th>Author         <th>Description
   * <tr><td>2019-06-12  <td> 1.0     <td>Mentos Seetoo  <td>Creator
   * <tr><td>2019-10-28  <td> 2.0     <td>Mentos Seetoo  <td>Add Timer manage object.
+  * <tr><td>2021-04-06  <td> 3.0     <td>M3chD09        <td>Remove HAL_TIM_Base_Start in Timer_Init.
   * </table>
   *
   ==============================================================================
@@ -41,6 +42,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_TIMER
+
 /* Includes ------------------------------------------------------------------*/
 #include "drv_timer.h"
 
@@ -74,8 +80,6 @@ void Timer_Init(TIM_HandleTypeDef* htim, EDelay_src src)
 	Timer_Manager.delay_ms_src = src;
     
   if(HAL_TIM_Base_Start_IT(Timer_Manager.htim_x)!=HAL_OK)
-      Error_Handler();
-  if(HAL_TIM_Base_Start(Timer_Manager.htim_x)!= HAL_OK)
       Error_Handler();
 }
 
@@ -139,4 +143,7 @@ static void Error_Handler(void)
   /* Nromally the program would never run here. */
   while(1){}
 }
+
+#endif /* USE_SRML_TIMER */
+
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

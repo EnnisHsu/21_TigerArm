@@ -92,6 +92,34 @@ MotorMsgSend(&hcan1, chassis_motor);
 pitch_motor.Out = 100;
 MotorMsgSend(&hcan1, pitch_motor);
 ```
+
+如果你想通过RTOS的队列发送CAN数据，可以调用`MotorMsgPack`函数。
+
+```C++
+//单个电机
+pitch_motor.Out = 100;
+Motor_CAN_COB pack = { };
+pack = MotorMsgPack(pack, pitch_motor);
+xQueueSend(CAN1_TxPort, &pack.Low, 0);
+
+//多个电机
+chassis_motor[0].Out = 100;
+chassis_motor[1].Out = 100;
+chassis_motor[2].Out = 100;
+chassis_motor[3].Out = 100;
+Motor_CAN_COB pack = { };
+pack = MotorMsgPack(pack, chassis_motor);
+xQueueSend(CAN1_TxPort, &pack.Low, 0); // 这里的Low对应电机ID一般为1，2，3，4
+xQueueSend(CAN1_TxPort, &pack.High, 0); // 这里的High对应电机ID一般为5，6，7，8
+
+//多种电机（发送ID一致）
+pitch_motor.Out = 100;
+yaw_motor.Out = 100;
+Motor_CAN_COB pack = { };
+pack = MotorMsgPack(pack, pitch_motor, yaw_motor);
+xQueueSend(CAN1_TxPort, &pack.Low, 0);
+```
+
 ### PID.h 的使用
 
 ![](https://img.shields.io/badge/%E7%BD%91%E7%AE%A1%E6%B5%8B%E8%AF%95-%E7%AD%89%E5%BE%85-yellow.svg)  

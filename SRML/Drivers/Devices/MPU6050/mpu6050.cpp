@@ -35,6 +35,10 @@
   ******************************************************************************
   */
 
+#include "SRML.h"
+
+#if USE_SRML_MPU6050
+
 /* Includes ------------------------------------------------------------------*/
 #include "mpu6050.h"
 
@@ -214,5 +218,7 @@ unsigned char MPU_Get_Accelerometer(IIC_PIN_Typedef *iic_pin, short *ax,short *a
 	}
     return res;;
 }
+
+#endif /* USE_SRML_MPU6050 */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

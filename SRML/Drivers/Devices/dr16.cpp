@@ -4,13 +4,14 @@
   * @file    dr16.cpp
   * @author  Zelong.Xu (8762322@qq.com)
   * @brief   Code for DJI-DR16 driver in embedded software system.
-  * @date    2019-11-08
-  * @version 2.1
+  * @date    2021-04-07
+  * @version 3.0
   * @par Change Log：
   * <table>
   * <tr><th>Date        <th>Version  <th>Author    		<th>Description
   * <tr><td>2019-04-00  <td> 2.0     <td>YuyongHu     <td>Creator
   * <tr><td>2019-11-08  <td> 2.1     <td>Zelong.Xu    <td>Re-format for API.
+  * <tr><td>2021-04-07  <td> 3.0     <td>M3chD09      <td>Add DR16 prefix for enum API.
   * </table>
   *
   ==============================================================================
@@ -34,6 +35,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_DR16
+
 /* Includes ------------------------------------------------------------------*/ 
 #include "dr16.h"
 
@@ -48,7 +54,7 @@ float DeadZone_Process(float num,float DZ_min, float DZ_max, float DZ_num);
 DR16_Classdef::DR16_Classdef()
 {
     MouseCoefficient = 128;      //鼠标系数初始化
-    Status = Connection_Lost;    //状态初始化
+    Status = DR16_LOST;    //状态初始化
     for(short i=0;i<16;i++)      //键值初始化
     {
         Key[i].isPressed=false;
@@ -72,7 +78,7 @@ void DR16_Classdef::DataCapture(DR16_DataPack_Typedef* captureData)
 
     /*设置在线，开始再次检测连接*/
     last_check_time = 0;
-    Status = Connection_Established;
+    Status = DR16_ESTABLISHED;
 
     /*各杂七杂八通道值归一化处理*/
     RX_Norm = DeadZone_Process((float)(DataPack.ch0-1024)/660.0f,-Ignore_Limit,Ignore_Limit,0);
@@ -122,18 +128,18 @@ void DR16_Classdef::Key_Process(void)
     }
     //鼠标左右键处理
     if(DataPack.press_l == 0x01)
-        Key[_Mouse_L].isPressed = true;
+        Key[DR16_MOUSE_L].isPressed = true;
     else
     {
-        Key[_Mouse_L].isPressed = false;
-        Key[_Mouse_L].isTriggered = false;
+        Key[DR16_MOUSE_L].isPressed = false;
+        Key[DR16_MOUSE_L].isTriggered = false;
     }
     if(DataPack.press_r == 0x01)
-        Key[_Mouse_R].isPressed = true;
+        Key[DR16_MOUSE_R].isPressed = true;
     else
     {
-        Key[_Mouse_R].isPressed = false;
-        Key[_Mouse_R].isTriggered = false;
+        Key[DR16_MOUSE_R].isPressed = false;
+        Key[DR16_MOUSE_R].isTriggered = false;
     }
 }
 
@@ -157,7 +163,7 @@ void DR16_Classdef::Exce_Click_Fun()
 {
     for(size_t i = 0; i < 18; i++)
     {
-        if(Click_Fun[i]!= NULL &&IsKeyPress(i)&&!IsKeyPress(_CTRL))
+        if(Click_Fun[i]!= NULL &&IsKeyPress(i)&&!IsKeyPress(DR16_KEY_CTRL))
         {
             if(!Key[i].isTriggered)
             {
@@ -308,7 +314,7 @@ void DR16_Classdef::Check_Link(uint32_t current_check_time)
               last_check_time = 0;
           /*每100ms不置位就认为掉线*/
           else
-              Status = Connection_Lost;
+              Status = DR16_LOST;
 
           /*重新开始检测*/
           last_check_time = 0;
@@ -332,5 +338,7 @@ float DeadZone_Process(float num,float DZ_min, float DZ_max, float DZ_num)
     else
         return num;
 }
+
+#endif /* USE_SRML_DR16 */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

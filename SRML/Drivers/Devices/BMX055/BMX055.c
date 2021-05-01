@@ -29,6 +29,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_BMX055
+
 /* Includes ------------------------------------------------------------------*/
 #include "BMX055.h"
 
@@ -217,5 +222,7 @@ uint8_t BMX055_Get_Angle(float *roll, float *pitch, float *yaw)
   *yaw = Attitude.yaw;	
   return 0;
 }
+
+#endif /* USE_SRML_BMX055 */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

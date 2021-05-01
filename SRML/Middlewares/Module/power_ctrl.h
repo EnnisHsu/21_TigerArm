@@ -35,15 +35,6 @@ enum E_LOOP{
 	REMAIN_ENERGY_LOOP = 1	/* !底盘!无电容与电流采样板(哨兵)，使用裁判系统供电，使用剩余能量进行电机功率控制 */
 };
 
-template<typename Type>
-Type _PowerCtrl_Constrain(Type input,Type min,Type max){
-  if (input <= min)
-    return min;
-  else if(input >= max)
-    return max;
-  else return input;
-}
-
 /* Exported macros -----------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 class PowerCtrl_ClassDef

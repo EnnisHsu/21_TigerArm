@@ -48,6 +48,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_UART
+
 /* Includes ------------------------------------------------------------------*/
 #include "drv_uart.h"
 
@@ -267,5 +272,7 @@ static void Error_Handler(void)
   /* Normally the program would never run here. */
   while(1){}
 }
+
+#endif /* USE_SRML_UART */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

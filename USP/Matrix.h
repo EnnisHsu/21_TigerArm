@@ -3,10 +3,10 @@
 #ifndef Matrix_h
 #define Matrix_h
 
-#include <iostream>
+//#include <iostream>
 //#include <vector>
 //#include <exception>
-using namespace std;
+//using namespace std;
 
 //----------------------------Definition of a Matrix class-----------------------------------------------
 
@@ -69,8 +69,8 @@ class Matrix
 		double* buf;
 	
 	//<< and >>
-	friend ostream& operator << (ostream& output, const Matrix& A);
-	friend istream& operator >> (istream& input, Matrix& A);
+	//friend ostream& operator << (ostream& output, const Matrix& A);
+	//friend istream& operator >> (istream& input, Matrix& A);
 
        // friend iostram& operator <<(iostream& output, const Matrix& A);
 

@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    SerialLineIP.cpp
+  * @file    serial_line_ip.cpp
   * @author  BigeYoung  SCUT.BigeYoung@gmail.com
   * @brief   SerialLineIP is a simple serial protocol for Data Link Layer.This file
   *          provide functions for framing and transparent transmission. 
@@ -24,8 +24,13 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_SERIAL_LINE_IP
+
 /* Includes ------------------------------------------------------------------*/ 
-#include "SerialLineIP.h"
+#include "serial_line_ip.h"
 
 /* Private define ------------------------------------------------------------*/
 using namespace SerialLineIP;
@@ -194,5 +199,7 @@ std::vector<uint8_t> SerialLineIP::Unpack(const void *const p_SDU, int SDU_len)
     PDU_data.clear();
     return PDU_data;
 }
+
+#endif /* USE_SRML_SERIAL_LINE_IP */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

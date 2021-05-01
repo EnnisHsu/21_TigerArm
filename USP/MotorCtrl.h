@@ -12,7 +12,7 @@
 #include "System_DataPool.h"
 	
 void Service_MotoCtrl_Init();
-static void Convert_Data(CAN_RxMessage* input, COB_TypeDef* output);
+static void Convert_Data(CAN_RxMessage* input, CAN_COB* output);
 void CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage);
 void Task_DogMotorCtrl(void);
 void Task_CAN1Receive(void);

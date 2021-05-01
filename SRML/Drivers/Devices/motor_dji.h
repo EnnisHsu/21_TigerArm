@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    motor.h
+  * @file    motor_dji.h
   * @author  BigeYoung 851756890@qq.com & M3chD09
   * @brief   Code for Motor driver, Including almost every motor model that used 
   *			     in robomaster(Since robomaster 2019).
@@ -33,19 +33,18 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include "../Components/drv_can.h"
+#include "Drivers/Components/drv_can.h"
+#include "srml_std_lib.h"
 #ifdef __cplusplus
 /* Private macros ------------------------------------------------------------*/
 /* Private type --------------------------------------------------------------*/
-template<typename Type> 
-void _motor_Constrain(Type *x, Type Min, Type Max) 
-{
-  if(*x < Min) *x = Min;
-  else if(*x > Max) *x = Max;
-  else{;}
-}
 /* Exported macros -----------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
+struct Motor_CAN_COB
+{
+    CAN_COB Low;
+    CAN_COB High;
+};
 /* Exported variables --------------------------------------------------------*/
 /* Exported function declarations --------------------------------------------*/
 /**
@@ -291,7 +290,7 @@ void MotorMsgSend(CAN_HandleTypeDef *hcan, MotorType (&motors)[N])
     bool high = false;
     for (int i = 0; i < N; i++)
     {
-        _motor_Constrain(&motors[i].Out, -motors[0].MAX_CURRENT(), motors[0].MAX_CURRENT());
+    	motors[i].Out = std_lib::constrain(motors[i].Out, -motors[0].MAX_CURRENT(), motors[0].MAX_CURRENT());
         constrain_Out = motors[i].Out;
         if (motors[i].ID <= 4 && motors[i].ID > 0)
         {
@@ -320,5 +319,61 @@ void MotorMsgSend(CAN_HandleTypeDef *hcan, MotorType &motor)
     MotorType motor_arr[1] = {motor};
     MotorMsgSend(hcan, motor_arr);
 }
+
+template <class MotorType, int N>
+Motor_CAN_COB &MotorMsgPack(Motor_CAN_COB &motor_msg, MotorType (&motors)[N])
+{
+    for (int i = 0; i < N; i++)
+    {
+        motor_msg = MotorMsgPack(motor_msg, motors[i]);
+    }
+    return motor_msg;
+}
+
+template <class MotorType, class... MotorTypes>
+Motor_CAN_COB &MotorMsgPack(Motor_CAN_COB &motor_msg, MotorType &motor, MotorTypes&... motors)
+{
+    motor_msg = MotorMsgPack(motor_msg, motor);
+    return MotorMsgPack(motor_msg, motors...);
+}
+
+template <class MotorType>
+Motor_CAN_COB &MotorMsgPack(Motor_CAN_COB &motor_msg, MotorType &motor)
+{
+    motor.Out = std_lib::constrain(motor.Out, -motor.MAX_CURRENT(), motor.MAX_CURRENT());
+    int16_t constrain_Out = motor.Out;
+    if (motor.ID <= 4 && motor.ID > 0)
+    {
+        if (motor_msg.Low.ID == 0)
+        {
+            motor_msg.Low.DLC = 8;
+            motor_msg.Low.ID = motor.SEND_ID_LOW();
+        }
+        else if (motor_msg.Low.ID != motor.SEND_ID_LOW())
+        {
+            motor_msg.Low = CAN_COB{};
+            return motor_msg;
+        }
+        motor_msg.Low.Data[motor.ID * 2 - 2] = (constrain_Out >> 8) & 0xff;
+        motor_msg.Low.Data[motor.ID * 2 - 1] = constrain_Out & 0xff;
+    }
+    else if (motor.ID <= 8 && motor.ID > 4)
+    {
+        if (motor_msg.High.ID == 0)
+        {
+            motor_msg.High.DLC = 8;
+            motor_msg.High.ID = motor.SEND_ID_HIGH();
+        }
+        else if (motor_msg.High.ID != motor.SEND_ID_HIGH())
+        {
+            motor_msg.High = CAN_COB{};
+            return motor_msg;
+        }
+        motor_msg.High.Data[motor.ID * 2 - 10] = (constrain_Out >> 8) & 0xff;
+        motor_msg.High.Data[motor.ID * 2 - 9] = constrain_Out & 0xff;
+    }
+    return motor_msg;
+}
+
 #endif
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

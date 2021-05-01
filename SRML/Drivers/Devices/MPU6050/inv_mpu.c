@@ -17,6 +17,11 @@
  *                  MPU9150 (or MPU6050 w/ AK8975 on the auxiliary bus)
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
+
+#include "SRML.h"
+
+#if USE_SRML_MPU6050
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -39,7 +44,7 @@
  * get_ms(unsigned long *count)
  * reg_int_cb(void (*cb)(void), unsigned char port, unsigned char pin)
  * labs(long x)
- * fabsf(float x)
+ * std::absf(float x)
  * min(int a, int b)
  */
 #if defined MOTION_DRIVER_TARGET_MSP430
@@ -53,8 +58,6 @@
 #define log_e  	printf	//打印信息
 
 /* labs is already defined by TI's toolchain. */
-/* fabs is for doubles. fabsf is for floats. */
-#define fabs        fabsf
 #define min(a,b) ((a<b)?a:b)
 
 
@@ -78,8 +81,6 @@ static inline int reg_int_cb(struct int_param_s *int_param)
 #define log_e       MPL_LOGE
 
 /* labs is already defined by TI's toolchain. */
-/* fabs is for doubles. fabsf is for floats. */
-#define fabs        fabsf
 #define min(a,b) ((a<b)?a:b)
 
 
@@ -107,7 +108,7 @@ static inline int reg_int_cb(struct int_param_s *int_param)
 #define log_e       MPL_LOGE
 /* UC3 is a 32-bit processor, so abs and labs are equivalent. */
 #define labs        abs
-#define fabs(x)     (((x)>0)?(x):-(x))
+#define std::abs(x)     (((x)>0)?(x):-(x))
 
 #else
 #error  Gyro driver is missing the system layer implementations.
@@ -1936,7 +1937,7 @@ static int accel_self_test(long *bias_regular, long *bias_st)
         st_shift_cust = labs(bias_regular[jj] - bias_st[jj]) / 65536.f;
         if (st_shift[jj]) {
             st_shift_var = st_shift_cust / st_shift[jj] - 1.f;
-            if (fabs(st_shift_var) > test.max_accel_var)
+            if (std::abs(st_shift_var) > test.max_accel_var)
                 result |= 1 << jj;
         } else if ((st_shift_cust < test.min_g) ||
             (st_shift_cust > test.max_g))
@@ -1966,7 +1967,7 @@ static int gyro_self_test(long *bias_regular, long *bias_st)
             while (--tmp[jj])
                 st_shift *= 1.046f;
             st_shift_var = st_shift_cust / st_shift - 1.f;
-            if (fabs(st_shift_var) > test.max_gyro_var)
+            if (std::abs(st_shift_var) > test.max_gyro_var)
                 result |= 1 << jj;
         } else if ((st_shift_cust < test.min_dps) ||
             (st_shift_cust > test.max_dps))
@@ -3050,22 +3051,4 @@ unsigned char mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /* USE_SRML_MPU6050 */

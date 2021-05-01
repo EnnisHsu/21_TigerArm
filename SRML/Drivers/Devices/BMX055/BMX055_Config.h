@@ -37,7 +37,7 @@ extern "C" {
 extern IIC_PIN_Typedef BMX055_IIC_PIN;	
 
 /* Exported function declarations --------------------------------------------*/
-uint8_t BMX055_Init(GPIO_TypeDef* gpiox,uint32_t scl_pinx,uint32_t sda_pinx);
+uint8_t BMX055_Init(GPIO_TypeDef* gpiox,uint16_t scl_pinx,uint16_t sda_pinx);
 
 #ifdef __cplusplus
 }

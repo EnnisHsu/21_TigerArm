@@ -44,6 +44,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
 */
+
+#include "SRML.h"
+
+#if USE_SRML_CAN
+
 /* Includes ------------------------------------------------------------------*/
 #include "drv_can.h"
 
@@ -229,5 +234,6 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 }
 
 
+#endif /* USE_SRML_CAN */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

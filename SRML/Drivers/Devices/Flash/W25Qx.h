@@ -20,8 +20,8 @@
 #define _W25QX_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "../../Components/drv_spi.h"
-#include "../../Components/drv_timer.h"
+#include "Drivers/Components/drv_spi.h"
+#include "Drivers/Components/drv_timer.h"
 #include "srml_config.h"
 #include <string.h>
 	

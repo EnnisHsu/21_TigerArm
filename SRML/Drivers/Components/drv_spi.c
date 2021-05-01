@@ -19,7 +19,7 @@
                             How to use this driver
   ==============================================================================
     @note
-      -# ±¾ÎÄ¼şÎªÓ²¼şspiÇı¶¯³ÌĞò£¬ÇëÈ·±£Ó²¼şspiÅäÖÃÕıÈ·
+      -# æœ¬æ–‡ä»¶ä¸ºç¡¬ä»¶spié©±åŠ¨ç¨‹åºï¼Œè¯·ç¡®ä¿ç¡¬ä»¶spié…ç½®æ­£ç¡®
 	
     @warning
       -# 
@@ -36,6 +36,11 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_SPI
+
 /* Includes ------------------------------------------------------------------*/
 #include "drv_spi.h"
 #include "drv_timer.h"
@@ -148,7 +153,7 @@ void SPI_Write1ReadN(SPI_HandleTypeDef* hspi,uint8_t tx_data,uint8_t * rx_buff,u
 
 inline void __SPI_Write_Read(HardwareSPI_HandleTypeDef spix,uint16_t tx_size,uint16_t rx_size)
 {
-	/* Ñ¡ÖĞÆ¬Ñ¡ */
+	/* é€‰ä¸­ç‰‡é€‰ */
 	HAL_GPIO_WritePin(spix.cs_port,spix.cs_pin,GPIO_PIN_RESET);
 	HAL_SPI_Transmit(spix.hspix,spix.tx_buff,tx_size,spix.time_out);
 	HAL_SPI_Receive(spix.hspix,spix.rx_buff,rx_size,spix.time_out);
@@ -156,3 +161,4 @@ inline void __SPI_Write_Read(HardwareSPI_HandleTypeDef spix,uint16_t tx_size,uin
 	delay_us_nos(10);
 }
 
+#endif /* USE_SRML_SPI */

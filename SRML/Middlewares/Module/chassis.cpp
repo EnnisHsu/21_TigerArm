@@ -49,8 +49,15 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_CHASSIS
+
 /* Includes ------------------------------------------------------------------*/
 #include "chassis.h"
+#include "srml_std_lib.h"
+#include <algorithm>
 /* Private define ------------------------------------------------------------*/
 #define _ch_dir(x)  (x >= 0 ? 1 : -1)
 /* Functions -----------------------------------------------------------------*/
@@ -97,8 +104,9 @@ inline uint8_t CChassis::position_control()
   else if(Mode == Follow_Position)
   {
     //Current_Pos & Zero_Pos is disable in this mode.
-    memset(&Relative_Pos,0,sizeof(_chassis_GlobalPos));
-    
+    //memset(&Relative_Pos,0,sizeof(_chassis_GlobalPos));
+    Relative_Pos = _chassis_GlobalPos{};
+
     //Calculate target velocity by external controller.
     Target_Velocity = *(position_controller(&Relative_Pos, &Target_Pos));
   }
@@ -132,9 +140,9 @@ inline uint8_t CChassis::torque_optimization()
         'Target_Velocity' may be changed elsewhere.
       */
       /* X Axis */
-      if(_Chassis_Abs(Command_Velocity.x_speed) > _Chassis_Abs(Last_Target.x_speed))
+      if(std::abs(Command_Velocity.x_speed) > std::abs(Last_Target.x_speed))
       { //accelerate
-        if(_Chassis_Abs(Command_Velocity.x_speed) <= Param.launch_speed)
+        if(std::abs(Command_Velocity.x_speed) <= Param.launch_speed)
           max_accceleration = Param.max_launch_acceleration;
         else
           max_accceleration = Param.max_normal_acceleration;
@@ -144,7 +152,7 @@ inline uint8_t CChassis::torque_optimization()
       
       dspeed = max_accceleration*((float)Param.task_run_interval);
       
-      if(_Chassis_Abs(Command_Velocity.x_speed - Last_Target.x_speed) >= dspeed)
+      if(std::abs(Command_Velocity.x_speed - Last_Target.x_speed) >= dspeed)
       {
         if(Command_Velocity.x_speed >= Last_Target.x_speed)
           Last_Target.x_speed += dspeed;
@@ -154,9 +162,9 @@ inline uint8_t CChassis::torque_optimization()
         Last_Target.x_speed = Command_Velocity.x_speed;
       
       /* Y Axis */
-      if(_Chassis_Abs(Command_Velocity.y_speed) > _Chassis_Abs(Last_Target.y_speed))
+      if(std::abs(Command_Velocity.y_speed) > std::abs(Last_Target.y_speed))
       { //accelerate
-        if(_Chassis_Abs(Command_Velocity.y_speed) <= Param.launch_speed)
+        if(std::abs(Command_Velocity.y_speed) <= Param.launch_speed)
           max_accceleration = Param.max_launch_acceleration;
         else
           max_accceleration = Param.max_normal_acceleration;
@@ -166,7 +174,7 @@ inline uint8_t CChassis::torque_optimization()
       
       dspeed = max_accceleration*((float)Param.task_run_interval);
       
-      if(_Chassis_Abs(Command_Velocity.y_speed - Last_Target.y_speed) >= dspeed)
+      if(std::abs(Command_Velocity.y_speed - Last_Target.y_speed) >= dspeed)
       {
         if(Command_Velocity.y_speed >= Last_Target.y_speed)
           Last_Target.y_speed += dspeed;
@@ -252,9 +260,9 @@ uint8_t CChassis::speed_control()
     an incorrect movement direction.
   */
   for (uint8_t k = 0; k < WHEEL_NUM; ++k )
-     TempBuff[k] = _Chassis_Abs(wheel_rpmOut[k]);
+     TempBuff[k] = std::abs(wheel_rpmOut[k]);
        
-  _Chassis_BubbleSort(TempBuff,WHEEL_NUM);
+  std::sort(TempBuff, TempBuff + WHEEL_NUM);
   if(TempBuff[WHEEL_NUM - 1] >= Param.wheel_max_speed)
       scale = ((float)Param.wheel_max_speed)/((float)TempBuff[WHEEL_NUM - 1]);
   else
@@ -272,7 +280,7 @@ uint8_t CChassis::speed_control()
     Constrain for wheel output to protect the actuator.
   */
   for (uint8_t k = 0; k < WHEEL_NUM; ++k )
-     wheel_Out[k] = _Chassis_Constrain(wheel_Out[k], (int32_t)-Param.MAX_MOTOR_OUTPUT, (int32_t)Param.MAX_MOTOR_OUTPUT);
+     wheel_Out[k] = std_lib::constrain(wheel_Out[k], (int32_t)-Param.MAX_MOTOR_OUTPUT, (int32_t)Param.MAX_MOTOR_OUTPUT);
   
   return 1;
 }
@@ -299,9 +307,9 @@ void CChassis::Set_Target(float target_X, float target_Y ,float target_Z)
   /* Calculate velocity(Only in 'Normal-Speed') .*/
   if(Mode == Normal_Speed)
   {
-    Command_Velocity.x_speed = _Chassis_Constrain(target_X,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
-    Command_Velocity.y_speed = _Chassis_Constrain(target_Y,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
-    Command_Velocity.z_speed = _Chassis_Constrain(target_Z,-1.0f,1.0f)*Param.coefficient_z*Param.wheel_max_speed;
+    Command_Velocity.x_speed = std_lib::constrain(target_X,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
+    Command_Velocity.y_speed = std_lib::constrain(target_Y,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
+    Command_Velocity.z_speed = std_lib::constrain(target_Z,-1.0f,1.0f)*Param.coefficient_z*Param.wheel_max_speed;
   }
   
   /* Set command pose */
@@ -321,21 +329,21 @@ void CChassis::Set_SpeedGear(_chassis_SpeedGears targetGear)
 
 void CChassis::Set_SpeedParam(float slow, float normal, float fast, float z)
 {
-  Param.coefficient_slow   = _Chassis_Constrain(slow, 0.0f, 1.0f);
-  Param.coefficient_normal = _Chassis_Constrain(normal, 0.0f, 1.0f);
-  Param.coefficient_fast   = _Chassis_Constrain(fast, 0.0f, 1.0f);
-  Param.coefficient_z      = _Chassis_Constrain(z, 0.0f, 1.0f);
+  Param.coefficient_slow   = std_lib::constrain(slow, 0.0f, 1.0f);
+  Param.coefficient_normal = std_lib::constrain(normal, 0.0f, 1.0f);
+  Param.coefficient_fast   = std_lib::constrain(fast, 0.0f, 1.0f);
+  Param.coefficient_z      = std_lib::constrain(z, 0.0f, 1.0f);
 }
 
 void CChassis::Set_AccelerationParam(int16_t launch, int16_t normal, uint16_t brake)
 {
-	launch = _Chassis_Constrain((int16_t)launch, (int16_t)-32765, (int16_t)32765);
-	normal = _Chassis_Constrain((int16_t)normal, (int16_t)-32765, (int16_t)32765);
-	brake = _Chassis_Constrain((int16_t)normal, (int16_t)0, (int16_t)65535);
+	launch = std_lib::constrain((int16_t)launch, (int16_t)-32765, (int16_t)32765);
+	normal = std_lib::constrain((int16_t)normal, (int16_t)-32765, (int16_t)32765);
+	brake = std_lib::constrain((int16_t)normal, (int16_t)0, (int16_t)65535);
 	
-  Param.max_launch_acceleration = _Chassis_Abs(launch);
-  Param.max_normal_acceleration = _Chassis_Abs(normal);
-	Param.max_brake_acceleration  = _Chassis_Abs(brake);
+  Param.max_launch_acceleration = std::abs(launch);
+  Param.max_normal_acceleration = std::abs(normal);
+	Param.max_brake_acceleration  = std::abs(brake);
 }
 
 void CChassis::Set_TorqueOptimizeFlag(bool flag)
@@ -485,13 +493,13 @@ inline void CChassis::model_resolve()
       /* Minimum delta angle pinciple */
       delta_angle = atan2f(wheelSpeed_y[cnt], wheelSpeed_x[cnt]) - steer_Set[cnt].vect_angleAbs;
 
-      if(_Chassis_Abs(delta_angle) > PI)
-        steer_Set[cnt].vect_angle -= _ch_dir(delta_angle)*(2*PI - _Chassis_Abs(delta_angle));
+      if(std::abs(delta_angle) > PI)
+        steer_Set[cnt].vect_angle -= _ch_dir(delta_angle)*(2*PI - std::abs(delta_angle));
       else
         steer_Set[cnt].vect_angle += delta_angle;
       
       steer_Set[cnt].vect_angleAbs = fmodf(steer_Set[cnt].vect_angle,2*PI);
-      steer_Set[cnt].vect_angleAbs -= _Chassis_Abs(steer_Set[cnt].vect_angleAbs) > PI ? _ch_dir(steer_Set[cnt].vect_angleAbs)*2*PI : 0;
+      steer_Set[cnt].vect_angleAbs -= std::abs(steer_Set[cnt].vect_angleAbs) > PI ? _ch_dir(steer_Set[cnt].vect_angleAbs)*2*PI : 0;
     }
     else{/*Do nothing for angle*/}
     
@@ -504,7 +512,7 @@ inline void CChassis::model_resolve()
     }
     else
     { /*Steer angle is limited*/
-      cal_temp = _Chassis_Abs(steer_Set[cnt].vect_angleAbs);
+      cal_temp = std::abs(steer_Set[cnt].vect_angleAbs);
       
       if(cal_temp > dead_zone_high)
       {
@@ -530,5 +538,6 @@ inline void CChassis::model_resolve()
 #endif
 }
 
+#endif /* USE_SRML_CHASSIS */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

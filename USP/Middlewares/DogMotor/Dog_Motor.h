@@ -42,7 +42,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include "drv_can.h"
+#include "Drivers/Components/drv_can.h"
 
 #ifdef __cplusplus
 
@@ -73,6 +73,7 @@ public:
     AK80_V3(uint16_t id ,CAN_HandleTypeDef* hcan) {ID=id; Can=hcan;}
     ~AK80_V3(){}
 		CAN_HandleTypeDef* Can;
+		virtual bool CheckID(uint16_t StdID) const { return StdID == (uint16_t)ID; }
     uint16_t ID = 0;
 		Control_State Current_mode = EXIT_CONTROL;
 	  float Command_Position = 0.0f;

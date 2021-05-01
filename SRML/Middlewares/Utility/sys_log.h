@@ -24,6 +24,7 @@
 
 #ifdef __cplusplus
 #include <stdarg.h>
+#include <string.h>
 #include <string>
 #include <stdint.h>
 

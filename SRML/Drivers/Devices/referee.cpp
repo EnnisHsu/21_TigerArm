@@ -50,10 +50,16 @@
   * through your new brief.
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_REFEREE
+
 /* Includes ------------------------------------------------------------------*/
 #include "referee.h"
 #include "FreeRTOS.h"
 #include "task.h"//需要用到taskDelay控制发送数据
+#include "srml_std_lib.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private function declarations --------------------------------------------*/
@@ -109,21 +115,6 @@ static const uint16_t wCRC_Table[256] = {
 /* Private function declarations ---------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-
-/**
- * @brief 
- * @note Template of data len limitation, use in SendDrawData() and character_drawing()
- * @param 
- * @retval 
- */
-template<typename Type>
-Type _referee_Constrain(Type input,Type min,Type max){
-  if (input <= min)
-    return min;
-  else if(input >= max)
-    return max;
-  else return input;
-}
 
 /**
   * @brief   Set referee's communicate channel at one time 
@@ -669,7 +660,7 @@ void referee_Classdef::int_drawing(drawOperate_e _operate_type, uint16_t startx,
  */
 void referee_Classdef::character_drawing(drawOperate_e _operate_type, uint16_t startx,uint16_t starty,uint16_t size, uint8_t char_length,uint8_t character[], colorType_e vcolor, uint8_t name[])
 {
-	char_length = _referee_Constrain(char_length, (uint8_t)0, (uint8_t)30);											//将字符串长度约束在30个之内
+	char_length = std_lib::constrain(char_length, (uint8_t)0, (uint8_t)30);											//将字符串长度约束在30个之内
 	
 	memcpy(drawing.graphic_name, name, 3);		
 	drawing.operate_tpye = _operate_type;	
@@ -800,5 +791,7 @@ void referee_Classdef::Draw_FitingGraph(uint8_t *data, uint16_t length, colorTyp
 		line_drawing(ADD_PICTURE, data[i],data[i+1],data[i+2],data[i+3],_color, name);								//直线绘制
 	}
 }
+
+#endif /* USE_SRML_REFEREE */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

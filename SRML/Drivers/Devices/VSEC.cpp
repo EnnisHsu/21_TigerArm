@@ -1,3 +1,7 @@
+#include "SRML.h"
+
+#if USE_SRML_VSEC
+
 #include "VSEC.h"
 
 void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
@@ -18,7 +22,7 @@ void buffer_append_float32(uint8_t* buffer, float number, float scale, int32_t *
     buffer_append_int32(buffer, (int32_t)(number * scale), index);
 }
 
-/* ÉèÖÃµçÁ÷Öµ µ¥Î»A */
+/* è®¾ç½®ç”µæµå€¼ å•ä½A */
 void VSEC_Set_Current(CAN_HandleTypeDef *hcan, uint8_t controller_id, float current) {
 	int32_t send_index = 0;
 	uint8_t buffer[4];
@@ -26,11 +30,13 @@ void VSEC_Set_Current(CAN_HandleTypeDef *hcan, uint8_t controller_id, float curr
 	CANx_SendExtData(hcan,(controller_id|((uint32_t)CAN_PACKET_SET_CURRENT<<8)),buffer,8);
 }
 
-/* µçµ÷»Ø´«Êı¾İ½â°ü */
+/* ç”µè°ƒå›ä¼ æ•°æ®è§£åŒ… */
 void VSEC_UnPack(CAN_RxBuffer *can_msg, float *temp_fet, float *temp_motor, float *current, float *pos) {
 	int32_t id = 0;
-	temp_fet = (float)buffer_get_int16(can_msg->data, &id) / 10.0;
-	temp_motor = (float)buffer_get_int16(can_msg->data, &id) / 10.0;
-	current = (float)buffer_get_int16(can_msg->data, &id) / 10.0;
-	pos = (float)buffer_get_int16(can_msg->data, &id) / 50.0;
+	*temp_fet = (float)buffer_get_int16(can_msg->data, &id) / 10.0f;
+	*temp_motor = (float)buffer_get_int16(can_msg->data, &id) / 10.0f;
+	*current = (float)buffer_get_int16(can_msg->data, &id) / 10.0f;
+	*pos = (float)buffer_get_int16(can_msg->data, &id) / 50.0f;
 }
+
+#endif /* USE_SRML_VSEC */

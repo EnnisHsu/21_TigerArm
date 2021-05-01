@@ -9,7 +9,7 @@
   *          performance of the physical system, such as gimbal, robotic arm...
   * @date    2020-1-1
   * @version 0.1
-  * @par Change Log£º
+  * @par Change Logï¼š
   * <table>
   * <tr><th>Date        <th>Version  <th>Author         <th>Description
   * <tr><td>2020-01-01  <td> 0.1     <td>Mentos Seetoo  <td>Creator
@@ -30,8 +30,8 @@
       - ARM_MATH & DSP is required!!!
       
     @Todo
-      - ½â¾ö¸ßÆµÇøÄÑÒÔ²ÉÑù£¬Éú³É²»×¼È·µÈÎÊÌâ
-      - ÍêÉÆÆäËûĞ¡¹¦ÄÜÓë½Ó¿Ú
+      - è§£å†³é«˜é¢‘åŒºéš¾ä»¥é‡‡æ ·ï¼Œç”Ÿæˆä¸å‡†ç¡®ç­‰é—®é¢˜
+      - å®Œå–„å…¶ä»–å°åŠŸèƒ½ä¸æ¥å£
   ******************************************************************************
   * @attention
   * 
@@ -44,9 +44,14 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
+
+#include "SRML.h"
+
+#if USE_SRML_SYSANALYSIS
+
 /* Includes ------------------------------------------------------------------*/
 #include "sys_analysis.h"
-#include "myAssert.h"
+#include "my_assert.h"
 
 #include <stm32f4xx.h>
 #include "arm_math.h"
@@ -129,10 +134,10 @@ uint8_t CAnalyzer::calculation_core()
     ampt_sample = val_sample - fixed_point;
     phase_lost  = fmodf(w*t, 2*PI)*rad2deg - 90.0f;
     
-    ampt_gain = 20*log10f(fabs(ampt_sample)/ampt_signal);
+    ampt_gain = 20*log10f(std::abs(ampt_sample)/ampt_signal);
     
     /*Effective sampling(default error rate is 5%)*/
-    if(fabs((ampt_gain - last_ampt_gain)/ampt_gain) < AMPT_ERROR_RATE)
+    if(std::abs((ampt_gain - last_ampt_gain)/ampt_gain) < AMPT_ERROR_RATE)
     {
       Ampt_Gains += ampt_gain;
       Phase_Losts += phase_lost;
@@ -231,4 +236,7 @@ CAnalyzer::~CAnalyzer()
   delete[] Param.Phase_Series;
   delete[] Param.Freq_Series;
 }
+
+#endif /* USE_SRML_SYSANALYSIS */
+
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

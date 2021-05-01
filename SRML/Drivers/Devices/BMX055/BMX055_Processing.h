@@ -24,7 +24,7 @@ extern "C" {
 #endif
 	
 /* Includes ------------------------------------------------------------------*/ 	
-#include <math.h>                         /* ffabs */	
+#include <math.h>                         /* fstd::abs */	
 #include "BMX055_Config.h"
 	
 /* Private macros ------------------------------------------------------------*/   

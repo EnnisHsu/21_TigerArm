@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    SerialLineIP.h
+  * @file    serial_line_ip.h
   * @author  BigeYoung  SCUT.BigeYoung@gmail.com
   * @brief   SerialLineIP is an easy serial protocol for Data-Link-Layer.This file
   *          provide functions for framing and transparent transmission.

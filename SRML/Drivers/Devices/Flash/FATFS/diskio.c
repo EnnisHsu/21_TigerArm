@@ -7,9 +7,13 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 
+#include "SRML.h"
+
+#if USE_SRML_FATFS
+
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
-#include "../W25Qx.h"
+#include "Drivers/Devices/Flash/W25Qx.h"
 #include "main.h"
 
 /* Definitions of physical drive number for each drive */
@@ -123,11 +127,11 @@ DRESULT disk_ioctl (
 				return RES_OK;
 			
 			case GET_SECTOR_COUNT:
-				*(DWORD * )buff = 4096;//W25Q128ÓĞ4096¸ö´óĞ¡Îª4k bytes µÄÉÈÇø
+				*(DWORD * )buff = 4096;//W25Q128æœ‰4096ä¸ªå¤§å°ä¸º4k bytes çš„æ‰‡åŒº
 				return RES_OK;
 		
 			case GET_SECTOR_SIZE :
-				*(WORD * )buff = 4096;//spi flashµÄÉÈÇø´óĞ¡ÊÇ 4K Bytes
+				*(WORD * )buff = 4096;//spi flashçš„æ‰‡åŒºå¤§å°æ˜¯ 4K Bytes
 			 return RES_OK;
 				
 			case GET_BLOCK_SIZE :
@@ -147,3 +151,5 @@ DWORD get_fattime()
 {
 	return 0;
 }
+
+#endif /* USE_SRML_FATFS */

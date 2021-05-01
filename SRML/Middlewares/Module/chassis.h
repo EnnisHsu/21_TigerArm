@@ -102,7 +102,7 @@ typedef struct _chassis_GlobalPos
   float pitch;
   float yaw;
 
-  _chassis_GlobalPos& operator = (_chassis_GlobalPos& value)
+  _chassis_GlobalPos& operator = (const _chassis_GlobalPos& value)
   {
     if(&value != this)
     {
@@ -188,34 +188,6 @@ typedef struct
 	float RUN_INTERVAL;	
 }_chassis_Parameter;
 
-
-template<typename Type>
-Type _Chassis_Constrain(Type input,Type min,Type max){
-  if (input <= min)
-    return min;
-  else if(input >= max)
-    return max;
-  else return input;
-}
-
-template<typename Type>
-void _Chassis_BubbleSort(Type a[], int n)
-{
-  int i,j;
-  Type temp;
-  for (j = 0; j < n - 1; j++){
-    for (i = 0; i < n - 1 - j; i++){
-      if(a[i] > a[i + 1]){
-          temp = a[i];
-          a[i] = a[i + 1];
-          a[i + 1] = temp;
-      }
-    }
-  }
-}
-
-template<typename Type> 
-Type _Chassis_Abs(Type x) {return ((x > 0) ? x : -x);}
 /* Exported ------------------------------------------------------------------*/
 /**
    @brief User Interface

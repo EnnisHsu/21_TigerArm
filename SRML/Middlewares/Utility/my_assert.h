@@ -1,12 +1,18 @@
 /**
   ******************************************************************************
   * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    unified_frame.h
-  * @author  Mentos_Seetoo
-  * @brief   unified_frame provide a unified application layer communication 
-  *          object.
-  * @date    2019-11-25
+  * @file    my_assert.h
+  * @author  Mentos_Seetoo 1356046979@qq.com
+  * @brief   my_assert is a customized assert module for SCUT-RobotLab.
+  * @date    2019-11-13
   * @version 1.0
+  ============================================================================== 
+                            How to use this module  
+  ==============================================================================
+    @note
+    
+    @warning
+		
   ******************************************************************************
   * @attention
   * 
@@ -19,9 +25,14 @@
   * All rights reserved.</center></h2>
   ******************************************************************************
   */
-#ifndef _UNIFIED_FRAME_H
-#define _UNIFIED_FRAME_H
+#ifndef _MY_ASSERT_H
+#define _MY_ASSERT_H
 
+#ifdef USE_MY_ASSERT
+  #define my_assert(expr) {if(!(expr))while(1){} else void(0);}
+#else
+  #define my_assert(x)    (void(0))
+#endif
 
 
 #endif

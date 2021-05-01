@@ -52,6 +52,16 @@ typedef struct
   usart_call_back call_back_f;
 } usart_manage_obj_t;
 
+/**
+* @brief USART message data type (Communication Object).
+*/
+typedef struct
+{
+  uint8_t port_num;
+  uint16_t len;
+  void* address;
+} USART_COB;
+
 /* Exported macros -----------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/

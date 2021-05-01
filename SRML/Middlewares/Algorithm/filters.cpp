@@ -40,6 +40,10 @@
   ******************************************************************************
   */
 
+#include "SRML.h"
+
+#if USE_SRML_FILTER
+
  /* Includes ------------------------------------------------------------------*/
 #include "filters.h"
 
@@ -72,5 +76,7 @@ float LowPassFilter::f(float num)
 	in(num);
 	return (out());
 }
+
+#endif /* USE_SRML_FILTER */
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

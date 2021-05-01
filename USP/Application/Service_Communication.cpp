@@ -16,6 +16,7 @@
 **/
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Communication.h"
+#include <vector>
 /* Private define ------------------------------------------------------------*/
 void Task_CAN1Transmit(void *arg);
 void Task_CAN2Transmit(void *arg);
@@ -29,7 +30,7 @@ void Service_Communication_Init(void)
 {
   
   /* CAN Filter Config*/
-  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x000,0x000);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
+  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x001,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
   CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
   CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
   
@@ -43,7 +44,7 @@ void Service_Communication_Init(void)
 TaskHandle_t CAN1SendPort_Handle;
 TaskHandle_t CAN2SendPort_Handle;
 TaskHandle_t CANReceivePort_Handle;
-static void Convert_Data(CAN_RxMessage* input, COB_TypeDef* output);
+static void Convert_Data(CAN_RxMessage* input, CAN_COB* output);
 
 /*Function Prototypes--------------------*/
 /**
@@ -55,7 +56,7 @@ void Task_CAN1Transmit(void *arg)
 {
   /* Cache for Task */
   uint8_t free_can_mailbox;
-  COB_TypeDef CAN_TxMsg;
+  CAN_COB CAN_TxMsg;
   /* Pre-Load for task */
   
   /* Infinite loop */
@@ -77,7 +78,7 @@ void Task_CAN2Transmit(void *arg)
 {
   /* Cache for Task */
   uint8_t free_can_mailbox;
-  COB_TypeDef CAN_TxMsg;
+  CAN_COB CAN_TxMsg;
   /* Pre-Load for task */
   
   /* Infinite loop */
@@ -103,7 +104,7 @@ void Task_CAN2Transmit(void *arg)
 */
 void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 {
-  static COB_TypeDef   CAN_RxCOB;
+  static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
   if(RMMotor_QueueHandle != NULL)
@@ -112,7 +113,7 @@ void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 
 void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 {
-  static COB_TypeDef   CAN_RxCOB;
+  static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
 
@@ -125,7 +126,7 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
           CAN_RxCOB：Application layer CAN Frame.
 * @return None.
 */
-static void Convert_Data(CAN_RxMessage* input, COB_TypeDef* output)
+static void Convert_Data(CAN_RxMessage* input, CAN_COB* output)
 {
   output->ID = input->header.StdId;
   output->DLC = input->header.DLC;
