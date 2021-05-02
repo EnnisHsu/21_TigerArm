@@ -6,10 +6,9 @@
 #include <queue.h>
 
 
-
 Motor_GM6020 Motor_Yaw(1),Motor_Wrist(2);
 MotorCascadeCtrl<myPID,myPID> Motor_Yaw_Ctrl(&Motor_Yaw),Motor_Wrist_Ctrl(&Motor_Wrist);
-AK80_V3 Motor_Shoulder(0x1A,&hcan2),Motor_Elbow(0x01,&hcan2);
+AK80_V3 Motor_Shoulder(0x0A,&hcan2),Motor_Elbow(0x01,&hcan2);
 
 TaskHandle_t CAN1_TaskHandle,DogMotoCtrl_TaskHandle;
 
@@ -50,16 +49,23 @@ void Wrist_To(double deg)
 	Motor_Wrist_Ctrl.setTarget(deg);
 }
 
-void Task_DogMotorCtrl(void)
+void TigerArm_Init(void)
 {
 	Motor_Shoulder.To_Into_Control();
 	Motor_Elbow.To_Into_Control();
+	MotorSpeedCtrl<myPID> Motor_Yaw_Init_Ctrl(&Motor_Yaw);
+	//Motor_Yaw_Init_Ctrl.setTarget(3000.0f);
+	//while (!PED_Yaw_Signal);
+}
+
+void Task_DogMotorCtrl(void)
+{
+	TigerArm_Init();
 	TickType_t xLastWakeTime_MotoCtrl;
 	for (;;)
 	{
 		xLastWakeTime_MotoCtrl = xTaskGetTickCount();
-		Motor_Shoulder.Out_Speed_Control(5,0.1);
-		Motor_Elbow.Out_Speed_Control(5,0);
+		
 		vTaskDelayUntil(&xLastWakeTime_MotoCtrl,5);
 	}
 }
