@@ -74,6 +74,7 @@ bool MechanicalArm::FK_cal()
 	world_x = T(1, 4);
 	world_y = T(2, 4);
 	world_z = T(3, 4);
+	return true;
 }
 
 /**

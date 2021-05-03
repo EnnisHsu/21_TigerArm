@@ -58,10 +58,9 @@ Matrix T6_g, Tw_c, Tw_g;
 */
 void User_Tasks_Init(void)
 {
-  TigerArm_Init();
+  xTaskCreate(Task_JointCtrl, "Joint Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &JointCtrl_Handle);
   xTaskCreate(Task_RobotCtrl, "Robot Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &RobotCtrl_Handle);
   xTaskCreate(Task_DataDisplay, "Data Display", Huge_Stack_Size, NULL, PrioritySuperHigh, &DataDisplay_Handle);
-  xTaskCreate(Task_JointCtrl, "Joint Ctrol", Huge_Stack_Size, NULL, PrioritySuperHigh, &JointCtrl_Handle);
 }
 
 void TigerArm_Init(void)
@@ -113,8 +112,7 @@ void Task_RobotCtrl(void *arg)
   /* Pre-Load for task */
   xLastWakeTime_t     = xTaskGetTickCount();
   (void)arg;
-  
-  
+  TigerArm_Init();
   /* Infinite loop */
   for (;;)
   {
@@ -133,7 +131,7 @@ void Task_RobotCtrl(void *arg)
       }
       if (ArmCtrlMode == dir_ctrl)
       {
-          if (keyboard.isKeyPressed(_W_KV))
+          //if (keyboard.isKeyPressed(_W_KV))
       }
    //mouse.resolveVelocity(5);
    //mouse.setExitFlag(false);
@@ -169,20 +167,6 @@ void Task_JointCtrl(void* arg)
         Joint[Wrist_roll]->obj_Target.angle_f = cur_target.deg[3];
         Joint[Wrist_pitch]->obj_Target.angle_f = cur_target.deg[4];
         Joint[Wrist_yaw]->obj_Target.angle_f = cur_target.deg[5];
-        /*static int j = 1;
-        if (Joint[Shoulder_yaw]->obj_Data.angle_f < -2)
-            j = 1;
-        else if(Joint[Shoulder_yaw]->obj_Data.angle_f > 2){
-            j = -1;
-        }
-            Joint[Shoulder_yaw]->obj_Target.angle_f = Joint[Shoulder_yaw]->obj_Data.angle_f +j;
-        static int i = 0;
-        if (i < 100) { i++; }
-        else {
-            std::cout << "target:" << Joint[Shoulder_yaw]->obj_Target.angle_f << std::endl;
-            std::cout << "current:" << Joint[Shoulder_yaw]->obj_Data.angle_f << std::endl;
-            i = 0;
-        }*/
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
     }
 }

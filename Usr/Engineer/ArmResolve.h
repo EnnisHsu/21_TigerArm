@@ -40,9 +40,9 @@ enum CREAVE_MODE_TYPE{
 class MechanicalArm
 {
 	public:
-		MechanicalArm();
+		MechanicalArm() {};
 		//MechnicalArm(int n);
-		~MechanicalArm();
+		~MechanicalArm() {};
 
 		Matrix convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis);
 		bool FK_cal();
