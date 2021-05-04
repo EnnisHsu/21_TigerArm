@@ -74,6 +74,9 @@ bool MechanicalArm::FK_cal()
 	world_x = T(1, 4);
 	world_y = T(2, 4);
 	world_z = T(3, 4);
+	roll = current_deg.deg[3];
+	pitch = current_deg.deg[4];
+	yaw = current_deg.deg[5];
 	return true;
 }
 
@@ -264,9 +267,8 @@ theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
     * @param  cur deg & uint32_t now_time
     * @retval None
     */
-void MechanicalArm::Set_Cubic_IP_Config(theta_deg_pack* cur,uint32_t now_time)
+void MechanicalArm::Set_Cubic_IP_Config(uint32_t now_time)
 {
-	this->update(cur);
 	last_IP_time=now_time;
 	for (int i=0;i<6;i++)
 	{
@@ -286,5 +288,6 @@ void MechanicalArm::update(theta_deg_pack* cur)
 {
 	for (int i=0;i<6;i++)
 		current_deg.deg[i]=cur->deg[i];
+	this->FK_cal();
 	return;
 }

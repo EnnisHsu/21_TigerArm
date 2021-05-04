@@ -30,12 +30,14 @@
 TaskHandle_t RobotCtrl_Handle;
 TaskHandle_t DataDisplay_Handle;
 TaskHandle_t JointCtrl_Handle;
+TaskHandle_t TigerArmUpdate_Handle;
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function declarations ---------------------------------------------*/
 void Task_RobotCtrl(void *arg);
 void Task_DataDisplay(void *arg);
 void Task_JointCtrl(void *arg);
+void Task_TigerArmUpdate(void *arg);
 
 /* Exported devices ----------------------------------------------------------*/
 /* Motor & ESC & Other actuators*/
@@ -61,6 +63,7 @@ void User_Tasks_Init(void)
   xTaskCreate(Task_JointCtrl, "Joint Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &JointCtrl_Handle);
   xTaskCreate(Task_RobotCtrl, "Robot Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &RobotCtrl_Handle);
   xTaskCreate(Task_DataDisplay, "Data Display", Huge_Stack_Size, NULL, PrioritySuperHigh, &DataDisplay_Handle);
+  xTaskCreate(Task_TigerArmUpdate, "TigerArm Update", Huge_Stack_Size, NULL, PrioritySuperHigh, &TigerArmUpdate_Handle);
 }
 
 void TigerArm_Init(void)
@@ -75,10 +78,12 @@ void TigerArm_Init(void)
         }
     }
     TigerArm.Init(Tw_c, T6_g);
-    double a[6] = { 0.0f,0.21f,0.28f,0.0f,0.0f,0.0f };
-    double d[6] = { 0.0f,0.0f,0.0f,0.08f,0.21f,0.0f };
-    double alpha[6] = { 0.0f,0.0f,-90.0f,0.0f,-90.0f };
-    double interval[6][2] = { {-90.0f,90.0f},{-45.0f,30.0f},{-60.0f,0.0f},{-180.0f,180.0f},{-30.0f,90.0f},{-30.0f,30.0f} };
+    
+    double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
+    double alpha[6] = { 0.0f,90.0f,0.0f,90.0f,-90.0f,-90.0f };
+    double d[6] = { 0.0f,0.0f,0.0f,0.12f,0.0f,0.0f };
+    
+    double interval[6][2] = { {-90.0f,210.0f},{0.0f,115.0f},{35.0f,120.0f},{-180.0f,180.0f},{-33.0f,90.0f},{-45.0f,45.0f} };
     TigerArm.Set_DHModel_Config(a, d, interval);
 }
 
@@ -87,17 +92,32 @@ void TigerArm_move(double x, double y, double z)
     Tw_g(1,4) = x; Tw_g(2, 4) = y; Tw_g(3, 4) = z;
     TigerArm.SetWorldGoal(Tw_g);
     TigerArm.solveT0_6();
-    theta_deg_pack cur_deg;
-    cur_deg.deg[0] = Joint[Shoulder_yaw]->obj_Data.angle_f;
-    cur_deg.deg[1] = Joint[Shouder_pitch]->obj_Data.angle_f;
-    cur_deg.deg[2] = Joint[Elbow]->obj_Data.angle_f;
-    cur_deg.deg[3] = Joint[Wrist_roll]->obj_Data.angle_f;
-    cur_deg.deg[4] = Joint[Wrist_pitch]->obj_Data.angle_f;
-    cur_deg.deg[5] = Joint[Wrist_yaw]->obj_Data.angle_f;
-    TigerArm.Set_Cubic_IP_Config(&cur_deg,xTaskGetTickCount());
+    TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());
     TigerArm.IK_cal();
 }
 
+void Task_TigerArmUpdate(void* arg)
+{
+    /* Cache for Task */
+    TickType_t xLastWakeTime_t;
+    const TickType_t xBlockTime = pdMS_TO_TICKS(5);
+    /* Pre-Load for task */
+    xLastWakeTime_t = xTaskGetTickCount();
+    (void)arg;
+    /* Infinite loop */
+    for (;;)
+    {
+        theta_deg_pack cur_deg;
+        cur_deg.deg[0] = Joint[Shoulder_yaw]->obj_Data.angle_f;
+        cur_deg.deg[1] = Joint[Shouder_pitch]->obj_Data.angle_f;
+        cur_deg.deg[2] = Joint[Elbow]->obj_Data.angle_f;
+        cur_deg.deg[3] = Joint[Wrist_roll]->obj_Data.angle_f;
+        cur_deg.deg[4] = Joint[Wrist_pitch]->obj_Data.angle_f;
+        cur_deg.deg[5] = Joint[Wrist_yaw]->obj_Data.angle_f;
+        TigerArm.update(&cur_deg);
+        vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
+    }
+}
 
 /**
 * @brief  User can run all your robot control code in this task.

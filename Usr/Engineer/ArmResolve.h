@@ -2,7 +2,7 @@
 #define _ArmResolve_H_
 
 #include "Matrix.h"
-#include <math.h> 
+#include "math.h"
 #include <stdint.h>
 #define a(n) this->dh_model[n].a
 #define d(n) this->dh_model[n].d
@@ -54,7 +54,7 @@ class MechanicalArm
 		int SetWorldGoal(Matrix Tw_g);
 		theta_deg_pack get_IK_ans();
 		theta_deg_pack get_curtarget_deg(uint32_t now_time);
-		void Set_Cubic_IP_Config(theta_deg_pack* cur,uint32_t now_time);
+		void Set_Cubic_IP_Config(uint32_t now_time);
 		void update(theta_deg_pack* cur);
 	private:
 		//int n_axis;
@@ -71,7 +71,7 @@ class MechanicalArm
 		Matrix Tw_c;//world_camera
 		Matrix T6_g;//6_goal
 		Matrix Tw_g;//world_goal
-		double world_x, world_y, world_z, world_roll, world_pitch, world_yaw;
+		double world_x, world_y, world_z, roll, pitch, yaw;
 };
 
 #endif // !_ArmResolve_H_
