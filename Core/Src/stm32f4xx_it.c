@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Drivers/Components/drv_uart.h"
+#include "SRML.h"
 
 /* USER CODE END Includes */
 

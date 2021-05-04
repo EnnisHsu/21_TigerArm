@@ -86,6 +86,13 @@ public:
 		void To_Exit_Control();
 		void To_Into_Control();
 			
+		float get_Current_Torque(){return this->Current_Torque;}
+		float get_Current_Pos(){return this->Current_Position;}
+		float get_Current_Angle(){return this->Current_Angle;}
+		float get_Current_Speed(){return this->Current_Speed;}
+		float get_Command_Pos() {return this->Command_Position;}
+
+		
 		void Out_Torque_Control(float torque);
 		void Out_Speed_Control  (float speed, float kd );
 		void Out_Position_Control(float position ,float kp);

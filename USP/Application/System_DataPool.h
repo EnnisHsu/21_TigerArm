@@ -56,6 +56,7 @@ extern QueueHandle_t  CAN2_TxPort;
 
 extern QueueHandle_t  DR16_QueueHandle;
 extern QueueHandle_t  RMMotor_QueueHandle;
+extern QueueHandle_t  RMMotor_QueueHandle2;
 extern QueueHandle_t  SuperRelay_QueueHandle;
 extern QueueHandle_t  IMU_QueueHandle;
 extern QueueHandle_t  NUC_QueueHandle;

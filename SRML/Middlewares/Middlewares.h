@@ -69,6 +69,9 @@
 #if USE_SRML_SYSANALYSIS
 #include "Utility/sys_analysis.h"
 #endif
+#if USE_SRML_ASUWAVE
+#include "Utility/asuwave.h"
+#endif
 /* Utilities header end */
 
 /* Modules header begin */

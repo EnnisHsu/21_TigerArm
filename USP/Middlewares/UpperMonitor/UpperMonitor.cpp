@@ -47,6 +47,7 @@ extern float debug_term1,debug_term2;
 
 /* Includes ------------------------------------------------------------------*/ 
 #include <UpperMonitor.h>
+#include "MotorCtrl.h"
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -92,12 +93,28 @@ void UpperMonitor_Sent_Choose(float * data)
     switch(USART0_Sent_Choose_Data[i])
     {
       /* 以下部分用于观察参数曲线 */
-      case 0: data[i]= AlphaTest.steer_Set[0].str_angle;
+			//motor_2
+      case 0: data[i]= Motor_2.get_Current_Angle();
           break;
-      case 1: data[i]= AlphaTest.steer_Set[0].vect_angle;
+      case 1: data[i]= Motor_2.get_Current_Speed();
           break;
-      case 2: data[i]= AlphaTest.steer_Set[0].speed_direction;
+      case 2: data[i]= Motor_2.get_Current_Torque();
           break;
+			case 3: data[i]=Motor_2.get_Current_Pos();
+					break;
+			case 4: data[i]=Motor_2.get_Command_Pos();
+					break;
+			//motor_3
+			case 11: data[i]= Motor_3.get_Current_Angle();
+          break;
+      case 12: data[i]= Motor_3.get_Current_Speed();
+          break;
+      case 13: data[i]= Motor_3.get_Current_Torque();
+          break;
+			case 14: data[i]=Motor_2.get_Current_Pos();
+					break;
+			case 15: data[i]=Motor_2.get_Command_Pos();
+					break;
       default:break;
 	  /* 以上部分用于观察参数曲线 */
     }

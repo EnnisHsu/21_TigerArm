@@ -48,7 +48,7 @@ void System_Resource_Init(void)
   Timer_Init(&htim4, USE_HAL_DELAY);
   
   CAN_Init(&hcan1,CAN1_RxCpltCallback);
-  CAN_Init(&hcan2,NULL);
+  CAN_Init(&hcan2,CAN2_RxCpltCallback);
 	
 	//CAN_Filter_Mask_Config(&hcan1,CanFilter_0 | CanFifo_0 | Can_STDID | Can_DataType,0x000,0x000);
   
@@ -56,7 +56,7 @@ void System_Resource_Init(void)
   Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,DR16_call_back);
   Uart_Init(&huart3, Uart3_Rx_Buff, USART3_RX_BUFFER_SIZE,NULL);
   Uart_Init(&huart4, Uart4_Rx_Buff, USART4_RX_BUFFER_SIZE,NULL);
-  Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,NULL);
+  Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,asuwave_callback);
   Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
   
   SPI_Init(&hspi1,GPIOA,GPIO_PIN_4,100);
@@ -74,6 +74,7 @@ void System_Resource_Init(void)
   CAN1_TxPort        = xQueueCreate(4,sizeof(COB_TypeDef));
   CAN2_TxPort        = xQueueCreate(4,sizeof(COB_TypeDef));
   RMMotor_QueueHandle= xQueueCreate(10,sizeof(COB_TypeDef));
+  RMMotor_QueueHandle2= xQueueCreate(10,sizeof(COB_TypeDef));
   IMU_QueueHandle    = xQueueCreate(2,sizeof(COB_TypeDef));
   NUC_QueueHandle    = xQueueCreate(2,sizeof(USART_COB));
   DR16_QueueHandle   = xQueueCreate(2,sizeof(USART_COB));
@@ -92,7 +93,7 @@ void System_Resource_Init(void)
   SysLog.global_conf(LOG_LVL_ALL, false);
   
   /* Service configurations -----------*/
-  
+  asuwave_init(&huart5,xTaskGetTickCount);
 }  
 
 

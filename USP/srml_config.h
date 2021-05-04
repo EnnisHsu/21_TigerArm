@@ -31,6 +31,7 @@ extern "C" {
 #define USE_SRML_LIST                     1
 #define USE_SRML_SYSLOG                   1
 #define USE_SRML_SYSANALYSIS              1
+#define USE_SRML_ASUWAVE									1
 
 #define USE_SRML_GIMBAL                   0
 #define USE_SRML_CHASSIS                  1

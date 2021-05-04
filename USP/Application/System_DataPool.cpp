@@ -17,6 +17,7 @@ QueueHandle_t  CAN1_TxPort;
 QueueHandle_t  CAN2_TxPort;
 QueueHandle_t  DR16_QueueHandle;
 QueueHandle_t  RMMotor_QueueHandle;
+QueueHandle_t  RMMotor_QueueHandle2;
 QueueHandle_t  IMU_QueueHandle;
 QueueHandle_t  NUC_QueueHandle;
 QueueHandle_t  Referee_QueueHandle;
