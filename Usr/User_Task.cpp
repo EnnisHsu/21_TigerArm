@@ -31,6 +31,7 @@ TaskHandle_t RobotCtrl_Handle;
 TaskHandle_t DataDisplay_Handle;
 TaskHandle_t JointCtrl_Handle;
 TaskHandle_t TigerArmUpdate_Handle;
+TaskHandle_t TigerArmCtrl_Handle;
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function declarations ---------------------------------------------*/
@@ -38,6 +39,7 @@ void Task_RobotCtrl(void *arg);
 void Task_DataDisplay(void *arg);
 void Task_JointCtrl(void *arg);
 void Task_TigerArmUpdate(void *arg);
+void Task_TigerArmCtrl(void* arg);
 
 /* Exported devices ----------------------------------------------------------*/
 /* Motor & ESC & Other actuators*/
@@ -64,6 +66,7 @@ void User_Tasks_Init(void)
   xTaskCreate(Task_RobotCtrl, "Robot Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &RobotCtrl_Handle);
   xTaskCreate(Task_DataDisplay, "Data Display", Huge_Stack_Size, NULL, PrioritySuperHigh, &DataDisplay_Handle);
   xTaskCreate(Task_TigerArmUpdate, "TigerArm Update", Huge_Stack_Size, NULL, PrioritySuperHigh, &TigerArmUpdate_Handle);
+  xTaskCreate(Task_TigerArmCtrl, "TigerArm Control", Huge_Stack_Size, NULL, PrioritySuperHigh, &TigerArmCtrl_Handle);
 }
 
 void TigerArm_Init(void)
@@ -87,14 +90,7 @@ void TigerArm_Init(void)
     TigerArm.Set_DHModel_Config(a, d, interval);
 }
 
-void TigerArm_move(double x, double y, double z)
-{
-    Tw_g(1,4) = x; Tw_g(2, 4) = y; Tw_g(3, 4) = z;
-    TigerArm.SetWorldGoal(Tw_g);
-    TigerArm.solveT0_6();
-    TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());
-    TigerArm.IK_cal();
-}
+
 
 void Task_TigerArmUpdate(void* arg)
 {
@@ -151,7 +147,14 @@ void Task_RobotCtrl(void *arg)
       }
       if (ArmCtrlMode == dir_ctrl)
       {
-          //if (keyboard.isKeyPressed(_W_KV))
+          static BaseType_t* pxHigherPriorityTaskWoken;
+          if (keyboard.isKeyPressed(_W_KV)) TigerArm.SetTargetx(TigerArm.GetWorldx() + 0.05f);
+          if (keyboard.isKeyPressed(_S_KV)) TigerArm.SetTargetx(TigerArm.GetWorldx() - 0.05f);
+          if (keyboard.isKeyPressed(_A_KV)) TigerArm.SetTargety(TigerArm.GetWorldy() + 0.05f);
+          if (keyboard.isKeyPressed(_D_KV)) TigerArm.SetTargety(TigerArm.GetWorldy() - 0.05f);
+          if (keyboard.isKeyPressed(_R_KV)) TigerArm.SetTargetz(TigerArm.GetWorldz() + 0.05f);
+          if (keyboard.isKeyPressed(_C_KV)) TigerArm.SetTargetz(TigerArm.GetWorldz() - 0.05f);
+          xTaskNotifyFromISR(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
       }
    //mouse.resolveVelocity(5);
    //mouse.setExitFlag(false);
@@ -191,6 +194,31 @@ void Task_JointCtrl(void* arg)
     }
 }
 
+void TigerArm_move()
+{
+    Tw_g(1, 4) = TigerArm.GetTargetx(); Tw_g(2, 4) = TigerArm.GetTargety(); Tw_g(3, 4) = TigerArm.GetTargetz();
+    TigerArm.SetWorldGoal(Tw_g);
+    TigerArm.solveT0_6();
+    TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());
+    TigerArm.IK_cal();
+}
+
+void Task_TigerArmCtrl(void* arg)
+{
+    /* Cache for Task */
+    
+    /* Pre-Load for task */
+    
+    (void)arg;
+    TigerArm_Init();
+    vTaskSuspend(TigerArmCtrl_Handle);
+    /* Infinite loop */
+    for (;;)
+    {
+        TigerArm_move();
+        vTaskSuspend(TigerArmCtrl_Handle);
+    }
+}
 
 /**
 * @brief  User can collect and show datas in a lower frequency.

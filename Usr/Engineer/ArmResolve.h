@@ -56,6 +56,18 @@ class MechanicalArm
 		theta_deg_pack get_curtarget_deg(uint32_t now_time);
 		void Set_Cubic_IP_Config(uint32_t now_time);
 		void update(theta_deg_pack* cur);
+		void SetTargetx(double x) { target_x = x; }
+		void SetTargety(double y) { target_y = y; }
+		void SetTargetz(double z) { target_z = z; }
+		double GetWorldx() { return world_x; }
+		double GetWorldy() { return world_y; }
+		double GetWorldz() { return world_z; }
+		double GetClawRoll() { return roll; }
+		double GetClawPitch() { return pitch; }
+		double GetClawYaw() { return yaw; }
+		double GetTargetx() { return target_x; }
+		double GetTargety() { return target_y; }
+		double GetTargetz() { return target_z; }
 	private:
 		//int n_axis;
 		GOAL_INPUT_METHOD_TYPE goal_input_mode=World_Input;
@@ -72,6 +84,7 @@ class MechanicalArm
 		Matrix T6_g;//6_goal
 		Matrix Tw_g;//world_goal
 		double world_x, world_y, world_z, roll, pitch, yaw;
+		double target_x, target_y, target_z, target_roll, target_pitch, target_yaw;
 };
 
 #endif // !_ArmResolve_H_

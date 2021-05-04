@@ -291,3 +291,4 @@ void MechanicalArm::update(theta_deg_pack* cur)
 	this->FK_cal();
 	return;
 }
+
