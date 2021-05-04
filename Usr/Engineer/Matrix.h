@@ -16,7 +16,6 @@ class Matrix
 		Matrix(); //default constructor
 		Matrix( int m,  int n);//declare an mxn matrix
 		Matrix(const Matrix& A); //copy constructor
-
 		~Matrix();//destructor
 		//Assignment
 		Matrix& operator = (const Matrix& A); //overloading =

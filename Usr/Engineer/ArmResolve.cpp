@@ -38,7 +38,7 @@
 
 Matrix MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
 {
-	Matrix Matrix_ans;
+	Matrix Matrix_ans(4, 4);
 	Matrix_ans(1, 1) = cos(axis.theta);
 	Matrix_ans(1, 2) = -sin(axis.theta);
 	Matrix_ans(1, 3) = 0;
@@ -60,8 +60,8 @@ Matrix MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
 
 bool MechanicalArm::FK_cal()
 {
-	Matrix T0_1, T1_2, T2_3, T3_4, T4_5, T5_6;
-	Matrix T;
+	Matrix T0_1(4, 4), T1_2(4, 4), T2_3(4, 4), T3_4(4, 4), T4_5(4, 4), T5_6(4, 4);
+	Matrix T(4, 4);
 	for (int i = 0; i < 6; i++)
 		this->dh_model[i].theta = current_deg.deg[i];
 	T0_1 = convert_DHModel_to_Matrix(dh_model[0]);
@@ -85,10 +85,10 @@ bool MechanicalArm::FK_cal()
     * @param  Tw_c,T6_g
     * @retval None
     */
-int MechanicalArm::Init(Matrix Tw_c,Matrix T6_g)
+int MechanicalArm::Init(Matrix Tw2c,Matrix T62g)
 {
-	if (goal_input_mode==Vision_Input) this->Tw_c = Tw_c;
-	this->T6_g = T6_g;
+	if (goal_input_mode==Vision_Input) Tw_c = Tw2c;
+	this->T6_g = T62g;
 	return 1;
 }
 

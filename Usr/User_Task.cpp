@@ -53,7 +53,7 @@ enum Ctrl_Mode_Typedef {
 
 /* Other boards */
 MechanicalArm TigerArm;
-Matrix T6_g, Tw_c, Tw_g;
+Matrix T6_g(4,4), Tw_c(4,4), Tw_g(4,4);
 /* Function prototypes -------------------------------------------------------*/
 /**
 * @brief  Initialization of Tasks

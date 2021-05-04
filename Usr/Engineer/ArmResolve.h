@@ -37,6 +37,7 @@ enum CREAVE_MODE_TYPE{
 	Quintic_IP
 };
 
+//template<class ArmMatrix>
 class MechanicalArm
 {
 	public:
@@ -46,7 +47,7 @@ class MechanicalArm
 
 		Matrix convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis);
 		bool FK_cal();
-		int Init(Matrix Tw_c,Matrix T6_g);
+		int Init(Matrix Tw_c, Matrix T6_g);
 		bool Set_DHModel_Config(double a[6],double d[6],double interval[6][2]);
 		bool IK_cal();
 		int solveT0_6();
@@ -79,6 +80,7 @@ class MechanicalArm
 		IP_data_pack joint_IP_data[6];
 		theta_deg_pack target_deg,current_deg,curtarget_deg;
 		Matrix T0_6;
+		//T0_6.Init(4, 4);
 		Matrix Tc_g;//camera_goal
 		Matrix Tw_c;//world_camera
 		Matrix T6_g;//6_goal

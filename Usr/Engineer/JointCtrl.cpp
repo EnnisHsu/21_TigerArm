@@ -35,7 +35,7 @@
 /* Includes ------------------------------------------------------------------*/ 
 #include "JointCtrl.h"
 /* private variable ----------------------------------------------------------*/
-MechanicalArm T_arm;
+//MechanicalArm T_arm;
 /* function prototypes -------------------------------------------------------*/
 int calSolve() {
     return 1;
