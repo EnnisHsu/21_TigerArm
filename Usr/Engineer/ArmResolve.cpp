@@ -36,32 +36,35 @@
 #include "ArmResolve.h"
 /* function prototypes -------------------------------------------------------*/
 
-Matrix MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
+Mat<4, 4> MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
 {
-	Matrix Matrix_ans(4, 4);
-	Matrix_ans(1, 1) = cos(axis.theta);
-	Matrix_ans(1, 2) = -sin(axis.theta);
-	Matrix_ans(1, 3) = 0;
-	Matrix_ans(1, 4) = axis.a;
-	Matrix_ans(2, 1) = sin(axis.theta) * cos(axis.alpha);
-	Matrix_ans(2, 2) = cos(axis.theta) * cos(axis.alpha);
-	Matrix_ans(2, 3) = -sin(axis.alpha);
-	Matrix_ans(2, 4) = -sin(axis.alpha) * axis.d;
-	Matrix_ans(3, 1) = sin(axis.theta) * sin(axis.alpha);
-	Matrix_ans(3, 2) = cos(axis.theta) * sin(axis.alpha);
-	Matrix_ans(3, 3) = cos(axis.alpha);
-	Matrix_ans(3, 4) = cos(axis.alpha) * axis.d;
-	Matrix_ans(4, 1) = 0;
-	Matrix_ans(4, 2) = 0;
-	Matrix_ans(4, 3) = 0;
-	Matrix_ans(4, 4) = 1;
+	Mat<4, 4> Matrix_ans;
+	Matrix_ans = { (float)cos(axis.theta),(float)-sin(axis.theta),0,(float)axis.a ,
+		(float)sin(axis.theta) * (float)cos(axis.alpha),(float)cos(axis.theta) * (float)cos(axis.alpha),(float)-sin(axis.alpha),(float)-sin(axis.alpha) * (float)axis.d,
+		(float)sin(axis.theta) * (float)sin(axis.alpha),(float)cos(axis.theta) * (float)sin(axis.alpha), (float)cos(axis.alpha) ,(float)cos(axis.alpha) * (float)axis.d,
+		0,0,0,1 };
+	//Matrix_ans(1, 2) = -sin(axis.theta);
+	//Matrix_ans(1, 3) = 0;
+	//Matrix_ans(1, 4) = axis.a;
+	//Matrix_ans(2, 1) = sin(axis.theta) * cos(axis.alpha);
+	//Matrix_ans(2, 2) = cos(axis.theta) * cos(axis.alpha);
+	//Matrix_ans(2, 3) = -sin(axis.alpha);
+	//Matrix_ans(2, 4) = -sin(axis.alpha) * axis.d;
+	//Matrix_ans(3, 1) = sin(axis.theta) * sin(axis.alpha);
+	//Matrix_ans(3, 2) = cos(axis.theta) * sin(axis.alpha);
+	//Matrix_ans(3, 3) = cos(axis.alpha);
+	//Matrix_ans(3, 4) = cos(axis.alpha) * axis.d;
+	//Matrix_ans(4, 1) = 0;
+	//Matrix_ans(4, 2) = 0;
+	//Matrix_ans(4, 3) = 0;
+	//Matrix_ans(4, 4) = 1;
 	return Matrix_ans;
 }
 
 bool MechanicalArm::FK_cal()
 {
-	Matrix T0_1(4, 4), T1_2(4, 4), T2_3(4, 4), T3_4(4, 4), T4_5(4, 4), T5_6(4, 4);
-	Matrix T(4, 4);
+	Mat<4,4> T0_1, T1_2, T2_3, T3_4, T4_5, T5_6;
+	Mat<4,4> T;
 	for (int i = 0; i < 6; i++)
 		this->dh_model[i].theta = current_deg.deg[i];
 	T0_1 = convert_DHModel_to_Matrix(dh_model[0]);
@@ -71,9 +74,9 @@ bool MechanicalArm::FK_cal()
 	T4_5 = convert_DHModel_to_Matrix(dh_model[4]);
 	T5_6 = convert_DHModel_to_Matrix(dh_model[5]);
 	T = T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6;
-	world_x = T(1, 4);
-	world_y = T(2, 4);
-	world_z = T(3, 4);
+	world_x = T[3];
+	world_y = T[7];
+	world_z = T[11];
 	roll = current_deg.deg[3];
 	pitch = current_deg.deg[4];
 	yaw = current_deg.deg[5];
@@ -85,9 +88,9 @@ bool MechanicalArm::FK_cal()
     * @param  Tw_c,T6_g
     * @retval None
     */
-int MechanicalArm::Init(Matrix Tw2c,Matrix T62g)
+int MechanicalArm::Init(Mat<4,4> Tw2c, Mat<4, 4> T62g)
 {
-	if (goal_input_mode==Vision_Input) Tw_c = Tw2c;
+	if (goal_input_mode==Vision_Input) this->Tw_c = Tw2c;
 	this->T6_g = T62g;
 	return 1;
 }
@@ -97,7 +100,7 @@ int MechanicalArm::Init(Matrix Tw2c,Matrix T62g)
     * @param  Tc_g
     * @retval None
     */
-int MechanicalArm::SetVision(Matrix Tc_g)
+int MechanicalArm::SetVision(Mat<4, 4> Tc_g)
 {
 	this->Tc_g = Tc_g;
 	return 1;
@@ -108,7 +111,7 @@ int MechanicalArm::SetVision(Matrix Tc_g)
     * @param  Tw_g
     * @retval None
     */
-int MechanicalArm::SetWorldGoal(Matrix Tw_g)
+int MechanicalArm::SetWorldGoal(Mat<4, 4> Tw_g)
 {
 	this->Tw_g = Tw_g;
 	return 1;
@@ -139,9 +142,9 @@ bool MechanicalArm::Set_DHModel_Config(double a[6], double d[6],double interval[
 int MechanicalArm::solveT0_6()
 {
 	if (goal_input_mode==Vision_Input) Tw_g = Tw_c*Tc_g;
-	Matrix T6_g_I;//T6_g inverse
-	T6_g_I = T6_g.Inverse();
-	Matrix Tw_6 = Tw_g*T6_g_I;
+	Mat<4, 4> T6_g_I;//T6_g inverse
+	T6_g_I = T6_g.inverse();
+	Mat<4, 4> Tw_6 = Tw_g*T6_g_I;
 	T0_6 = Tw_6;//if define axis0 == axisw
 	return 1;
 }
@@ -153,9 +156,9 @@ int MechanicalArm::solveT0_6()
     */
 bool MechanicalArm::IK_cal()
 {
-	double p_x = this->T0_6(1, 4), p_y = this->T0_6(2, 4), p_z = this->T0_6(3, 4);
-	double r13 = this->T0_6(1, 3), r23 = this->T0_6(2, 3), r33 = this->T0_6(3, 3);
-	double r11 = this->T0_6(1, 1), r21 = this->T0_6(2, 1), r31 = this->T0_6(3, 1);
+	double p_x = this->T0_6[3], p_y = this->T0_6[7], p_z = this->T0_6[11];
+	double r13 = this->T0_6[2], r23 = this->T0_6[6], r33 = this->T0_6[10];
+	double r11 = this->T0_6[0], r21 = this->T0_6[4], r31 = this->T0_6[8];
 	for (int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 2; j++)

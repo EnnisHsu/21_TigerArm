@@ -1,7 +1,7 @@
 #ifndef _ArmResolve_H_
 #define _ArmResolve_H_
 
-#include "Matrix.h"
+#include "Tool_Mat.h"
 #include "math.h"
 #include <stdint.h>
 #define a(n) this->dh_model[n].a
@@ -45,14 +45,14 @@ class MechanicalArm
 		//MechnicalArm(int n);
 		~MechanicalArm() {};
 
-		Matrix convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis);
+		Mat<4,4> convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis);
 		bool FK_cal();
-		int Init(Matrix Tw_c, Matrix T6_g);
+		int Init(Mat<4, 4> Tw_c, Mat<4, 4> T6_g);
 		bool Set_DHModel_Config(double a[6],double d[6],double interval[6][2]);
 		bool IK_cal();
 		int solveT0_6();
-		int SetVision(Matrix Tc_g);
-		int SetWorldGoal(Matrix Tw_g);
+		int SetVision(Mat<4, 4> Tc_g);
+		int SetWorldGoal(Mat<4, 4> Tw_g);
 		theta_deg_pack get_IK_ans();
 		theta_deg_pack get_curtarget_deg(uint32_t now_time);
 		void Set_Cubic_IP_Config(uint32_t now_time);
@@ -79,12 +79,12 @@ class MechanicalArm
 		uint32_t last_IP_time;
 		IP_data_pack joint_IP_data[6];
 		theta_deg_pack target_deg,current_deg,curtarget_deg;
-		Matrix T0_6;
+		Mat<4, 4> T0_6;
 		//T0_6.Init(4, 4);
-		Matrix Tc_g;//camera_goal
-		Matrix Tw_c;//world_camera
-		Matrix T6_g;//6_goal
-		Matrix Tw_g;//world_goal
+		Mat<4, 4> Tc_g;//camera_goal
+		Mat<4, 4> Tw_c;//world_camera
+		Mat<4, 4> T6_g;//6_goal
+		Mat<4, 4> Tw_g;//world_goal
 		double world_x, world_y, world_z, roll, pitch, yaw;
 		double target_x, target_y, target_z, target_roll, target_pitch, target_yaw;
 };

@@ -53,7 +53,7 @@ enum Ctrl_Mode_Typedef {
 
 /* Other boards */
 MechanicalArm TigerArm;
-Matrix T6_g(4,4), Tw_c(4,4), Tw_g(4,4);
+Mat<4, 4> T6_g(1.0f), Tw_c, Tw_g;
 /* Function prototypes -------------------------------------------------------*/
 /**
 * @brief  Initialization of Tasks
@@ -71,15 +71,8 @@ void User_Tasks_Init(void)
 
 void TigerArm_Init(void)
 {
-    for (int i = 1; i <= 4; i++)
-    {
-        for (int j = 1; j <= 4; j++)
-        {
-            T6_g(i, j) = 1.0f;
-            if (i == j) Tw_g(i, j) = 1.0f;
-            else Tw_g(i, j) = 0.0f;
-        }
-    }
+    Tw_g[1, 1] = 1.0f; Tw_g[2, 2] = 1.0f;
+    Tw_g[3, 3] = 1.0f; Tw_g[4, 4] = 1.0f;
     TigerArm.Init(Tw_c, T6_g);
     
     double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
@@ -196,7 +189,8 @@ void Task_JointCtrl(void* arg)
 
 void TigerArm_move()
 {
-    Tw_g(1, 4) = TigerArm.GetTargetx(); Tw_g(2, 4) = TigerArm.GetTargety(); Tw_g(3, 4) = TigerArm.GetTargetz();
+    Tw_g[1, 4] = TigerArm.GetTargetx(); Tw_g[2, 4] = TigerArm.GetTargety();
+    Tw_g[3, 4] = TigerArm.GetTargetz();
     TigerArm.SetWorldGoal(Tw_g);
     TigerArm.solveT0_6();
     TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());

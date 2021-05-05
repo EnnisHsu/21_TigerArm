@@ -141,9 +141,6 @@
     <ClCompile Include="Usr\Engineer\Matrix.cpp">
       <Filter>App Source\USER</Filter>
     </ClCompile>
-    <ClCompile Include="Usr\Engineer\JointCtrl.cpp">
-      <Filter>App Source\USER</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeRTOS\include\croutine.h">

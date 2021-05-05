@@ -103,7 +103,6 @@
     <ClCompile Include="Usr\CoppeliaSim\remoteApi\extApi.c" />
     <ClCompile Include="Usr\CoppeliaSim\remoteApi\extApiPlatform.c" />
     <ClCompile Include="Usr\Engineer\ArmResolve.cpp" />
-    <ClCompile Include="Usr\Engineer\JointCtrl.cpp" />
     <ClCompile Include="Usr\Engineer\Matrix.cpp" />
     <ClCompile Include="Usr\inputInterface.cpp" />
     <ClCompile Include="Usr\SerialPort\SerialPort.cpp" />
