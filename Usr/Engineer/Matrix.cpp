@@ -22,6 +22,7 @@ Matrix::Matrix( int m,  int n)//declare an mxn matrix
   //  cout<<"call constructor"<<endl;
 }
 
+
 Matrix::Matrix(const Matrix& A) //copy constructor
 {
      //                          Matrix C(C); ??????????? could not pass compile, don't worry

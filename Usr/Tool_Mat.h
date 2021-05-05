@@ -4,9 +4,9 @@
 #include <array>
 //#include <math.h>
 
-//#if 1
-//#include "arm_math.h"
-//#else
+#if 0
+#include "arm_math.h"
+#else
 struct arm_matrix_instance_f32
 {
 	int numRows;
@@ -19,7 +19,8 @@ void arm_mat_sub_f32(const arm_matrix_instance_f32* a, const arm_matrix_instance
 void arm_mat_mult_f32(const arm_matrix_instance_f32* a, const arm_matrix_instance_f32* b, const arm_matrix_instance_f32* c) {}
 void arm_mat_trans_f32(const arm_matrix_instance_f32* a, arm_matrix_instance_f32* b) {}
 void arm_mat_inverse_f32(const arm_matrix_instance_f32* a, arm_matrix_instance_f32* b) {}
-//#endif
+#endif
+
 
 /**
  * @brief Mat æÿ’Û¿‡

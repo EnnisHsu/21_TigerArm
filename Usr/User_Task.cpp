@@ -24,7 +24,7 @@
 #include "UpperMonitor.h"
 #include "win32_support.h"
 #include "ArmResolve.h"
-#include "windows.h"
+//#include "windows.h"
 
 /* Private define ------------------------------------------------------------*/
 TaskHandle_t RobotCtrl_Handle;
@@ -53,7 +53,7 @@ enum Ctrl_Mode_Typedef {
 
 /* Other boards */
 MechanicalArm TigerArm;
-Mat<4, 4> T6_g(1.0f), Tw_c, Tw_g;
+Matrix T6_g(4,4,1.0f), Tw_c(4,4), Tw_g(4,4);
 /* Function prototypes -------------------------------------------------------*/
 /**
 * @brief  Initialization of Tasks
@@ -71,8 +71,8 @@ void User_Tasks_Init(void)
 
 void TigerArm_Init(void)
 {
-    Tw_g[1, 1] = 1.0f; Tw_g[2, 2] = 1.0f;
-    Tw_g[3, 3] = 1.0f; Tw_g[4, 4] = 1.0f;
+    Tw_g(1,1) = 1.0f; Tw_g(2,2) = 1.0f;
+    Tw_g(3,3) = 1.0f; Tw_g(4,4) = 1.0f;
     TigerArm.Init(Tw_c, T6_g);
     
     double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
@@ -189,8 +189,8 @@ void Task_JointCtrl(void* arg)
 
 void TigerArm_move()
 {
-    Tw_g[1, 4] = TigerArm.GetTargetx(); Tw_g[2, 4] = TigerArm.GetTargety();
-    Tw_g[3, 4] = TigerArm.GetTargetz();
+    Tw_g(1,4) = TigerArm.GetTargetx(); Tw_g(2,4) = TigerArm.GetTargety();
+    Tw_g(3,4) = TigerArm.GetTargetz();
     TigerArm.SetWorldGoal(Tw_g);
     TigerArm.solveT0_6();
     TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());

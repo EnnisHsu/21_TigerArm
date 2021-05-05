@@ -10,12 +10,23 @@
 
 //----------------------------Definition of a Matrix class-----------------------------------------------
 
+//template<int m,int n>
 class Matrix 
  {
 	public:
 		Matrix(); //default constructor
 		Matrix( int m,  int n);//declare an mxn matrix
 		Matrix(const Matrix& A); //copy constructor
+		Matrix(int m,int n,float _data)
+		{
+			if (!this->buf)delete[] this->buf;
+			this->rows = m;
+			this->columns = n;
+			this->buf = new double[m * n];
+			for (int i = 0; i < m * n; i++)
+				this->buf[i] = _data;
+		}
+
 		~Matrix();//destructor
 		//Assignment
 		Matrix& operator = (const Matrix& A); //overloading =
