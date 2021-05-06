@@ -9,6 +9,11 @@
 #define d(n) this->dh_model[n].d
 #define alpha(n) this->dh_model[n].alpha
 #define theta(n) this->dh_model[n].theta
+#define ENABLE 1
+#define DISABLE 0
+
+double rad2deg(double rad);
+double deg2rad(double deg);
 
 #define PI 3.14159265358979323846
 
@@ -75,6 +80,7 @@ class MechanicalArm
 		//int n_axis;
 		GOAL_INPUT_METHOD_TYPE goal_input_mode=World_Input;
 		CREAVE_MODE_TYPE creave_mode=Cubic_IP ;
+		int CP62g=DISABLE;
 		DH_MODEL_Typedef dh_model[6];
 		double theta[8][6];
 		int tf=2000.0f;

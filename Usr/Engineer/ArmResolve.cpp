@@ -37,13 +37,24 @@
 /* function prototypes -------------------------------------------------------*/
 //MechanicalArm::MechanicalArm(int i) :T0_6(4, 4), Tc_g(4, 4), Tw_c(4, 4), T6_g(4, 4), Tw_g(4, 4) {};
 
+double rad2deg(double rad)
+{
+	return rad / 3.14 * 180;
+}
+
+double deg2rad(double deg)
+{
+	return deg / 180 * 3.14;
+}
+
 Matrix MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
 {
-	Matrix Matrix_ans;
+	Matrix Matrix_ans(4,4);
 	/*Matrix_ans = { (float)cos(axis.theta),(float)-sin(axis.theta),0,(float)axis.a ,
 		(float)sin(axis.theta) * (float)cos(axis.alpha),(float)cos(axis.theta) * (float)cos(axis.alpha),(float)-sin(axis.alpha),(float)-sin(axis.alpha) * (float)axis.d,
 		(float)sin(axis.theta) * (float)sin(axis.alpha),(float)cos(axis.theta) * (float)sin(axis.alpha), (float)cos(axis.alpha) ,(float)cos(axis.alpha) * (float)axis.d,
 		0,0,0,1 };*/
+	Matrix_ans(1, 1) = 0;
 	Matrix_ans(1, 2) = -sin(axis.theta);
 	Matrix_ans(1, 3) = 0;
 	Matrix_ans(1, 4) = axis.a;
@@ -64,8 +75,8 @@ Matrix MechanicalArm::convert_DHModel_to_Matrix(DH_MODEL_Typedef& axis)
 
 bool MechanicalArm::FK_cal()
 {
-	Matrix T0_1, T1_2, T2_3, T3_4, T4_5, T5_6;
-	Matrix T;
+	/*Matrix T0_1(4,4), T1_2(4, 4), T2_3(4, 4), T3_4(4, 4), T4_5(4, 4), T5_6(4, 4);
+	Matrix T(4, 4);
 	for (int i = 0; i < 6; i++)
 		this->dh_model[i].theta = current_deg.deg[i];
 	T0_1 = convert_DHModel_to_Matrix(dh_model[0]);
@@ -77,7 +88,12 @@ bool MechanicalArm::FK_cal()
 	T = T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6;
 	world_x = T(1,4);
 	world_y = T(2,4);
-	world_z = T(3,4);
+	world_z = T(3,4);*/
+	double l, l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
+	l = l2 * cos(current_deg.deg[1]) + l3 * sin(90 + current_deg.deg[1] - current_deg.deg[2]);
+	world_x = l * cos(current_deg.deg[0]);
+	world_y = l * sin(current_deg.deg[0]);
+	world_z = l1 + l2 * sin(current_deg.deg[1]) - l3 * cos(90 + current_deg.deg[1] - current_deg.deg[2]);
 	roll = current_deg.deg[3];
 	pitch = current_deg.deg[4];
 	yaw = current_deg.deg[5];
@@ -143,10 +159,18 @@ bool MechanicalArm::Set_DHModel_Config(double a[6], double d[6],double interval[
 int MechanicalArm::solveT0_6()
 {
 	if (goal_input_mode==Vision_Input) Tw_g = Tw_c*Tc_g;
-	Matrix T6_g_I;//T6_g inverse
-	T6_g_I = T6_g.Inverse();
-	Matrix Tw_6 = Tw_g*T6_g_I;
-	T0_6 = Tw_6;//if define axis0 == axisw
+	if (CP62g)
+	{
+		Matrix T6_g_I(4, 4);//T6_g inverse
+		T6_g_I = T6_g.Inverse();
+		Matrix Tw_6(4, 4);
+		Tw_6 = Tw_g * T6_g_I;
+		T0_6 = Tw_6;//if define axis0 == axisw
+	}
+	else
+	{
+		T0_6 = Tw_g;
+	}
 	return 1;
 }
 
@@ -160,15 +184,30 @@ bool MechanicalArm::IK_cal()
 	//double p_x = this->T0_6[3], p_y = this->T0_6[7], p_z = this->T0_6[11];
 	//double r13 = this->T0_6[2], r23 = this->T0_6[6], r33 = this->T0_6[10];
 	//double r11 = this->T0_6[0], r21 = this->T0_6[4], r31 = this->T0_6[8];
-	double p_x = this->T0_6(1,4), p_y = this->T0_6(2,4), p_z = this->T0_6(3,4);
+	/*double p_x = this->T0_6(1,4), p_y = this->T0_6(2,4), p_z = this->T0_6(3,4);
 	double r13 = this->T0_6(1,3), r23 = this->T0_6(2,3), r33 = this->T0_6(3,3);
-	double r11 = this->T0_6(1,1), r21 = this->T0_6(2,1), r31 = this->T0_6(3,1);
-	for (int i = 0; i < 2; i++)
+	double r11 = this->T0_6(1,1), r21 = this->T0_6(2,1), r31 = this->T0_6(3,1);*/
+	double p_x = fabs(this->GetTargetx()) < 1e5 ? this->GetWorldx() : this->GetTargetx();
+	double p_y = fabs(this->GetTargety()) < 1e5 ? this->GetWorldy() : this->GetTargety();
+	double p_z = fabs(this->GetTargetz()) < 1e5 ? this->GetWorldz() : this->GetTargetz();
+	double theta1, theta2, theta3, theta4, theta5, theta6;
+	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
+	if (p_x != 0) theta1 = atan2(p_y, p_x);
+	else theta1 = 1.57f;
+	this->target_deg.deg[0] = rad2deg(theta1);
+	double k = p_x * p_x + p_y * p_y + (p_z - l1) * (p_z - l1) - l2 * l2 - l3 * l3;
+	theta3 = acos((k / (2 * l2 * l3)));
+	this->target_deg.deg[2] = rad2deg(theta3);
+	if (this->target_deg.deg[2]<dh_model[2].min_deg || this->target_deg.deg[2]>dh_model[2].max_deg) this->target_deg.deg[2] = -this->target_deg.deg[2];
+	if (this->target_deg.deg[2]<dh_model[2].min_deg || this->target_deg.deg[2]>dh_model[2].max_deg) return false;
+	theta2 = atan2(p_z - l1, sqrt(p_x * p_x + p_y * p_y)) + atan2(l3 * sin(theta3), l2 + l3 * cos(theta3));
+	this->target_deg.deg[1] = rad2deg(theta2);
+	/*for (int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 2; j++)
 		{
 			//for (int t = 0; t < 2; t++)
-			//{
+			//{//d2!=0!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				//theta 1
 				double sqrt1[2], theta1;
 				sqrt1[0] = sqrt(p_x * p_x + p_y * p_y - d(2) * d(2));
@@ -240,7 +279,8 @@ bool MechanicalArm::IK_cal()
 			return true;
 		}
 	}
-	return false;
+	return false;*/
+
 }
 
 /**

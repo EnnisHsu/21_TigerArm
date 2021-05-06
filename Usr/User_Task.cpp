@@ -24,6 +24,7 @@
 #include "UpperMonitor.h"
 #include "win32_support.h"
 #include "ArmResolve.h"
+#include "conio.h"
 //#include "windows.h"
 
 /* Private define ------------------------------------------------------------*/
@@ -46,15 +47,17 @@ void Task_TigerArmCtrl(void* arg);
 
 /* Remote control */
 enum Ctrl_Mode_Typedef {
-    kb_input=0x01,
-    dir_ctrl
+    dir_ctrl,
+    kb_input,
 } ArmCtrlMode;
 /* IMU & NUC & Other sensors */
 
 /* Other boards */
-MechanicalArm TigerArm;
-Matrix T6_g(4,4,1.0f), Tw_c(4,4), Tw_g(4,4);
+MechanicalArm TigerArm(1);
+Matrix T6_g(4,4,0.0f), Tw_c(4,4,0.0f), Tw_g(4,4,0.0f);
 /* Function prototypes -------------------------------------------------------*/
+
+
 /**
 * @brief  Initialization of Tasks
 * @param  None.
@@ -73,13 +76,15 @@ void TigerArm_Init(void)
 {
     Tw_g(1,1) = 1.0f; Tw_g(2,2) = 1.0f;
     Tw_g(3,3) = 1.0f; Tw_g(4,4) = 1.0f;
+    T6_g(1, 4) = 1.0f; T6_g(2, 4) = 1.0f;
+    T6_g(3, 4) = 1.0f; T6_g(4, 4) = 1.0f;
     TigerArm.Init(Tw_c, T6_g);
     
     double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
     double alpha[6] = { 0.0f,90.0f,0.0f,90.0f,-90.0f,-90.0f };
     double d[6] = { 0.0f,0.0f,0.0f,0.12f,0.0f,0.0f };
     
-    double interval[6][2] = { {-90.0f,210.0f},{0.0f,115.0f},{35.0f,120.0f},{-180.0f,180.0f},{-33.0f,90.0f},{-45.0f,45.0f} };
+    double interval[6][2] = { {-90.0f,210.0f},{-90.0f,0.0f},{35.0f,120.0f},{-180.0f,180.0f},{-33.0f,90.0f},{-45.0f,45.0f} };
     TigerArm.Set_DHModel_Config(a, d, interval);
 }
 
@@ -97,12 +102,12 @@ void Task_TigerArmUpdate(void* arg)
     for (;;)
     {
         theta_deg_pack cur_deg;
-        cur_deg.deg[0] = Joint[Shoulder_yaw]->obj_Data.angle_f;
-        cur_deg.deg[1] = Joint[Shouder_pitch]->obj_Data.angle_f;
-        cur_deg.deg[2] = Joint[Elbow]->obj_Data.angle_f;
-        cur_deg.deg[3] = Joint[Wrist_roll]->obj_Data.angle_f;
-        cur_deg.deg[4] = Joint[Wrist_pitch]->obj_Data.angle_f;
-        cur_deg.deg[5] = Joint[Wrist_yaw]->obj_Data.angle_f;
+        cur_deg.deg[0] = rad2deg(Joint[Shoulder_yaw]->obj_Data.angle_f);
+        cur_deg.deg[1] = rad2deg(Joint[Shouder_pitch]->obj_Data.angle_f);
+        cur_deg.deg[2] = rad2deg(Joint[Elbow]->obj_Data.angle_f);
+        cur_deg.deg[3] = rad2deg(Joint[Wrist_roll]->obj_Data.angle_f);
+        cur_deg.deg[4] = rad2deg(Joint[Wrist_pitch]->obj_Data.angle_f);
+        cur_deg.deg[5] = rad2deg(Joint[Wrist_yaw]->obj_Data.angle_f);
         TigerArm.update(&cur_deg);
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
     }
@@ -122,10 +127,11 @@ void Task_RobotCtrl(void *arg)
   xLastWakeTime_t     = xTaskGetTickCount();
   (void)arg;
   TigerArm_Init();
+  int isResume = 0;
   /* Infinite loop */
   for (;;)
   {
-      if (keyboard.isKeyPressed(_SHIFT_KV))
+      if (GetKeyState(_CTRL_KV)<0)
       {
           if (ArmCtrlMode == kb_input)
           {
@@ -141,13 +147,37 @@ void Task_RobotCtrl(void *arg)
       if (ArmCtrlMode == dir_ctrl)
       {
           static BaseType_t* pxHigherPriorityTaskWoken;
-          if (keyboard.isKeyPressed(_W_KV)) TigerArm.SetTargetx(TigerArm.GetWorldx() + 0.05f);
-          if (keyboard.isKeyPressed(_S_KV)) TigerArm.SetTargetx(TigerArm.GetWorldx() - 0.05f);
-          if (keyboard.isKeyPressed(_A_KV)) TigerArm.SetTargety(TigerArm.GetWorldy() + 0.05f);
-          if (keyboard.isKeyPressed(_D_KV)) TigerArm.SetTargety(TigerArm.GetWorldy() - 0.05f);
-          if (keyboard.isKeyPressed(_R_KV)) TigerArm.SetTargetz(TigerArm.GetWorldz() + 0.05f);
-          if (keyboard.isKeyPressed(_C_KV)) TigerArm.SetTargetz(TigerArm.GetWorldz() - 0.05f);
-          xTaskNotifyFromISR(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
+          if (GetKeyState(_W_KV)<0) {
+              isResume = 1;
+              TigerArm.SetTargetx(TigerArm.GetWorldx() + 1.0f);
+              std::cout << "w pressed" << std::endl;
+          }
+          if (GetKeyState(_S_KV)<0){
+              isResume = 1;
+              TigerArm.SetTargetx(TigerArm.GetWorldx() - 1.0f);
+              std::cout << "s pressed" << std::endl;}
+          if (GetKeyState(_A_KV)<0){
+              isResume = 1;
+              TigerArm.SetTargety(TigerArm.GetWorldy() + 1.0f);
+              std::cout << "a pressed" << std::endl;}
+          if (GetKeyState(_D_KV)<0){
+              isResume = 1;
+              TigerArm.SetTargety(TigerArm.GetWorldy() - 1.0f);
+              std::cout << "d pressed" << std::endl;}
+          if (GetKeyState(_R_KV)<0){
+              isResume = 1;
+              TigerArm.SetTargetz(TigerArm.GetWorldz() + 0.05f);
+              std::cout << "r pressed" << std::endl;}
+          if (GetKeyState(_C_KV)<0){
+              isResume = 1;
+              TigerArm.SetTargetz(TigerArm.GetWorldz() - 0.05f);
+              std::cout << "c pressed" << std::endl;}
+          //xTaskNotifyFromISR(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
+          if (isResume) {
+              isResume = 0;
+              vTaskResume(TigerArmCtrl_Handle);
+              xTaskNotify(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite);//1should be message to be send
+          }
       }
    //mouse.resolveVelocity(5);
    //mouse.setExitFlag(false);
@@ -177,22 +207,23 @@ void Task_JointCtrl(void* arg)
     {
         theta_deg_pack cur_target;
         cur_target = TigerArm.get_curtarget_deg(xTaskGetTickCount());
-        Joint[Shoulder_yaw]->obj_Target.angle_f = cur_target.deg[0];
-        Joint[Shouder_pitch]->obj_Target.angle_f = cur_target.deg[1];
-        Joint[Elbow]->obj_Target.angle_f = cur_target.deg[2];
-        Joint[Wrist_roll]->obj_Target.angle_f = cur_target.deg[3];
-        Joint[Wrist_pitch]->obj_Target.angle_f = cur_target.deg[4];
-        Joint[Wrist_yaw]->obj_Target.angle_f = cur_target.deg[5];
+        //Joint[Shoulder_yaw]->obj_Target.angle_f = cur_target.deg[0];
+        //Joint[Shouder_pitch]->obj_Target.angle_f = cur_target.deg[1];
+        //Joint[Elbow]->obj_Target.angle_f = cur_target.deg[2];
+       // Joint[Wrist_roll]->obj_Target.angle_f = cur_target.deg[3];
+        //Joint[Wrist_pitch]->obj_Target.angle_f = cur_target.deg[4];
+        //Joint[Wrist_yaw]->obj_Target.angle_f = cur_target.deg[5];
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
     }
 }
 
 void TigerArm_move()
 {
-    Tw_g(1,4) = TigerArm.GetTargetx(); Tw_g(2,4) = TigerArm.GetTargety();
-    Tw_g(3,4) = TigerArm.GetTargetz();
+    /*Tw_g(1, 4) = abs(TigerArm.GetTargetx()) < 1e5 ? TigerArm.GetWorldx() : TigerArm.GetTargetx();
+    Tw_g(2, 4) = abs(TigerArm.GetTargety()) < 1e5 ? TigerArm.GetWorldy() : TigerArm.GetTargety();
+    Tw_g(3, 4) = abs(TigerArm.GetTargetz()) < 1e5 ? TigerArm.GetWorldz() : TigerArm.GetTargetz();
     TigerArm.SetWorldGoal(Tw_g);
-    TigerArm.solveT0_6();
+    TigerArm.solveT0_6();*/
     TigerArm.Set_Cubic_IP_Config(xTaskGetTickCount());
     TigerArm.IK_cal();
 }
@@ -202,7 +233,7 @@ void Task_TigerArmCtrl(void* arg)
     /* Cache for Task */
     
     /* Pre-Load for task */
-    
+    static uint32_t i;
     (void)arg;
     TigerArm_Init();
     vTaskSuspend(TigerArmCtrl_Handle);
@@ -210,7 +241,12 @@ void Task_TigerArmCtrl(void* arg)
     for (;;)
     {
         TigerArm_move();
+        if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, &i, 0) == pdTRUE)
+        {
+            //std::cout << i << std::endl;
+        }
         vTaskSuspend(TigerArmCtrl_Handle);
+
     }
 }
 
