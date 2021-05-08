@@ -34,6 +34,8 @@
 
 /* Includes ------------------------------------------------------------------*/ 
 #include "ArmResolve.h"
+#include <iostream>
+using namespace std;
 /* function prototypes -------------------------------------------------------*/
 //MechanicalArm::MechanicalArm(int i) :T0_6(4, 4), Tc_g(4, 4), Tw_c(4, 4), T6_g(4, 4), Tw_g(4, 4) {};
 
@@ -89,11 +91,16 @@ bool MechanicalArm::FK_cal()
 	world_x = T(1,4);
 	world_y = T(2,4);
 	world_z = T(3,4);*/
-	double l, l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
-	l = l2 * cos(current_deg.deg[1]) + l3 * sin(90 + current_deg.deg[1] - current_deg.deg[2]);
-	world_x = l * cos(current_deg.deg[0]);
-	world_y = l * sin(current_deg.deg[0]);
-	world_z = l1 + l2 * sin(current_deg.deg[1]) - l3 * cos(90 + current_deg.deg[1] - current_deg.deg[2]);
+	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
+	double c1 = cos(deg2rad(current_deg.deg[1]));
+	double st = sin(deg2rad(90.0f + current_deg.deg[1] - current_deg.deg[2]));
+	//std::cout << c1 << " " << st << " " << cos(3.14) << " ";
+	double l = l2 * c1 + l3 * st;
+	//std::cout << l2 * cos(current_deg.deg[1]) << "     " << l3 * sin(90 + current_deg.deg[1] - current_deg.deg[2]) << "\n";
+	//delete(&l);
+	world_x = l * cos(deg2rad(current_deg.deg[0]));
+	world_y = l * sin(deg2rad(current_deg.deg[0]));
+	world_z = l1 + l2 * sin(deg2rad(current_deg.deg[1])) - l3 * cos(deg2rad(90 + current_deg.deg[1] - current_deg.deg[2]));
 	roll = current_deg.deg[3];
 	pitch = current_deg.deg[4];
 	yaw = current_deg.deg[5];
@@ -187,9 +194,9 @@ bool MechanicalArm::IK_cal()
 	/*double p_x = this->T0_6(1,4), p_y = this->T0_6(2,4), p_z = this->T0_6(3,4);
 	double r13 = this->T0_6(1,3), r23 = this->T0_6(2,3), r33 = this->T0_6(3,3);
 	double r11 = this->T0_6(1,1), r21 = this->T0_6(2,1), r31 = this->T0_6(3,1);*/
-	double p_x = fabs(this->GetTargetx()) < 1e5 ? this->GetWorldx() : this->GetTargetx();
-	double p_y = fabs(this->GetTargety()) < 1e5 ? this->GetWorldy() : this->GetTargety();
-	double p_z = fabs(this->GetTargetz()) < 1e5 ? this->GetWorldz() : this->GetTargetz();
+	double p_x = fabs(this->GetTargetx()) < 1e-5 ? this->GetWorldx() : this->GetTargetx();
+	double p_y = fabs(this->GetTargety()) < 1e-5 ? this->GetWorldy() : this->GetTargety();
+	double p_z = fabs(this->GetTargetz()) < 1e-5 ? this->GetWorldz() : this->GetTargetz();
 	double theta1, theta2, theta3, theta4, theta5, theta6;
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
 	if (p_x != 0) theta1 = atan2(p_y, p_x);

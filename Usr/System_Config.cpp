@@ -67,6 +67,7 @@ void System_Resource_Init(void)
   SysLog.filter_conf(DEFAULT_TAG, LOG_LVL_ALL, LogConsole_Output);
   SysLog.filter_conf("Simulation", LOG_LVL_INFO, LogConsole_Output, &Filter_List[0]);
   SysLog.filter_conf("CoppeliaSim", LOG_LVL_INFO, LogConsole_Output, &Filter_List[1]);
+  SysLog.filter_conf("TigerArm", LOG_LVL_INFO, LogConsole_Output, &Filter_List[2]);
   SysLog.global_conf(LOG_LVL_ALL, false);
   SysLog.Record(_INFO_, "SysLog initialized success...");
 

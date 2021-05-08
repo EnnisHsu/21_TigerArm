@@ -41,7 +41,7 @@
 #define WHEEL_NUM         4
 #define ARM_JOINT       6
 extern CLogger SysLog;
-extern LogFilter_t Filter_List[2];
+extern LogFilter_t Filter_List[3];
 
 extern _simObjectHandle_Type* Body;
 extern _simObjectHandle_Type* Wheel[WHEEL_NUM];

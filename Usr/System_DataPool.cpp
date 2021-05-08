@@ -17,7 +17,7 @@
 
 /* Other Resources -----------------------------------------------------------*/
 CLogger SysLog;
-LogFilter_t Filter_List[2];
+LogFilter_t Filter_List[3];
 
 _simObjectHandle_Type* Body;
 _simObjectHandle_Type* Wheel[WHEEL_NUM];
