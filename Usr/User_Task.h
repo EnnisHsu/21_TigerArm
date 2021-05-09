@@ -12,12 +12,12 @@
 #include "System_DataPool.h"
 /* Private macros ------------------------------------------------------------*/
 /* Private type --------------------------------------------------------------*/
-//shoulder_yaw	->shouder_pitch	->elbow	->wrist_roll->wrist_pitch	->wrist_yaw
+//shoulder_yaw	->shoulder_pitch	->elbow	->wrist_roll->wrist_pitch	->wrist_yaw
 //joint0		->joint1		->joint2->joint3	->joint4		->joint5
 enum _Joint_Type
 {
 	Shoulder_yaw = 0U,
-	Shouder_pitch,
+	Shoulder_pitch,
 	Elbow,
 	Wrist_roll,
 	Wrist_pitch,

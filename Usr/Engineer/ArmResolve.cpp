@@ -92,15 +92,15 @@ bool MechanicalArm::FK_cal()
 	world_y = T(2,4);
 	world_z = T(3,4);*/
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
-	double c1 = cos(deg2rad(current_deg.deg[1]));
-	double st = sin(deg2rad(90.0f + current_deg.deg[1] - current_deg.deg[2]));
+	double c1 = cos(deg2rad(fabs(current_deg.deg[1])));
+	double st = sin(deg2rad(90.0f + fabs(current_deg.deg[1]) - current_deg.deg[2]));
 	//std::cout << c1 << " " << st << " " << cos(3.14) << " ";
 	double l = l2 * c1 + l3 * st;
 	//std::cout << l2 * cos(current_deg.deg[1]) << "     " << l3 * sin(90 + current_deg.deg[1] - current_deg.deg[2]) << "\n";
 	//delete(&l);
 	world_x = l * cos(deg2rad(current_deg.deg[0]));
 	world_y = l * sin(deg2rad(current_deg.deg[0]));
-	world_z = l1 + l2 * sin(deg2rad(current_deg.deg[1])) - l3 * cos(deg2rad(90 + current_deg.deg[1] - current_deg.deg[2]));
+	world_z = l1 + l2 * sin(deg2rad(fabs(current_deg.deg[1]))) - l3 * cos(deg2rad(90 + fabs(current_deg.deg[1]) - current_deg.deg[2]));
 	roll = current_deg.deg[3];
 	pitch = current_deg.deg[4];
 	yaw = current_deg.deg[5];
@@ -199,16 +199,37 @@ bool MechanicalArm::IK_cal()
 	double p_z = fabs(this->GetTargetz()) < 1e-5 ? this->GetWorldz() : this->GetTargetz();
 	double theta1, theta2, theta3, theta4, theta5, theta6;
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
-	if (p_x != 0) theta1 = atan2(p_y, p_x);
+	if (p_x != 0) theta1 = atan(p_y/p_x);
 	else theta1 = 1.57f;
 	this->target_deg.deg[0] = rad2deg(theta1);
+	if (this->target_deg.deg[0]<dh_model[0].min_deg || this->target_deg.deg[0]>dh_model[0].max_deg)
+	{
+		SysLog.Record(_INFO_, "TigerArm", "Theta1 out of range.TigerArm may not reach this target point...");
+		return false;
+	}
 	double k = p_x * p_x + p_y * p_y + (p_z - l1) * (p_z - l1) - l2 * l2 - l3 * l3;
+	double c3 = k / (2 * l2 * l3);
+	if (c3>1)
+	{
+		SysLog.Record(_INFO_, "TigerArm", "Theta3 error.TigerArm may not reach this target point...");
+		return false;
+	}
 	theta3 = acos((k / (2 * l2 * l3)));
 	this->target_deg.deg[2] = rad2deg(theta3);
 	if (this->target_deg.deg[2]<dh_model[2].min_deg || this->target_deg.deg[2]>dh_model[2].max_deg) this->target_deg.deg[2] = -this->target_deg.deg[2];
-	if (this->target_deg.deg[2]<dh_model[2].min_deg || this->target_deg.deg[2]>dh_model[2].max_deg) return false;
+	if (this->target_deg.deg[2]<dh_model[2].min_deg || this->target_deg.deg[2]>dh_model[2].max_deg)
+	{
+		SysLog.Record(_INFO_, "TigerArm", "Theta3 out of range.TigerArm may not reach this target point...");
+		return false;
+	}
 	theta2 = atan2(p_z - l1, sqrt(p_x * p_x + p_y * p_y)) + atan2(l3 * sin(theta3), l2 + l3 * cos(theta3));
-	this->target_deg.deg[1] = rad2deg(theta2);
+	this->target_deg.deg[1] = -rad2deg(theta2);
+	if (this->target_deg.deg[1]<dh_model[1].min_deg || this->target_deg.deg[1]>dh_model[1].max_deg)
+	{
+		SysLog.Record(_INFO_, "TigerArm", "Theta2 out of range.TigerArm may not reach this target point...");
+		return false;
+	}
+	NewTarget = ENABLE;
 	/*for (int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 2; j++)

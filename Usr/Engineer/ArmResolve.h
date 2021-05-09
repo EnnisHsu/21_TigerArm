@@ -4,6 +4,8 @@
 //#include "Tool_Mat.h"
 #include "Matrix.h"
 #include "math.h"
+#include "SRML/SRML.h"
+#include "System_DataPool.h"
 #include <stdint.h>
 #define a(n) this->dh_model[n].a
 #define d(n) this->dh_model[n].d
@@ -76,11 +78,14 @@ class MechanicalArm
 		double GetTargetx() { return target_x; }
 		double GetTargety() { return target_y; }
 		double GetTargetz() { return target_z; }
+
+		int NewTarget = DISABLE;
 	private:
 		//int n_axis;
 		GOAL_INPUT_METHOD_TYPE goal_input_mode=World_Input;
 		CREAVE_MODE_TYPE creave_mode=Cubic_IP ;
 		int CP62g=DISABLE;
+		
 		DH_MODEL_Typedef dh_model[6];
 		double theta[8][6];
 		int tf=2000.0f;

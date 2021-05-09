@@ -101,7 +101,7 @@ void System_Tasks_Init(void)
   //CoppeliaSim-client connected successfully.
   Body = CoppeliaSim->Add_Object("chassis_respondable", OTHER_OBJECT, { SIM_ORIENTATION | CLIENT_RO, SIM_VELOCITY | CLIENT_RO });
   Joint[Shoulder_yaw] = CoppeliaSim->Add_Object("shoulder_yaw", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Joint[Shouder_pitch] = CoppeliaSim->Add_Object("shoulder_pitch", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  Joint[Shoulder_pitch] = CoppeliaSim->Add_Object("shoulder_pitch", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   Joint[Elbow] = CoppeliaSim->Add_Object("Elbow", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   Joint[Wrist_roll] = CoppeliaSim->Add_Object("Wrist_roll", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   Joint[Wrist_pitch] = CoppeliaSim->Add_Object("Wrist_pitch", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
