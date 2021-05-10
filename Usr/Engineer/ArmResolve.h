@@ -64,6 +64,7 @@ class MechanicalArm
 		int SetWorldGoal(Matrix Tw_g);
 		theta_deg_pack get_IK_ans();
 		theta_deg_pack get_curtarget_deg(uint32_t now_time);
+		bool ReachTargetDeg();
 		void Set_Cubic_IP_Config(uint32_t now_time);
 		void update(theta_deg_pack* cur);
 		void SetTargetx(double x) { target_x = x; }

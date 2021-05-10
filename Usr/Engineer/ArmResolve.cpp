@@ -199,7 +199,7 @@ bool MechanicalArm::IK_cal()
 	double p_z = fabs(this->GetTargetz()) < 1e-5 ? this->GetWorldz() : this->GetTargetz();
 	double theta1, theta2, theta3, theta4, theta5, theta6;
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
-	if (p_x != 0) theta1 = atan(p_y/p_x);
+	if (p_x != 0) theta1 = atan2(p_y,p_x);
 	else theta1 = 1.57f;
 	this->target_deg.deg[0] = rad2deg(theta1);
 	if (this->target_deg.deg[0]<dh_model[0].min_deg || this->target_deg.deg[0]>dh_model[0].max_deg)
@@ -335,6 +335,15 @@ theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
 		curtarget_deg.deg[i]=joint_IP_data[i].a[0]+joint_IP_data[i].a[1]*t+joint_IP_data[i].a[2]*t*t+joint_IP_data[i].a[3]*t*t*t;
 	}
 	return curtarget_deg;
+}
+
+bool MechanicalArm::ReachTargetDeg()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		if (fabs(current_deg.deg[i] - target_deg.deg[i]) > 1e-5) return false;
+	}
+	return true;
 }
 
 /**

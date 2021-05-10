@@ -236,22 +236,24 @@ void Task_JointCtrl(void* arg)
     /* Pre-Load for task */
     xLastWakeTime_t = xTaskGetTickCount();
     (void)arg;
-
+    
     /* Infinite loop */
     for (;;)
     {
         theta_deg_pack cur_target;
-        //cur_target = TigerArm.get_curtarget_deg(xTaskGetTickCount());
-        cur_target = TigerArm.get_IK_ans();
+        
         if (TigerArm.NewTarget == ENABLE)
         {
+            //cur_target = TigerArm.get_curtarget_deg(xTaskGetTickCount());
+            cur_target = TigerArm.get_IK_ans();
             Joint[Shoulder_yaw]->obj_Target.angle_f = deg2rad(cur_target.deg[0]);
             Joint[Shoulder_pitch]->obj_Target.angle_f = deg2rad(cur_target.deg[1]);
             Joint[Elbow]->obj_Target.angle_f = deg2rad(cur_target.deg[2]);
             Joint[Wrist_roll]->obj_Target.angle_f = deg2rad(cur_target.deg[3]);
             Joint[Wrist_pitch]->obj_Target.angle_f = deg2rad(cur_target.deg[4]);
             Joint[Wrist_yaw]->obj_Target.angle_f = deg2rad(cur_target.deg[5]);
-            TigerArm.NewTarget = DISABLE;
+            //if (TigerArm.ReachTargetDeg()) 
+                TigerArm.NewTarget = DISABLE;
         }
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
     }
