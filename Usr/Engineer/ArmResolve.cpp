@@ -98,9 +98,9 @@ bool MechanicalArm::FK_cal()
 	double l = l2 * c1 + l3 * st;
 	//std::cout << l2 * cos(current_deg.deg[1]) << "     " << l3 * sin(90 + current_deg.deg[1] - current_deg.deg[2]) << "\n";
 	//delete(&l);
-	world_x = l * cos(deg2rad(current_deg.deg[0]));
-	world_y = l * sin(deg2rad(current_deg.deg[0]));
-	world_z = l1 + l2 * sin(deg2rad(fabs(current_deg.deg[1]))) - l3 * cos(deg2rad(90 + fabs(current_deg.deg[1]) - current_deg.deg[2]));
+	world_x = l * cos(deg2rad(current_deg.deg[0]))+x_offset;
+	world_y = l * sin(deg2rad(current_deg.deg[0]))+y_offset;
+	world_z = l1 + l2 * sin(deg2rad(fabs(current_deg.deg[1]))) - l3 * cos(deg2rad(90 + fabs(current_deg.deg[1]) - current_deg.deg[2])) + z_offset;
 	roll = current_deg.deg[3];
 	pitch = current_deg.deg[4];
 	yaw = current_deg.deg[5];
@@ -199,7 +199,7 @@ bool MechanicalArm::IK_cal()
 	double p_z = fabs(this->GetTargetz()) < 1e-5 ? this->GetWorldz() : this->GetTargetz();
 	double theta1, theta2, theta3, theta4, theta5, theta6;
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
-	if (p_x != 0) theta1 = atan2(p_y,p_x);
+	if (p_x-x_offset != 0) theta1 = atan2(p_y-y_offset,p_x-x_offset);
 	else theta1 = 1.57f;
 	this->target_deg.deg[0] = rad2deg(theta1);
 	if (this->target_deg.deg[0]<dh_model[0].min_deg || this->target_deg.deg[0]>dh_model[0].max_deg)
@@ -207,7 +207,7 @@ bool MechanicalArm::IK_cal()
 		SysLog.Record(_INFO_, "TigerArm", "Theta1 out of range.TigerArm may not reach this target point...");
 		return false;
 	}
-	double k = p_x * p_x + p_y * p_y + (p_z - l1) * (p_z - l1) - l2 * l2 - l3 * l3;
+	double k = (p_x-x_offset) * (p_x-x_offset) + (p_y-y_offset) * (p_y-y_offset) + (p_z - z_offset - l1) * (p_z - z_offset - l1) - l2 * l2 - l3 * l3;
 	double c3 = k / (2 * l2 * l3);
 	if (c3>1)
 	{
@@ -222,7 +222,7 @@ bool MechanicalArm::IK_cal()
 		SysLog.Record(_INFO_, "TigerArm", "Theta3 out of range.TigerArm may not reach this target point...");
 		return false;
 	}
-	theta2 = atan2(p_z - l1, sqrt(p_x * p_x + p_y * p_y)) + atan2(l3 * sin(theta3), l2 + l3 * cos(theta3));
+	theta2 = atan2(p_z-z_offset - l1, sqrt((p_x-x_offset) * (p_x-x_offset) + (p_y-y_offset) * (p_y-y_offset))) + atan2(l3 * sin(theta3), l2 + l3 * cos(theta3));
 	this->target_deg.deg[1] = -rad2deg(theta2);
 	if (this->target_deg.deg[1]<dh_model[1].min_deg || this->target_deg.deg[1]>dh_model[1].max_deg)
 	{
@@ -230,6 +230,7 @@ bool MechanicalArm::IK_cal()
 		return false;
 	}
 	NewTarget = ENABLE;
+	return true;
 	/*for (int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 2; j++)

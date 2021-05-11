@@ -47,6 +47,15 @@
 #define _O_KV		0x49
 #define _P_KV		0x50
 #define _F7_KV		0x76
+#define _0_KV		0X30
+#define _0_KV		0X30
+#define _1_KV		0X31
+#define _2_KV		0X32
+#define _3_KV		0X33
+#define _4_KV		0X34
+#define _5_KV		0X35
+#define _6_KV		0X36
+#define _7_KV		0X37
 
 class keyboardHook_t
 {

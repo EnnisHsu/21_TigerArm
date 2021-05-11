@@ -81,6 +81,7 @@ class MechanicalArm
 		double GetTargetz() { return target_z; }
 
 		int NewTarget = DISABLE;
+		double x_offset = 0.325f, y_offset = -0.425f, z_offset = 0.14f;
 	private:
 		//int n_axis;
 		GOAL_INPUT_METHOD_TYPE goal_input_mode=World_Input;

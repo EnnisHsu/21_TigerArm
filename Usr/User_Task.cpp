@@ -86,15 +86,13 @@ void TigerArm_Init(void)
     Joint[Wrist_roll]->obj_Target.angle_f = 0;
     Joint[Wrist_pitch]->obj_Target.angle_f = 0;
     Joint[Wrist_yaw]->obj_Target.angle_f = 0;
-    //Mineral[0]->obj_Target.position_3f[0] = 0.64f;
-    //Mineral[0]->obj_Target.position_3f[1] = -1.0f;
-    //Mineral[0]->obj_Target.position_3f[2] = 1.2f;
-    //Mineral[1]->obj_Target.position_3f[0] = 0.32f;
-    //Mineral[1]->obj_Target.position_3f[1] = -1.0f;
-    //Mineral[1]->obj_Target.position_3f[2] = 1.2f;
-    //Mineral[2]->obj_Target.position_3f[0] = 0.0f;
-    //Mineral[2]->obj_Target.position_3f[1] = -1.0f;
-    //Mineral[2]->obj_Target.position_3f[2] = 1.2f;
+    for (int i = 0; i < 5; i++)
+    {
+        Mineral[i]->obj_Target.position_3f[0] = 0.64f - 0.32f * i;
+        Mineral[i]->obj_Target.position_3f[1] = -1.0f;
+        Mineral[i]->obj_Target.position_3f[2] = 0.502f;
+    }
+
     double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
     double alpha[6] = { 0.0f,90.0f,0.0f,90.0f,-90.0f,-90.0f };
     double d[6] = { 0.0f,0.0f,0.0f,0.12f,0.0f,0.0f };
@@ -134,6 +132,14 @@ void Task_TigerArmUpdate(void* arg)
         }
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);
     }
+}
+
+void Catch_Mineral(int pos)
+{
+    SysLog.Record(_INFO_, "TigerArm", "TigerArm is assigned to catch mineral NO.%d...",pos);
+    TigerArm.SetTargetx(Mineral[pos - 1]->obj_Data.position_3f[0]);
+    TigerArm.SetTargety(Mineral[pos - 1]->obj_Data.position_3f[1] + 0.1f);
+    TigerArm.SetTargetz(Mineral[pos - 1]->obj_Data.position_3f[2] + 0.05f);
 }
 
 /**
@@ -221,6 +227,31 @@ void Task_RobotCtrl(void *arg)
               vTaskResume(TigerArmCtrl_Handle);
               xTaskNotify(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite);//1should be message to be send
               vTaskDelayUntil(&xLastWakeTime_t, xHitTime);
+          }
+          if (GetKeyState(_1_KV) < 0)
+          {
+              Catch_Mineral(1);
+              isResume = 1;
+          }
+          if (GetKeyState(_2_KV) < 0)
+          {
+              Catch_Mineral(2);
+              isResume = 1;
+          }
+          if (GetKeyState(_3_KV) < 0)
+          {
+              Catch_Mineral(3);
+              isResume = 1;
+          }
+          if (GetKeyState(_4_KV) < 0)
+          {
+              Catch_Mineral(4);
+              isResume = 1;
+          }
+          if (GetKeyState(_5_KV) < 0)
+          {
+              Catch_Mineral(5);
+              isResume = 1;
           }
       }
    //mouse.resolveVelocity(5);
