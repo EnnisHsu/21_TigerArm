@@ -89,7 +89,7 @@ class MechanicalArm
 		
 		DH_MODEL_Typedef dh_model[6];
 		double theta[8][6];
-		int tf=2000.0f;
+		int tf=20.0f;
 		uint32_t last_IP_time;
 		IP_data_pack joint_IP_data[6];
 		theta_deg_pack target_deg,current_deg,curtarget_deg;

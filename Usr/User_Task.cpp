@@ -244,15 +244,15 @@ void Task_JointCtrl(void* arg)
         
         if (TigerArm.NewTarget == ENABLE)
         {
-            //cur_target = TigerArm.get_curtarget_deg(xTaskGetTickCount());
-            cur_target = TigerArm.get_IK_ans();
+            cur_target = TigerArm.get_curtarget_deg(xLastWakeTime_t);
+            //cur_target = TigerArm.get_IK_ans();
             Joint[Shoulder_yaw]->obj_Target.angle_f = deg2rad(cur_target.deg[0]);
             Joint[Shoulder_pitch]->obj_Target.angle_f = deg2rad(cur_target.deg[1]);
             Joint[Elbow]->obj_Target.angle_f = deg2rad(cur_target.deg[2]);
             Joint[Wrist_roll]->obj_Target.angle_f = deg2rad(cur_target.deg[3]);
             Joint[Wrist_pitch]->obj_Target.angle_f = deg2rad(cur_target.deg[4]);
             Joint[Wrist_yaw]->obj_Target.angle_f = deg2rad(cur_target.deg[5]);
-            //if (TigerArm.ReachTargetDeg()) 
+            if (TigerArm.ReachTargetDeg()) 
                 TigerArm.NewTarget = DISABLE;
         }
         vTaskDelayUntil(&xLastWakeTime_t, xBlockTime);

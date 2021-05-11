@@ -329,7 +329,7 @@ theta_deg_pack MechanicalArm::get_IK_ans()
 theta_deg_pack MechanicalArm::get_curtarget_deg(uint32_t now_time)
 {
 	double t=now_time-last_IP_time;
-	if (t > 2000.0f) t = 2000.0f;
+	if (t > tf) t = tf;
 	for (int i=0;i<6;i++)
 	{
 		curtarget_deg.deg[i]=joint_IP_data[i].a[0]+joint_IP_data[i].a[1]*t+joint_IP_data[i].a[2]*t*t+joint_IP_data[i].a[3]*t*t*t;
