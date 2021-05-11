@@ -22,6 +22,7 @@ LogFilter_t Filter_List[3];
 _simObjectHandle_Type* Body;
 _simObjectHandle_Type* Wheel[WHEEL_NUM];
 _simObjectHandle_Type* Joint[ARM_JOINT];
+_simObjectHandle_Type* Mineral[MINERAL_NUM];
 
 _simSignalHandle_Type* Signal;
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

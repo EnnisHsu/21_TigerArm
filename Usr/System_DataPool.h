@@ -40,6 +40,7 @@
 /* Other Resources -----------------------------------------------------------*/
 #define WHEEL_NUM         4
 #define ARM_JOINT       6
+#define MINERAL_NUM		5
 extern CLogger SysLog;
 extern LogFilter_t Filter_List[3];
 
@@ -47,6 +48,7 @@ extern _simObjectHandle_Type* Body;
 extern _simObjectHandle_Type* Wheel[WHEEL_NUM];
 extern _simObjectHandle_Type* Joint[ARM_JOINT];
 extern _simSignalHandle_Type* Signal;
+extern _simObjectHandle_Type* Mineral[MINERAL_NUM];
 /*
   @brief Unified communication struct.
 */

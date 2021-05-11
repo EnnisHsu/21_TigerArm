@@ -167,7 +167,7 @@ void Task_RobotCtrl(void *arg)
           if (GetKeyState(_G_KV) < 0)
           {
               double wx, wy, wz;
-              std::cout << "请输出世界坐标系:";
+              std::cout << "Please input world point target:";
               std::cin >> wx >> wy >> wz;
               TigerArm.SetTargetx(wx);
               TigerArm.SetTargety(wy);
