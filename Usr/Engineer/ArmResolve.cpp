@@ -359,7 +359,7 @@ void MechanicalArm::Set_Cubic_IP_Config(uint32_t now_time)
 		joint_IP_data[i].a[0]=current_deg.deg[i];
 		joint_IP_data[i].a[1]=0.0f;
 		joint_IP_data[i].a[2]=3.0f*(target_deg.deg[i]-current_deg.deg[i])/(tf*tf);
-		joint_IP_data[i].a[4]=-2.0f*(target_deg.deg[i]-current_deg.deg[i])/(tf*tf*tf);
+		joint_IP_data[i].a[3]=-2.0f*(target_deg.deg[i]-current_deg.deg[i])/(tf*tf*tf);
 	}
 }
 
