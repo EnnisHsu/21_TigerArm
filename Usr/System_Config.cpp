@@ -106,11 +106,11 @@ void System_Tasks_Init(void)
   Joint[Wrist_roll] = CoppeliaSim->Add_Object("Wrist_roll", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   Joint[Wrist_pitch] = CoppeliaSim->Add_Object("Wrist_pitch", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   Joint[Wrist_yaw] = CoppeliaSim->Add_Object("Wrist_yaw", JOINT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Mineral[0] = CoppeliaSim->Add_Object("Shape3", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Mineral[1] = CoppeliaSim->Add_Object("Shape1", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Mineral[2] = CoppeliaSim->Add_Object("Shape2", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Mineral[3] = CoppeliaSim->Add_Object("Shape4", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
-  Mineral[4] = CoppeliaSim->Add_Object("Shape5", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  //Mineral[0] = CoppeliaSim->Add_Object("Shape3", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  //Mineral[1] = CoppeliaSim->Add_Object("Shape1", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  //Mineral[2] = CoppeliaSim->Add_Object("Shape2", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  //Mineral[3] = CoppeliaSim->Add_Object("Shape4", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
+  //Mineral[4] = CoppeliaSim->Add_Object("Shape5", OTHER_OBJECT, { SIM_FORCE | CLIENT_RO, SIM_POSITION | CLIENT_RW });
   //Wheel[_LF] = CoppeliaSim->Add_Object("Force_Sensor0", FORCE_SENSOR, { SIM_FORCE | CLIENT_RO });
   //Wheel[_RF] = CoppeliaSim->Add_Object("Force_Sensor1", FORCE_SENSOR, { SIM_FORCE | CLIENT_RO });
   //Wheel[_RB] = CoppeliaSim->Add_Object("Force_Sensor2", FORCE_SENSOR, { SIM_FORCE | CLIENT_RO });

@@ -86,6 +86,15 @@ void TigerArm_Init(void)
     Joint[Wrist_roll]->obj_Target.angle_f = 0;
     Joint[Wrist_pitch]->obj_Target.angle_f = 0;
     Joint[Wrist_yaw]->obj_Target.angle_f = 0;
+    //Mineral[0]->obj_Target.position_3f[0] = 0.64f;
+    //Mineral[0]->obj_Target.position_3f[1] = -1.0f;
+    //Mineral[0]->obj_Target.position_3f[2] = 1.2f;
+    //Mineral[1]->obj_Target.position_3f[0] = 0.32f;
+    //Mineral[1]->obj_Target.position_3f[1] = -1.0f;
+    //Mineral[1]->obj_Target.position_3f[2] = 1.2f;
+    //Mineral[2]->obj_Target.position_3f[0] = 0.0f;
+    //Mineral[2]->obj_Target.position_3f[1] = -1.0f;
+    //Mineral[2]->obj_Target.position_3f[2] = 1.2f;
     double a[6] = { 0.0f,0.0f,0.21f,0.0f,0.0f,0.0f };
     double alpha[6] = { 0.0f,90.0f,0.0f,90.0f,-90.0f,-90.0f };
     double d[6] = { 0.0f,0.0f,0.0f,0.12f,0.0f,0.0f };
