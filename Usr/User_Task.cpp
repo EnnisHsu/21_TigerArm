@@ -198,28 +198,40 @@ void Task_RobotCtrl(void *arg)
           if (GetKeyState(_W_KV)<0) {
               isResume = 1;
               TigerArm.SetTargetx(TigerArm.GetWorldx() + move_step);
+              TigerArm.SetTargety(TigerArm.GetWorldy());
+              TigerArm.SetTargetz(TigerArm.GetWorldz());
               std::cout << "w pressed" << std::endl;
           }
           if (GetKeyState(_S_KV)<0){
               isResume = 1;
               TigerArm.SetTargetx(TigerArm.GetWorldx() - move_step);
+              TigerArm.SetTargety(TigerArm.GetWorldy());
+              TigerArm.SetTargetz(TigerArm.GetWorldz());
               std::cout << "s pressed" << std::endl;
           }
           if (GetKeyState(_A_KV)<0){
               isResume = 1;
               TigerArm.SetTargety(TigerArm.GetWorldy() + move_step);
+              TigerArm.SetTargetx(TigerArm.GetWorldx());
+              TigerArm.SetTargetz(TigerArm.GetWorldz());
               std::cout << "a pressed" << std::endl;}
           if (GetKeyState(_D_KV)<0){
               isResume = 1;
               TigerArm.SetTargety(TigerArm.GetWorldy() - move_step);
+              TigerArm.SetTargetx(TigerArm.GetWorldx());
+              TigerArm.SetTargetz(TigerArm.GetWorldz());
               std::cout << "d pressed" << std::endl;}
           if (GetKeyState(_R_KV)<0){
               isResume = 1;
               TigerArm.SetTargetz(TigerArm.GetWorldz() + move_step);
+              TigerArm.SetTargetx(TigerArm.GetWorldx());
+              TigerArm.SetTargety(TigerArm.GetWorldy());
               std::cout << "r pressed" << std::endl;}
           if (GetKeyState(_C_KV)<0){
               isResume = 1;
               TigerArm.SetTargetz(TigerArm.GetWorldz() - move_step);
+              TigerArm.SetTargetx(TigerArm.GetWorldx());
+              TigerArm.SetTargety(TigerArm.GetWorldy());
               std::cout << "c pressed" << std::endl;}
           //xTaskNotifyFromISR(TigerArmCtrl_Handle, 1, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
           if (isResume) {

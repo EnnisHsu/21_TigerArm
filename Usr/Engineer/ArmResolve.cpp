@@ -194,9 +194,9 @@ bool MechanicalArm::IK_cal()
 	/*double p_x = this->T0_6(1,4), p_y = this->T0_6(2,4), p_z = this->T0_6(3,4);
 	double r13 = this->T0_6(1,3), r23 = this->T0_6(2,3), r33 = this->T0_6(3,3);
 	double r11 = this->T0_6(1,1), r21 = this->T0_6(2,1), r31 = this->T0_6(3,1);*/
-	double p_x = fabs(this->GetTargetx()) < 1e-5 ? this->GetWorldx() : this->GetTargetx();
-	double p_y = fabs(this->GetTargety()) < 1e-5 ? this->GetWorldy() : this->GetTargety();
-	double p_z = fabs(this->GetTargetz()) < 1e-5 ? this->GetWorldz() : this->GetTargetz();
+	double p_x = this->GetTargetx();
+	double p_y = this->GetTargety();
+	double p_z = this->GetTargetz();
 	double theta1, theta2, theta3, theta4, theta5, theta6;
 	double l1 = 0.21f, l2 = 0.21f, l3 = 0.29f;
 	if (p_x != 0) theta1 = atan2(p_y,p_x);
