@@ -137,9 +137,9 @@ void Task_TigerArmUpdate(void* arg)
 void Catch_Mineral(int pos)
 {
     SysLog.Record(_INFO_, "TigerArm", "TigerArm is assigned to catch mineral NO.%d...",pos);
-    TigerArm.SetTargetx(Mineral[pos - 1]->obj_Data.position_3f[0]);
-    TigerArm.SetTargety(Mineral[pos - 1]->obj_Data.position_3f[1] + 0.1f);
-    TigerArm.SetTargetz(Mineral[pos - 1]->obj_Data.position_3f[2] + 0.05f);
+    TigerArm.SetTargetx(0.30f);
+    TigerArm.SetTargety(0.25f-0.25f*(pos-1));
+    TigerArm.SetTargetz(0.55f);
 }
 
 /**
