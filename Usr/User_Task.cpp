@@ -255,16 +255,6 @@ void Task_RobotCtrl(void *arg)
               Catch_Mineral(3);
               isResume = 1;
           }
-          if (GetKeyState(_4_KV) < 0)
-          {
-              Catch_Mineral(4);
-              isResume = 1;
-          }
-          if (GetKeyState(_5_KV) < 0)
-          {
-              Catch_Mineral(5);
-              isResume = 1;
-          }
       }
    //mouse.resolveVelocity(5);
    //mouse.setExitFlag(false);
