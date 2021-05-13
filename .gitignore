@@ -25,6 +25,12 @@ JLinkSettings.ini
 *.lib
 !arm_cortexM4lf_math.lib
 
+#WIN32的Debug文件
+Debug/
+.vs/
+*.db
+sys_log.txt
+
 #Keil工程记录和DeBug配置
 *.uvguix.*
 *.uvopt
