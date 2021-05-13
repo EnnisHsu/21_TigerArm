@@ -18,6 +18,8 @@ extern TaskHandle_t CANReceivePort_Handle;
 extern TaskHandle_t UartTransmitPort_Handle;
 
 /*------------------------------Function prototypes ---------------------------*/
+void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage);
+void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage);
 uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen);
 uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen);
 uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen);

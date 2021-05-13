@@ -116,7 +116,8 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-
+	if(RMMotor_QueueHandle != NULL)
+    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
 }
 
 /**

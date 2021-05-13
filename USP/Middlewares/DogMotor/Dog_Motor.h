@@ -81,6 +81,8 @@ public:
 		float Command_Torque = 0.0f;
 	  float Command_Kp =0.0f;
 		float Command_Kd =0.0f;
+		
+		float get_current_angle(){return this->Current_Angle;}
 			
 		void Update(uint8_t can_rx_data[]);
 		void Set_ZeroPosition();

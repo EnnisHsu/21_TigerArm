@@ -46,8 +46,8 @@ void System_Resource_Init(void)
   /* Drivers Init ---------------------*/
   Timer_Init(&htim4, USE_HAL_DELAY);
   
-  CAN_Init(&hcan1,NULL);
-  CAN_Init(&hcan2,NULL);
+  CAN_Init(&hcan1,User_CAN1_RxCpltCallback);
+  CAN_Init(&hcan2,User_CAN2_RxCpltCallback);
   
   Uart_Init(&huart1, Uart1_Rx_Buff, USART1_RX_BUFFER_SIZE,RecHandle);
   Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,DR16_call_back);
