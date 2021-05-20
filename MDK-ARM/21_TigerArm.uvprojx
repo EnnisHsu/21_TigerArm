@@ -384,29 +384,14 @@
           <GroupName>Application/User/Robomaster2021</GroupName>
           <Files>
             <File>
-              <FileName>ArmResolve.cpp</FileName>
+              <FileName>Service_RobotCtrl.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\USP\ArmResolve.cpp</FilePath>
+              <FilePath>..\USP\Application\Service_RobotCtrl.cpp</FilePath>
             </File>
             <File>
-              <FileName>Matrix.cpp</FileName>
+              <FileName>Service_MotoCtrl.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\USP\Matrix.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>MotorCtrl.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\USP\MotorCtrl.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>Dog_Motor.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\USP\Middlewares\DogMotor\Dog_Motor.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>Actuator.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\USP\Actuator.cpp</FilePath>
+              <FilePath>..\USP\Application\Service_MotoCtrl.cpp</FilePath>
             </File>
           </Files>
         </Group>
@@ -861,11 +846,6 @@
           <GroupName>Drivers/Devices</GroupName>
           <Files>
             <File>
-              <FileName>motor_AK80.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\SRML\Drivers\Devices\motor_AK80.h</FilePath>
-            </File>
-            <File>
               <FileName>motor_dji.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\SRML\Drivers\Devices\motor_dji.h</FilePath>
@@ -914,6 +894,11 @@
               <FileName>motor_ctrl.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\SRML\Middlewares\Module\motor_ctrl.h</FilePath>
+            </File>
+            <File>
+              <FileName>motor_AK80.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\SRML\Drivers\Devices\motor_AK80.cpp</FilePath>
             </File>
           </Files>
         </Group>

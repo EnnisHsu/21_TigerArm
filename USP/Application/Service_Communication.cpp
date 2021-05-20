@@ -16,11 +16,15 @@
 **/
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Communication.h"
+#include "Service_MotoCtrl.h"
 #include <vector>
 /* Private define ------------------------------------------------------------*/
 void Task_CAN1Transmit(void *arg);
 void Task_CAN2Transmit(void *arg);
 void Task_UsartTransmit(void *arg);
+void Task_CANReceive(void *arg);
+
+float deg[6];
 /**
 * @brief  Initialization of communication service
 * @param  None.
@@ -30,13 +34,17 @@ void Service_Communication_Init(void)
 {
   
   /* CAN Filter Config*/
-  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x001,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
-  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
-  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
-  
+//  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x001,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
+//  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
+//  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
+	CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
+	CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType, 0x0A, 0xff);
+	CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
+	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
   xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
   xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
+  xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
 }
 
 /*----------------------------------------------- CAN Manager ---------------------------------------------*/
@@ -96,6 +104,30 @@ void Task_CAN2Transmit(void *arg)
   }
 }
 
+void Task_CANReceive(void *arg)
+{
+	/* Cache for Task */
+	TickType_t xLastWakeTime=xTaskGetTickCount();
+	static CAN_COB RX_COB;
+	/* Pre-Load for task */
+
+	/* Infinite loop */
+
+	for(;;)
+	{
+		while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0)==pdPASS)
+		{
+			if (Tigerarm_Yaw.CheckID(RX_COB.ID)) Tigerarm_Yaw.update(RX_COB.Data);
+
+		}
+		while (xQueueReceive(AK80Motor_QueueHandle, &RX_COB, 0)==pdPASS)
+		{
+			if (Tigerarm_Shoulder.CheckID(RX_COB.ID)) Tigerarm_Shoulder.Update(RX_COB.Data);
+			if (Tigerarm_Elbow.CheckID(RX_COB.ID)) Tigerarm_Elbow.Update(RX_COB.Data);
+		}
+		vTaskDelayUntil(&xLastWakeTime, 1);
+	}
+}
 
 /**
 * @brief  Callback function in CAN Interrupt
@@ -107,8 +139,10 @@ void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-  if(RMMotor_QueueHandle != NULL)
+  if(CAN_RxCOB.ID!=0x0A && RMMotor_QueueHandle != NULL)
     xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
+  if (CAN_RxCOB.ID==0x0A && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
 }
 
 void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
@@ -116,8 +150,7 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-	if(RMMotor_QueueHandle != NULL)
-    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
+
 }
 
 /**
@@ -129,7 +162,8 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 */
 static void Convert_Data(CAN_RxMessage* input, CAN_COB* output)
 {
-  output->ID = input->header.StdId;
+	if (input->header.StdId==0x00) output->ID=input->data[0];
+	else output->ID = input->header.StdId;
   output->DLC = input->header.DLC;
   memcpy(output->Data, input->data, output->DLC);
 }
@@ -185,13 +219,13 @@ void Task_UsartTransmit(void *arg)
 /*
   DR16
 */
-uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen)
+uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data,uint16_t ReceiveLen)
 {
   static USART_COB Usart_RxCOB;
   //Send To UART Receive Queue
   if(DR16_QueueHandle != NULL)
   {
-    Usart_RxCOB.port_num = 3;
+    Usart_RxCOB.port_num = 2;
     Usart_RxCOB.len      = ReceiveLen;
     Usart_RxCOB.address  = Recv_Data;
     xQueueSendFromISR(DR16_QueueHandle,&Usart_RxCOB,0);
@@ -199,18 +233,33 @@ uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen)
   return 0;
 }
 
-uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen)
+uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
   return 0;
 }
 
-uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen)
+uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
   return 0;
 }
 
-uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint32_t ReceiveLen)
+uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
+	static USART_COB Usart_RxCOB;
+//	if (NUC_QueueHandle!=NULL)
+//	{
+//		Usart_RxCOB.port_num=5;
+//		Usart_RxCOB.len=ReceiveLen;
+//		Usart_RxCOB.address=Recv_Data;
+//		xQueueSendFromISR(NUC_QueueHandle,&Usart_RxCOB,0);
+//	}
+	//float deg[6];
+	static int16_t len=ReceiveLen;
+	/*for (int i=0;i<6;i++)
+	{
+		memcpy(&deg[i],&Recv_Data[4*i],4);
+	}*/
+	memcpy(deg,Recv_Data,ReceiveLen);
   return 0;
 }
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

@@ -32,7 +32,7 @@ void Device_DR16(void *arg);
 
 /* Exported devices ----------------------------------------------------------*/
 /* Motor & ESC & Other actuators*/
-Motor_AK80_9  Test_Motor(1, 0, 0);
+
 /* Remote control */
 
 /* IMU & NUC & Other sensors */
@@ -57,17 +57,10 @@ void Service_Devices_Init(void)
 void Device_Actuators(void *arg)
 {
   /* Cache for Task */
-  CAN_COB Rx_Buff;
-  CAN_COB Tx_Buff;
+
   
   /* Pre-Load for task */
-  Tx_Buff.ID = 1;
-  
-//  Analyzer.set(30, 500, 0, 500, 3);
-//  Analyzer.start(AUTO_FREQ);
-  
-  Test_Motor.enterCtrlMode_cmd(Tx_Buff.Data);
-  xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
+
   
   /* Infinite loop */
   TickType_t xLastWakeTime_t;
@@ -77,15 +70,12 @@ void Device_Actuators(void *arg)
     /* Connection check */
 
     /* Read Message */
-//    Analyzer.sample_control(0.5f*Analyzer.val_signal,0.7f);
+
     
-    xQueueReceive(CAN1_TxPort, &Rx_Buff, 0);
-    if(Rx_Buff.ID == 1) Test_Motor.unpack_reply(Rx_Buff.Data);
-    else {}
+
     /* Send Message */
-    Test_Motor.pack_cmd(Tx_Buff.Data, 0, 5, 0);
-    xQueueSend(RMMotor_QueueHandle, &Tx_Buff, 0);
     
+
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);
   }
@@ -94,16 +84,23 @@ void Device_Actuators(void *arg)
 void Device_DR16(void *arg)
 {
   /* Cache for Task */
-
+	DR16_DataPack_Typedef _buffer;
+	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
   /* Pre-Load for task */
 
   /* Infinite loop */
   TickType_t xLastWakeTime_t;
   xLastWakeTime_t = xTaskGetTickCount();
+
   for(;;)
   {
     
-    DR16.Check_Link(xTaskGetTickCount());
+
+    if (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+    {
+    	DR16.Check_Link(xTaskGetTickCount());
+    	DR16.DataCapture(&_buffer);
+    }
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);
   }

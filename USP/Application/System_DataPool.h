@@ -56,6 +56,7 @@ extern QueueHandle_t  CAN2_TxPort;
 
 extern QueueHandle_t  DR16_QueueHandle;
 extern QueueHandle_t  RMMotor_QueueHandle;
+extern QueueHandle_t AK80Motor_QueueHandle;
 extern QueueHandle_t  SuperRelay_QueueHandle;
 extern QueueHandle_t  IMU_QueueHandle;
 extern QueueHandle_t  NUC_QueueHandle;
@@ -84,6 +85,9 @@ extern W25Qx_Classdef Flash;
 extern CLogger SysLog;
 extern LogFilter_t Filter_List[2];
 extern CAnalyzer Analyzer;
+
+float rad2deg(float x);
+float deg2rad(float x);
 //暂时被遗忘在这,统一标准接口制定后再集中回收
 //#ifndef __UUCOBTypeDef_DEFINED
 //#define __UUCOBTypeDef_DEFINED

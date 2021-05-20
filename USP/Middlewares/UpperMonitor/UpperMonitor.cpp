@@ -40,8 +40,9 @@
 	
 /***********************上位机调参使用***********************/
 /* 在这里extern需要使用的变量和需要包含的头文件 */
-#include "Service_SwerveChassis.h"
-extern float debug_term1,debug_term2;
+//#include "Service_SwerveChassis.h"
+#include "Service_Communication.h"
+//extern float debug_term1,debug_term2;
 
 /***********************上位机调参使用***********************/
 
@@ -92,12 +93,25 @@ void UpperMonitor_Sent_Choose(float * data)
     switch(USART0_Sent_Choose_Data[i])
     {
       /* 以下部分用于观察参数曲线 */
-      case 0: data[i]= AlphaTest.steer_Set[0].str_angle;
+      /*case 0: data[i]= AlphaTest.steer_Set[0].str_angle;
           break;
       case 1: data[i]= AlphaTest.steer_Set[0].vect_angle;
           break;
       case 2: data[i]= AlphaTest.steer_Set[0].speed_direction;
-          break;
+          break;*/
+    case 0:data[i]=deg[0];
+    	break;
+    case 1:data[i]=deg[1];
+    	break;
+    case 2:data[i]=deg[2];
+    	break;
+    case 3:data[i]=deg[3];
+    	break;
+    case 4:data[i]=deg[4];
+       	break;
+    case 5:data[i]=deg[5];
+        break;
+
       default:break;
 	  /* 以上部分用于观察参数曲线 */
     }

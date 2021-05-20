@@ -27,8 +27,10 @@
 /* Service */
 #include "Service_Devices.h"
 #include "Service_Debug.h"
-#include "Service_SwerveChassis.h"
+//#include "Service_SwerveChassis.h"
 #include "Service_Communication.h"
+#include "Service_MotoCtrl.h"
+#include "Service_RobotCtrl.h"
 /* User support package & SRML */
 #include <SRML.h>
 #include "SEGGER_SYSVIEW.h"
@@ -49,11 +51,12 @@ void System_Resource_Init(void)
   CAN_Init(&hcan1,User_CAN1_RxCpltCallback);
   CAN_Init(&hcan2,User_CAN2_RxCpltCallback);
   
+
   Uart_Init(&huart1, Uart1_Rx_Buff, USART1_RX_BUFFER_SIZE,RecHandle);
-  Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,DR16_call_back);
+  Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,User_UART2_RxCpltCallback);
   Uart_Init(&huart3, Uart3_Rx_Buff, USART3_RX_BUFFER_SIZE,NULL);
   Uart_Init(&huart4, Uart4_Rx_Buff, USART4_RX_BUFFER_SIZE,NULL);
-  Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,NULL);
+  Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,User_UART5_RxCpltCallback);
   Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
   
   SPI_Init(&hspi1,GPIOA,GPIO_PIN_4,100);
@@ -71,6 +74,7 @@ void System_Resource_Init(void)
   CAN1_TxPort        = xQueueCreate(4,sizeof(CAN_COB));
   CAN2_TxPort        = xQueueCreate(4,sizeof(CAN_COB));
   RMMotor_QueueHandle= xQueueCreate(10,sizeof(CAN_COB));
+  AK80Motor_QueueHandle=xQueueCreate(10,sizeof(CAN_COB));
   IMU_QueueHandle    = xQueueCreate(2,sizeof(CAN_COB));
   NUC_QueueHandle    = xQueueCreate(2,sizeof(USART_COB));
   DR16_QueueHandle   = xQueueCreate(2,sizeof(USART_COB));
@@ -103,6 +107,8 @@ void System_Tasks_Init(void)
   Service_Debug_Init();
   Service_Devices_Init();
   Service_Communication_Init();
+  Service_RobotCtrl_Init();
+  Service_MotoCtrl_Init();
   /* Applications Init ----------------*/
   //xTaskCreate(Task_SwerveChassis, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &TestSwerveChassis_Handle);
 }

@@ -17,6 +17,7 @@ QueueHandle_t  CAN1_TxPort;
 QueueHandle_t  CAN2_TxPort;
 QueueHandle_t  DR16_QueueHandle;
 QueueHandle_t  RMMotor_QueueHandle;
+QueueHandle_t  AK80Motor_QueueHandle;
 QueueHandle_t  IMU_QueueHandle;
 QueueHandle_t  NUC_QueueHandle;
 QueueHandle_t  Referee_QueueHandle;
@@ -39,6 +40,16 @@ CLogger SysLog;
 LogFilter_t Filter_List[2];
 
 CAnalyzer Analyzer;
+/* Function ------------------------------------------------------------------*/
+float rad2deg(float x)
+{
+	return x/3.14*180;
+}
+
+float deg2rad(float x)
+{
+	return x/180*3.14;
+}
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
 
 
