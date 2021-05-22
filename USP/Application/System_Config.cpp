@@ -96,7 +96,7 @@ void System_Resource_Init(void)
   
 }  
 
-
+extern int flag;
 /**
 * @brief Load and start User Tasks. 
 * @note  Edit this function to add tasks into the activated tasks list.

@@ -26,7 +26,7 @@ void Service_Debug_Init(void)
          "Debug_Service",       /* Task Name. */
        Normal_Stack_Size,       /* Stack depth. */
                     NULL,       /* Task parameter */
-     PriorityBelowNormal,       /* Priority */
+     PriorityAboveNormal,       /* Priority */
           &Debug_Handle);       /* Task handle */
 }
 

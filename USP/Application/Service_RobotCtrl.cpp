@@ -32,6 +32,8 @@
 #include "Service_RobotCtrl.h"
 #include "Service_MotoCtrl.h"
 
+float deg[6];
+TaskHandle_t Robot_ROSCtrl;
 TaskHandle_t Robot_ArmSingleCtrl;
 TaskHandle_t Robot_DR16Ctrl;
 TaskHandle_t Robot_KeyboardCtrl;
@@ -40,6 +42,7 @@ void Service_RobotCtrl_Init()
 {
 	xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
+//	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -100,6 +103,31 @@ void Task_ArmSingleCtrl(void *arg)
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
+}
+
+void Task_ROSCtrl(void *arg)
+{
+	  /* Cache for Task */
+	USART_COB _buffer;
+	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+	  /* Pre-Load for task */
+
+	  /* Infinite loop */
+	  TickType_t xLastWakeTime_t;
+	  xLastWakeTime_t = xTaskGetTickCount();
+	  for(;;)
+	  {
+		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+		{
+			memcpy(deg,_buffer.address,_buffer.len);
+			Yaw_target_pos=rad2deg(deg[0]);
+			Shoulder_target_pos=deg[1];
+			Elbow_target_pos=deg[2];
+			
+		}
+	    /* Pass control to the next task */
+	    vTaskDelayUntil(&xLastWakeTime_t,1);
+	  }	
 }
 
  void Task_KeyboardCtrl(void *arg)

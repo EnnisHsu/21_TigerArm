@@ -17,10 +17,13 @@
 extern "C"
 {
 #endif
+	
+extern float deg[6];
 
 void Service_RobotCtrl_Init();
 void Task_ArmSingleCtrl(void *arg);
 void Task_DR16Ctrl(void *arg);
+void Task_ROSCtrl(void *arg);
 void Task_KeyboardCtrl(void *arg);
 
 #ifdef __cplusplus

@@ -42,6 +42,7 @@
 /* 在这里extern需要使用的变量和需要包含的头文件 */
 //#include "Service_SwerveChassis.h"
 #include "Service_Communication.h"
+#include "Service_MotoCtrl.h"
 //extern float debug_term1,debug_term2;
 
 /***********************上位机调参使用***********************/
@@ -49,7 +50,7 @@
 /* Includes ------------------------------------------------------------------*/ 
 #include <UpperMonitor.h>
 /* Private define ------------------------------------------------------------*/
-
+extern int flag;
 /* Private variables ---------------------------------------------------------*/
 /** 
 * @brief 千万不要改以下变量内容！！！！
@@ -99,18 +100,30 @@ void UpperMonitor_Sent_Choose(float * data)
           break;
       case 2: data[i]= AlphaTest.steer_Set[0].speed_direction;
           break;*/
-    case 0:data[i]=deg[0];
+    case 0:data[i]=Tigerarm_Shoulder.get_current_position();
     	break;
-    case 1:data[i]=deg[1];
+    case 1:data[i]=Shoulder_target_pos;
     	break;
-    case 2:data[i]=deg[2];
+	case 2:data[i]=shoulder_async_controller.getSteppingTarget();
+		break;
+	case 3:data[i]=shoulder_async_controller.getTarget();
+		break;
+    case 4:data[i]=Tigerarm_Elbow.get_current_position();
     	break;
-    case 3:data[i]=deg[3];
-    	break;
-    case 4:data[i]=deg[4];
-       	break;
-    case 5:data[i]=deg[5];
-        break;
+    case 5:data[i]=Elbow_target_pos;
+    	break;	
+	case 6:data[i]=elbow_async_controller.getSteppingTarget();
+		break;
+	case 7:data[i]=elbow_async_controller.getTarget();
+		break;
+	case 8:data[i]=elbow_async_controller.getActCur();
+		break;
+	case 9:data[i]=flag;
+		break;
+//    case 4:data[i]=deg[4];
+//       	break;
+//    case 5:data[i]=deg[5];
+//        break;
 
       default:break;
 	  /* 以上部分用于观察参数曲线 */
@@ -130,6 +143,10 @@ void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
     /* 以下部分用于修改参数内容 */
 //    case 0x00: variable =PARAMETER_Change_float(PARAMETER+1);
 //          break;
+	  case 0x00:Shoulder_target_pos=PARAMETER_Change_float(PARAMETER+1);
+		break;
+	  case 0x01:Elbow_target_pos=PARAMETER_Change_float(PARAMETER+1);
+		break;
      default:break;
 	/* 以上部分用于修改参数内容 */
   }
