@@ -23,9 +23,12 @@
 
 	extern float Shoulder_target_pos,Elbow_target_pos;
 	extern float Yaw_target_pos;//		deg
-		
+	
+	extern Asynchronous_Controller yaw_async_controller;
 	extern Asynchronous_Controller shoulder_async_controller;	//2nd joint
 	extern Asynchronous_Controller elbow_async_controller;		//3rd joint
+		
+	extern TaskHandle_t ServiceMotoCtrl_Handle;
 	
 	enum Curve_Type{
 		LINEAR = 0,	//直线	

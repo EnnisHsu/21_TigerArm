@@ -2,12 +2,13 @@
 
 Motor_GM6020 Tigerarm_Yaw(1);
 MotorCascadeCtrl<myPID,myPID> Tigerarm_Yaw_Ctrl(&Tigerarm_Yaw);
-AK80_V3 Tigerarm_Shoulder(0x0A,&hcan1),Tigerarm_Elbow(0x01,&hcan2);
+AK80_V3 Tigerarm_Shoulder(0x02,&hcan1),Tigerarm_Elbow(0x01,&hcan1);
 
+Asynchronous_Controller yaw_async_controller;
 Asynchronous_Controller shoulder_async_controller;	//2nd joint
 Asynchronous_Controller elbow_async_controller;		//3rd joint
 
-float Shoulder_kp=50.0f,Shoulder_kd=2.0f,Elbow_kp=16.0f,Elbow_kd=1.0f;
+float Shoulder_kp=50.0f,Shoulder_kd=2.0f,Elbow_kp=100.0f,Elbow_kd=1.0f;
 float spd=10.0f;
 float Shoulder_target_pos,Elbow_target_pos;//	rad
 float Yaw_target_pos;//		deg
@@ -35,7 +36,7 @@ void ArmMotorSetZeroConfig()
 void ArmYawInit()
 {
 	Tigerarm_Yaw_Ctrl.AnglePID.SetPIDParam(100.0f,0.0f,0.0f,1000.0f,30000.0f);
-	Tigerarm_Yaw_Ctrl.SpeedPID.SetPIDParam(80.0f,0.0f,0.0f,1000.0f,30000.0f);
+	Tigerarm_Yaw_Ctrl.SpeedPID.SetPIDParam(80.0f,0.0f,0.0f,1000.0f,20000.0f);
 	Yaw_target_pos=Tigerarm_Yaw.getAngle();
 	Motor_CAN_COB Motor_TxMsgx;
 	TickType_t xLastSetTime=xTaskGetTickCount();
@@ -53,10 +54,8 @@ void ArmYawInit()
 		vTaskDelay(1);
 	}
 	//ArmMotorSetZeroConfig();
-	Yaw_target_pos+=270.0f;
-	Tigerarm_Yaw_Ctrl.setTarget(Yaw_target_pos);
-	Yaw_Zero_Offset=Yaw_target_pos;
-	//uint8_t* YawInitMsg=0xFF;
+	
+	
 }
 
 void ArmShoulderInit()
@@ -98,12 +97,14 @@ void ArmElbowInit()
 
 void ArmMotorInit()
 {
+	vTaskDelay(2000);
 	Tigerarm_Shoulder.To_Into_Control();
-	//vTaskDelay(500);
+	vTaskDelay(500);
 	Tigerarm_Elbow.To_Into_Control();
 	//vTaskDelay(100);
-	elbow_async_controller.setSpeedConstrain(0.5f);
-	shoulder_async_controller.setSpeedConstrain(0.5f);
+	yaw_async_controller.setSpeedConstrain(75.0f);
+	elbow_async_controller.setSpeedConstrain(1.0f);
+	shoulder_async_controller.setSpeedConstrain(1.0f);
 	//ArmMotorSetZeroConfig();
 	
 	
@@ -112,7 +113,7 @@ void ArmMotorInit()
 	Tigerarm_Elbow.Out_Mixed_Control(Elbow_target_pos,spd,80.0f,1.0f);
 	Shoulder_target_pos=Tigerarm_Shoulder.get_current_position();
 	ArmShoulderInit();	//slow
-	flag=1;
+	
 	Shoulder_target_pos=Tigerarm_Shoulder.get_current_position();
 	Tigerarm_Shoulder.Out_Mixed_Control(Shoulder_target_pos, spd, Shoulder_kp, Shoulder_kd);
 	//Tigerarm_Elbow.Set_ZeroPosition();
@@ -120,7 +121,6 @@ void ArmMotorInit()
 	ArmElbowInit();		//slow
 	
 	ArmYawInit(); //yaw slowly set zero config to foward 
-	
 	//set 3rd joint
 	Elbow_target_pos=Tigerarm_Elbow.get_current_position()- 2.0f;
 	elbow_async_controller.resetStepTarget(Elbow_target_pos, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());	//asynchorously set target
@@ -130,48 +130,35 @@ void ArmMotorInit()
 		Tigerarm_Elbow.Out_Mixed_Control(elbow_async_controller.getSteppingTarget(),spd,30.0f,1.0f);
 		vTaskDelay(1);
 	}
-
+	flag=2;
 	
 	Elbow_Zero_Offset=Elbow_target_pos;
-	//vTaskDelay(500);
 	Shoulder_target_pos=Tigerarm_Shoulder.get_current_position()-2.25f;
 	shoulder_async_controller.resetStepTarget(Shoulder_target_pos, Tigerarm_Shoulder.get_current_position(), xTaskGetTickCount());
-	
-	//Elbow_target_pos=Tigerarm_Elbow.get_current_position()+2.25f;
-	//elbow_async_controller.resetStepTarget(Elbow_target_pos, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());
-	flag=2;
-	//elbow_async_controller.resetStepTarget(Tigerarm_Elbow.get_current_position()+2.25f, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());
 	while (fabs(Tigerarm_Shoulder.get_current_position()-Shoulder_target_pos)>0.1f) 
 	{
 		Tigerarm_Shoulder.Out_Mixed_Control(shoulder_async_controller.getSteppingTarget(), spd, Shoulder_kp, Shoulder_kd);
 		Elbow_target_pos=Elbow_Zero_Offset+2.25f-fabs(Shoulder_target_pos-shoulder_async_controller.getSteppingTarget());
-		Tigerarm_Elbow.Out_Mixed_Control(/*elbow_async_controller.getSteppingTarget()*/Elbow_target_pos,spd,30.0f,1.0f);
+		Tigerarm_Elbow.Out_Mixed_Control(Elbow_target_pos,spd,30.0f,1.0f);
 		vTaskDelay(1);
 	}
 	flag=3;
-	//Tigerarm_Shoulder.Out_Mixed_Control(Shoulder_target_pos, spd, Shoulder_kp, Shoulder_kd);
-	//Tigerarm_Elbow.Out_Mixed_Control(Elbow_target_pos,spd,80.0f,1.0f);
-	/*Elbow_target_pos-=1.0f;
-	elbow_async_controller.resetStepTarget(Elbow_target_pos, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());
-	while (fabs(Tigerarm_Elbow.get_current_position()-Elbow_target_pos)>0.1f) 
+	Motor_CAN_COB Motor_TxMsg;
+	Yaw_target_pos+=270.0f;
+	yaw_async_controller.resetStepTarget(Yaw_target_pos,Tigerarm_Yaw.getAngle(),xTaskGetTickCount());
+	Tigerarm_Yaw_Ctrl.setTarget(yaw_async_controller.getSteppingTarget());
+	while (fabs(Tigerarm_Yaw.getAngle()-Yaw_target_pos)>1.0f)
 	{
-		Tigerarm_Shoulder.Out_Mixed_Control(Shoulder_target_pos, spd, Shoulder_kp, Shoulder_kd);
-		//Elbow_target_pos=Elbow_Zero_Offset+2.25f-fabs(Shoulder_target_pos-shoulder_async_controller.getSteppingTarget());
-		Tigerarm_Elbow.Out_Mixed_Control(elbow_async_controller.getSteppingTarget(),spd,30.0f,1.0f);
+		Tigerarm_Yaw_Ctrl.setTarget(yaw_async_controller.getSteppingTarget());
+		Tigerarm_Yaw_Ctrl.Adjust();
+		MotorMsgPack(Motor_TxMsg, Tigerarm_Yaw);
+		xQueueSendFromISR(CAN1_TxPort,&Motor_TxMsg.Low,0);
 		vTaskDelay(1);
 	}
-	Elbow_target_pos+=1.0f;
-	elbow_async_controller.resetStepTarget(Elbow_target_pos, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());
-	while (fabs(Tigerarm_Elbow.get_current_position()-Elbow_target_pos)>0.1f) 
-	{
-		Tigerarm_Shoulder.Out_Mixed_Control(Shoulder_target_pos, spd, Shoulder_kp, Shoulder_kd);
-		//Elbow_target_pos=Elbow_Zero_Offset+2.25f-fabs(Shoulder_target_pos-shoulder_async_controller.getSteppingTarget());
-		Tigerarm_Elbow.Out_Mixed_Control(elbow_async_controller.getSteppingTarget(),spd,30.0f,1.0f);
-		vTaskDelay(1);
-	}*/
+	
 	Elbow_Zero_Offset=Elbow_target_pos;
 	Shoulder_Zero_Offset=Shoulder_target_pos;
-
+	Yaw_Zero_Offset=Yaw_target_pos;
 }
 
 void Task_LinearTargetCtrl(void *arg)
@@ -187,6 +174,7 @@ void Task_LinearTargetCtrl(void *arg)
 	  {
 		shoulder_async_controller.spinOnce(xTaskGetTickCount());
 		elbow_async_controller.spinOnce(xTaskGetTickCount());
+		yaw_async_controller.spinOnce(xTaskGetTickCount());
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
@@ -207,8 +195,7 @@ void Task_ArmMotoCtrl(void *arg)
 		Tigerarm_Shoulder.Out_Mixed_Control(shoulder_async_controller.getSteppingTarget(), spd, Shoulder_kp, Shoulder_kd);
 		if (fabs(Elbow_target_pos-elbow_async_controller.getTarget())>0.1f) elbow_async_controller.resetStepTarget(Elbow_target_pos, Tigerarm_Elbow.get_current_position(), xTaskGetTickCount());
 		Tigerarm_Elbow.Out_Mixed_Control(elbow_async_controller.getSteppingTarget(), spd, Elbow_kp, Elbow_kd);
-		flag=4;
-		Tigerarm_Yaw_Ctrl.setTarget(Yaw_target_pos);
+		Tigerarm_Yaw_Ctrl.setTarget(yaw_async_controller.getSteppingTarget());
 		Tigerarm_Yaw_Ctrl.Adjust();
 		MotorMsgPack(Motor_TxMsg, Tigerarm_Yaw);
 		xQueueSendFromISR(CAN1_TxPort,&Motor_TxMsg.Low,0);

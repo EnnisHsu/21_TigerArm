@@ -37,8 +37,9 @@ void Service_Communication_Init(void)
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-	CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType, 0x0A, 0xff);
+	CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType, 0x02, 0xff);
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_2|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
+	CAN_Filter_Mask_Config(&hcan1, CanFilter_3|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
@@ -142,9 +143,9 @@ void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-  if(CAN_RxCOB.ID!=0x0A && CAN_RxCOB.ID!=0x01 && RMMotor_QueueHandle != NULL)
+  if(CAN_RxCOB.ID!=0x02 && CAN_RxCOB.ID!=0x01 && RMMotor_QueueHandle != NULL)
     xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x0A && AK80Motor_QueueHandle != NULL)
+  if (CAN_RxCOB.ID==0x02 && AK80Motor_QueueHandle != NULL)
 	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
   if (CAN_RxCOB.ID==0x01 && AK80Motor_QueueHandle != NULL)
 	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
@@ -170,7 +171,7 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
 */
 static void Convert_Data(CAN_RxMessage* input, CAN_COB* output)
 {
-	if (input->header.StdId==0x00) output->ID=input->data[0];
+	if (input->header.StdId==0x00 || input->header.StdId==0x66) output->ID=input->data[0];
 	else output->ID = input->header.StdId;
   output->DLC = input->header.DLC;
   memcpy(output->Data, input->data, output->DLC);
@@ -248,6 +249,8 @@ uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
+	if (ReceiveLen==1 && Recv_Data[0]==0xf0)
+		vTaskResume(ServiceMotoCtrl_Handle);
   return 0;
 }
 

@@ -118,7 +118,13 @@ void UpperMonitor_Sent_Choose(float * data)
 		break;
 	case 8:data[i]=elbow_async_controller.getActCur();
 		break;
-	case 9:data[i]=flag;
+	case 9:data[i]=Tigerarm_Yaw.getAngle();
+		break;
+	case 10:data[i]=Yaw_target_pos;
+		break;
+	case 11:data[i]=yaw_async_controller.getSteppingTarget();
+		break;
+	case 12:data[i]=flag;
 		break;
 //    case 4:data[i]=deg[4];
 //       	break;
