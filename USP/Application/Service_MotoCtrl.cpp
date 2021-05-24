@@ -2,7 +2,7 @@
 
 Motor_GM6020 Tigerarm_Yaw(1);
 MotorCascadeCtrl<myPID,myPID> Tigerarm_Yaw_Ctrl(&Tigerarm_Yaw);
-AK80_V3 Tigerarm_Shoulder(0x02,&hcan1),Tigerarm_Elbow(0x01,&hcan1);
+AK80_V3 Tigerarm_Shoulder(0x02,&hcan2),Tigerarm_Elbow(0x01,&hcan2);
 
 Asynchronous_Controller yaw_async_controller;
 Asynchronous_Controller shoulder_async_controller;	//2nd joint
@@ -50,7 +50,7 @@ void ArmYawInit()
 		Tigerarm_Yaw_Ctrl.setTarget(Yaw_target_pos);
 		Tigerarm_Yaw_Ctrl.Adjust();
 		MotorMsgPack(Motor_TxMsgx, Tigerarm_Yaw);
-		xQueueSendFromISR(CAN1_TxPort,&Motor_TxMsgx.Low,0);
+		xQueueSendFromISR(CAN2_TxPort,&Motor_TxMsgx.Low,0);
 		vTaskDelay(1);
 	}
 	//ArmMotorSetZeroConfig();
@@ -152,7 +152,7 @@ void ArmMotorInit()
 		Tigerarm_Yaw_Ctrl.setTarget(yaw_async_controller.getSteppingTarget());
 		Tigerarm_Yaw_Ctrl.Adjust();
 		MotorMsgPack(Motor_TxMsg, Tigerarm_Yaw);
-		xQueueSendFromISR(CAN1_TxPort,&Motor_TxMsg.Low,0);
+		xQueueSendFromISR(CAN2_TxPort,&Motor_TxMsg.Low,0);
 		vTaskDelay(1);
 	}
 	
@@ -198,7 +198,7 @@ void Task_ArmMotoCtrl(void *arg)
 		Tigerarm_Yaw_Ctrl.setTarget(yaw_async_controller.getSteppingTarget());
 		Tigerarm_Yaw_Ctrl.Adjust();
 		MotorMsgPack(Motor_TxMsg, Tigerarm_Yaw);
-		xQueueSendFromISR(CAN1_TxPort,&Motor_TxMsg.Low,0);
+		xQueueSendFromISR(CAN2_TxPort,&Motor_TxMsg.Low,0);
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }

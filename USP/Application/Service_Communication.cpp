@@ -41,6 +41,7 @@ void Service_Communication_Init(void)
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_2|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_3|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
+	CAN_Filter_Mask_Config(&hcan2, CanFilter_17|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
@@ -156,10 +157,12 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
+  if(CAN_RxCOB.ID!=0x02 && CAN_RxCOB.ID!=0x01 && RMMotor_QueueHandle != NULL)
+    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
+  if (CAN_RxCOB.ID==0x02 && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
   if (CAN_RxCOB.ID==0x01 && AK80Motor_QueueHandle != NULL)
 	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x205 && RMMotor_QueueHandle != NULL)
-	  xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
 }
 
 /**
@@ -249,13 +252,6 @@ uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
-	if (ReceiveLen==1 && Recv_Data[0]==0xf0)
-		vTaskResume(ServiceMotoCtrl_Handle);
-  return 0;
-}
-
-uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
-{
 	static USART_COB Usart_RxCOB;
 	if (NUC_QueueHandle!=NULL)
 	{
@@ -264,6 +260,11 @@ uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 		Usart_RxCOB.address=Recv_Data;
 		xQueueSendFromISR(NUC_QueueHandle,&Usart_RxCOB,0);
 	}
+	return 0;
+}
+
+uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
+{
 
   return 0;
 }

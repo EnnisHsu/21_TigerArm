@@ -29,6 +29,8 @@
 	extern Asynchronous_Controller elbow_async_controller;		//3rd joint
 		
 	extern TaskHandle_t ServiceMotoCtrl_Handle;
+		
+	extern float Shoulder_Zero_Offset,Yaw_Zero_Offset,Elbow_Zero_Offset;
 	
 	enum Curve_Type{
 		LINEAR = 0,	//直线	
