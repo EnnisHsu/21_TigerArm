@@ -54,12 +54,18 @@ void System_Resource_Init(void)
 
   Uart_Init(&huart1, Uart1_Rx_Buff, USART1_RX_BUFFER_SIZE,RecHandle);
   Uart_Init(&huart2, Uart2_Rx_Buff, USART2_RX_BUFFER_SIZE,User_UART2_RxCpltCallback);
-  Uart_Init(&huart3, Uart3_Rx_Buff, USART3_RX_BUFFER_SIZE,NULL);
+  //Uart_Init(&huart3, Uart3_Rx_Buff, USART3_RX_BUFFER_SIZE,NULL);
   Uart_Init(&huart4, Uart4_Rx_Buff, USART4_RX_BUFFER_SIZE,User_UART4_RxCpltCallback);
   Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,NULL);
-  Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
+  //Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
   
   SPI_Init(&hspi1,GPIOA,GPIO_PIN_4,100);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_4);
   
 #ifdef USE_BMX055
   BMX055_Init(GPIOB, GPIO_PIN_10, GPIO_PIN_11, 10, 11, 0.002f);

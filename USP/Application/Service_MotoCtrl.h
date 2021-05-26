@@ -108,6 +108,7 @@
 	void Service_MotoCtrl_Init();
 		void ArmMotorInit();
 	void Task_ArmMotoCtrl(void *arg);
+	void Task_ServoCtrl(void *arg);
 
 #ifdef __cplusplus
 	}

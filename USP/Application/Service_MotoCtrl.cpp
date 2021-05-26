@@ -19,12 +19,14 @@ int flag=0;
 
 TaskHandle_t ServiceMotoCtrl_Handle;
 TaskHandle_t LinearTargetCtrl_Handle;
+TaskHandle_t ServoCtrl_Handle;
 
 void Service_MotoCtrl_Init()
 {
 	//ArmMotorInit();
 	xTaskCreate(Task_ArmMotoCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &ServiceMotoCtrl_Handle);
 	xTaskCreate(Task_LinearTargetCtrl,"LinearTargetCtrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&LinearTargetCtrl_Handle);
+	xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&ServoCtrl_Handle);
 }
 
 void ArmMotorSetZeroConfig()
@@ -109,7 +111,7 @@ void ArmMotorInit()
 	
 	
 	
-	Elbow_target_pos=Tigerarm_Elbow.get_current_position();
+	Elbow_target_pos=Tigerarm_Elbow.get_current_position(); 
 	Tigerarm_Elbow.Out_Mixed_Control(Elbow_target_pos,spd,80.0f,1.0f);
 	Shoulder_target_pos=Tigerarm_Shoulder.get_current_position();
 	ArmShoulderInit();	//slow
@@ -204,6 +206,22 @@ void Task_ArmMotoCtrl(void *arg)
 	  }
 }
 
+int16_t bulletBayDelay;
+float ang=0.0f;
+
+int16_t angle2pwm(float angle)
+{
+	return (int16_t)(1500+angle/90*1000);
+}
+
+void TestServo()
+{
+	if (bulletBayDelay==0) 
+		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_1,angle2pwm(ang));
+	bulletBayDelay++;
+	bulletBayDelay%=500;
+}
+
 void Task_ServoCtrl(void *arg)
 {
 	  /* Cache for Task */
@@ -215,7 +233,7 @@ void Task_ServoCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-
+		TestServo();
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
