@@ -36,14 +36,14 @@ void Service_Communication_Init(void)
 //  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x001,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
-	CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-	CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType, 0x02, 0xff);
-	CAN_Filter_Mask_Config(&hcan1, CanFilter_2|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
-	CAN_Filter_Mask_Config(&hcan1, CanFilter_3|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_17|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
+  CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
+  CAN_Filter_Mask_Config(&hcan1, CanFilter_1|CanFifo_0|Can_STDID|Can_DataType, 0x02, 0xff);
+  CAN_Filter_Mask_Config(&hcan1, CanFilter_2|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
+  CAN_Filter_Mask_Config(&hcan1, CanFilter_3|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
+  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
+  CAN_Filter_Mask_Config(&hcan2, CanFilter_17|CanFifo_0|Can_STDID|Can_DataType, 0x66, 0xff);
+  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
+  CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
  // xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
  // xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
@@ -111,27 +111,26 @@ void Task_CAN2Transmit(void *arg)
 
 void Task_CANReceive(void *arg)
 {
-	/* Cache for Task */
-	TickType_t xLastWakeTime=xTaskGetTickCount();
-	static CAN_COB RX_COB;
-	/* Pre-Load for task */
+  /* Cache for Task */
+  TickType_t xLastWakeTime=xTaskGetTickCount();
+  static CAN_COB RX_COB;
+  /* Pre-Load for task */
 
-	/* Infinite loop */
+  /* Infinite loop */
 
-	for(;;)
-	{
-		while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0)==pdPASS)
-		{
-			if (Tigerarm_Yaw.CheckID(RX_COB.ID)) Tigerarm_Yaw.update(RX_COB.Data);
-
-		}
-		while (xQueueReceive(AK80Motor_QueueHandle, &RX_COB, 0)==pdPASS)
-		{
-			if (Tigerarm_Shoulder.CheckID(RX_COB.ID)) Tigerarm_Shoulder.Update(RX_COB.Data);
-			if (Tigerarm_Elbow.CheckID(RX_COB.ID)) Tigerarm_Elbow.Update(RX_COB.Data);
-		}
-		vTaskDelayUntil(&xLastWakeTime, 1);
-	}
+  for(;;)
+  {
+    while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0) == pdPASS)
+    {
+      if (yaw_controller.joint_motor.CheckID(RX_COB.ID)) yaw_controller.joint_motor.update(RX_COB.Data);
+    }
+    while (xQueueReceive(AK80Motor_QueueHandle, &RX_COB, 0) == pdPASS)
+    {
+      //if (Tigerarm_Shoulder.CheckID(RX_COB.ID)) Tigerarm_Shoulder.Update(RX_COB.Data);
+      //if (Tigerarm_Elbow.CheckID(RX_COB.ID)) Tigerarm_Elbow.Update(RX_COB.Data);
+    }
+    vTaskDelayUntil(&xLastWakeTime, 1);
+  }
 }
 
 /**
@@ -144,12 +143,12 @@ void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-  if(CAN_RxCOB.ID!=0x02 && CAN_RxCOB.ID!=0x01 && RMMotor_QueueHandle != NULL)
-    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x02 && AK80Motor_QueueHandle != NULL)
-	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x01 && AK80Motor_QueueHandle != NULL)
-	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
+  if(CAN_RxCOB.ID != 0x02 && CAN_RxCOB.ID != 0x01 && RMMotor_QueueHandle != NULL)
+    xQueueSendFromISR(RMMotor_QueueHandle, &CAN_RxCOB, 0);
+  if (CAN_RxCOB.ID == 0x02 && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle, &CAN_RxCOB, 0);
+  if (CAN_RxCOB.ID == 0x01 && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle, &CAN_RxCOB, 0);
 }
 
 void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
@@ -157,12 +156,12 @@ void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-  if(CAN_RxCOB.ID!=0x02 && CAN_RxCOB.ID!=0x01 && RMMotor_QueueHandle != NULL)
-    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x02 && AK80Motor_QueueHandle != NULL)
-	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
-  if (CAN_RxCOB.ID==0x01 && AK80Motor_QueueHandle != NULL)
-	  xQueueSendFromISR(AK80Motor_QueueHandle,&CAN_RxCOB,0);
+  if(CAN_RxCOB.ID != 0x02 && CAN_RxCOB.ID != 0x01 && RMMotor_QueueHandle != NULL)
+    xQueueSendFromISR(RMMotor_QueueHandle, &CAN_RxCOB, 0);
+  if (CAN_RxCOB.ID == 0x02 && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle, &CAN_RxCOB, 0);
+  if (CAN_RxCOB.ID == 0x01 && AK80Motor_QueueHandle != NULL)
+	  xQueueSendFromISR(AK80Motor_QueueHandle, &CAN_RxCOB, 0);
 }
 
 /**

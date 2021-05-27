@@ -40,7 +40,7 @@ TaskHandle_t Robot_KeyboardCtrl;
 
 void Service_RobotCtrl_Init()
 {
-	xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
+	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	//xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 }
@@ -59,6 +59,7 @@ void Task_ArmSingleCtrl(void *arg)
 	  {
 		  if (xTaskNotifyWait(0x00000000, 0xffffffff, NULL, _xTicksToWait)==pdTRUE)
 		  {
+		    /*
 			  if (DR16.Get_LX_Norm()<-0.5f && abs(Tigerarm_Elbow.get_current_position()-Elbow_target_pos)<move_step)
 				  Elbow_target_pos-=move_step;
 			  if (DR16.Get_LX_Norm()>0.5f && abs(Tigerarm_Elbow.get_current_position()-Elbow_target_pos)<move_step)
@@ -71,6 +72,7 @@ void Task_ArmSingleCtrl(void *arg)
 				  Yaw_target_pos-=1.0f;
 			  if (DR16.Get_RX_Norm()>0.5f && abs(Tigerarm_Yaw.getAngle()-Yaw_target_pos)<1.0f)
 				  Yaw_target_pos+=1.0f;
+				 */
 		  }
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,5);
@@ -119,11 +121,12 @@ void Task_ROSCtrl(void *arg)
 	  {
 		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 		{
+		  /*
 			memcpy(deg,_buffer.address,_buffer.len);
 			Yaw_target_pos=Yaw_Zero_Offset + rad2deg(deg[0]);
 			Shoulder_target_pos=Shoulder_Zero_Offset + deg[1];
 			Elbow_target_pos=Elbow_Zero_Offset + deg[2];
-			
+			*/
 		}
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);

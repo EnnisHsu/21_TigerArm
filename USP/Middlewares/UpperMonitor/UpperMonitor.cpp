@@ -94,42 +94,12 @@ void UpperMonitor_Sent_Choose(float * data)
     switch(USART0_Sent_Choose_Data[i])
     {
       /* 以下部分用于观察参数曲线 */
-      /*case 0: data[i]= AlphaTest.steer_Set[0].str_angle;
-          break;
-      case 1: data[i]= AlphaTest.steer_Set[0].vect_angle;
-          break;
-      case 2: data[i]= AlphaTest.steer_Set[0].speed_direction;
-          break;*/
-    case 0:data[i]=Tigerarm_Shoulder.get_current_position();
-    	break;
-    case 1:data[i]=Shoulder_target_pos;
-    	break;
-	case 2:data[i]=shoulder_async_controller.getSteppingTarget();
-		break;
-	case 3:data[i]=shoulder_async_controller.getTarget();
-		break;
-    case 4:data[i]=Tigerarm_Elbow.get_current_position();
-    	break;
-    case 5:data[i]=Elbow_target_pos;
-    	break;	
-	case 6:data[i]=elbow_async_controller.getSteppingTarget();
-		break;
-	case 7:data[i]=elbow_async_controller.getTarget();
-		break;
-	case 8:data[i]=elbow_async_controller.getActCur();
-		break;
-	case 9:data[i]=Tigerarm_Yaw.getAngle();
-		break;
-	case 10:data[i]=Yaw_target_pos;
-		break;
-	case 11:data[i]=yaw_async_controller.getSteppingTarget();
-		break;
-	case 12:data[i]=flag;
-		break;
-//    case 4:data[i]=deg[4];
-//       	break;
-//    case 5:data[i]=deg[5];
-//        break;
+      case 0:data[i] = yaw_controller.joint_motor.getAngle();
+        break;
+      case 1:data[i] = yaw_controller.async_controller.getTarget();
+        break;
+      case 2:data[i] = yaw_controller.async_controller.getSteppingTarget();
+        break;
 
       default:break;
 	  /* 以上部分用于观察参数曲线 */
@@ -144,16 +114,16 @@ void UpperMonitor_Sent_Choose(float * data)
 */
 void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 {
+  float float_param;
   switch(PARAMETER[0])
   {
     /* 以下部分用于修改参数内容 */
-//    case 0x00: variable =PARAMETER_Change_float(PARAMETER+1);
-//          break;
-	  case 0x00:Shoulder_target_pos=PARAMETER_Change_float(PARAMETER+1);
-		break;
-	  case 0x01:Elbow_target_pos=PARAMETER_Change_float(PARAMETER+1);
-		break;
-     default:break;
+    case 0x00:
+	    float_param = PARAMETER_Change_float(PARAMETER+1);
+	    yaw_controller.setStepTarget(float_param);
+	    break;
+	  default:
+	    break;
 	/* 以上部分用于修改参数内容 */
   }
 }
