@@ -16,7 +16,7 @@
 
 void Service_MotoCtrl_Init();
 void Task_ArmMotorInit(void *arg);
-void Task_ArmMotoCtrl(void *arg);
+void Task_ArmMotorCtrl(void *arg);
 //void Task_ServoCtrl(void *arg);
 
 class Asynchronous_Controller;
@@ -114,7 +114,11 @@ public:
   }
   void init();
   void slowlyMoveToLimit();
-  virtual float getCurrentAngle();
+  virtual float getCurrentAngle()
+  {
+    /* Please rewrite on your child class */
+    return 0;
+  }
   void setCurrentAsZero();
   void setStepTarget(float target)
   {
