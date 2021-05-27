@@ -86,7 +86,6 @@ extern DR16_Classdef DR16;
 extern W25Qx_Classdef Flash;
 extern CLogger SysLog;
 extern LogFilter_t Filter_List[2];
-extern CAnalyzer Analyzer;
 
 float rad2deg(float x);
 float deg2rad(float x);

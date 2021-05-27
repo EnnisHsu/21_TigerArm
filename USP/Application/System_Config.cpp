@@ -38,7 +38,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 
-/*Founctions------------------------------------------------------------------*/
+/*Functions------------------------------------------------------------------*/
 /**
 * @brief Load drivers ,modules, and data resources for tasks.
 * @note  Edit this function to add Init-functions and configurations.
@@ -92,7 +92,7 @@ void System_Resource_Init(void)
   /* Modules Init ---------------------*/
   SEGGER_SYSVIEW_Conf();
   myPIDTimer::getMicroTick_regist(Get_SystemTimer);
-  Analyzer.getMicroTick_regist(Get_SystemTimer);
+
   SysLog.getMilliTick_regist(HAL_GetTick);
   SysLog.filter_conf(DEFAULT_TAG, LOG_LVL_ALL,Uart1_Transmit);
   SysLog.filter_conf("Test Tag", LOG_LVL_ALL, Uart1_Transmit,&Filter_List[0]);
