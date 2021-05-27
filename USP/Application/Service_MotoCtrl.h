@@ -179,8 +179,102 @@ private:
   MotorCascadeCtrl<myPID, myPID> joint_ctrl;
 };
 
+class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
+{
+	public:
+		Godzilla_Arm_Controller(int id, CAN_HandleTypeDef* hcan, float speed) : Godzilla_Joint_Controller(id, hcan, speed){}
+		void init()
+		{
+			this->joint_motor.To_Into_Control();
+		}			
+		void slowlyMoveToLimit()
+		{
+			float slowly_moving_target = this->joint_motor.get_current_angle();
+			auto xLastSetTime = xTaskGetTickCount();
+			while (xTaskGetTickCount() - xLastSetTime < 500)
+			{
+				/* slowly change target */
+				if (fabs(slowly_moving_target - this->joint_motor.get_current_angle()) < 0.05f)
+				{
+					xLastSetTime = xTaskGetTickCount();
+					slowly_moving_target -= 0.05f;
+				}
+
+				/* Send Control to Motor */
+				//this->joint_motor.Out_Mixed_Control(slowly_moving_target,10.0f,mot_kp,mot_kd);
+				vTaskDelay(1);
+			}			
+		}
+		/*void ResetPIDparma(float kp,float kd)
+		{
+			mot_kp=kp;
+			mot_kd=kd;
+		}*/
+		float getCurrentAngle()
+		{
+			return this->joint_motor.get_current_angle();
+		}
+		void spinOnce()
+		{
+			this->async_controller.spinOnce(xTaskGetTickCount());
+			//this->joint_motor.Out_Mixed_Control(this->async_controller.getSteppingTarget(),10.0f,mot_kp,mot_kd);
+		}
+		
+	private:
+		float mot_kp=1.0f,mot_kd=1.0f;
+};
+
+class Godzilla_Elbow_Controller : public Godzilla_Joint_Controller<AK80_V3>
+{
+	public:
+		Godzilla_Elbow_Controller(int id, CAN_HandleTypeDef* hcan, float speed) : Godzilla_Joint_Controller(id, hcan, speed){}
+		void init()
+		{
+			this->joint_motor.To_Into_Control();
+		}			
+		void slowlyMoveToLimit()
+		{
+			float slowly_moving_target = this->joint_motor.get_current_angle();
+			auto xLastSetTime = xTaskGetTickCount();
+			while (xTaskGetTickCount() - xLastSetTime < 500)
+			{
+				/* slowly change target */
+				if (fabs(slowly_moving_target - this->joint_motor.get_current_angle()) < 0.05f)
+				{
+					xLastSetTime = xTaskGetTickCount();
+					slowly_moving_target -= 0.05f;
+				}
+
+				/* Send Control to Motor */
+				//this->joint_motor.Out_Mixed_Control(slowly_moving_target,10.0f,mot_kp,mot_kd);
+				vTaskDelay(1);
+			}			
+		}
+		/*void ResetPIDparma(float kp,float kd)
+		{
+			mot_kp=kp;
+			mot_kd=kd;
+		}*/
+		float getCurrentAngle()
+		{
+			return this->joint_motor.get_current_angle();
+		}
+		void spinOnce()
+		{
+			this->async_controller.spinOnce(xTaskGetTickCount());
+			//this->joint_motor.Out_Mixed_Control(this->async_controller.getSteppingTarget(),10.0f,mot_kp,mot_kd);
+		}
+		
+	private:
+		float mot_kp=1.0f,mot_kd=1.0f;
+};
+
 
 extern Godzilla_Yaw_Controller yaw_controller;
+extern Godzilla_Arm_Controller arm_controller;
+extern Godzilla_Elbow_Controller elbow_controller;
+
+
 
 extern TaskHandle_t ServiceMotoCtrl_Handle;
 

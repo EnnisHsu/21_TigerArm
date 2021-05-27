@@ -122,7 +122,7 @@ void Task_CANReceive(void *arg)
   {
     while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0) == pdPASS)
     {
-      if (yaw_controller.joint_motor.CheckID(RX_COB.ID)) yaw_controller.joint_motor.update(RX_COB.Data);
+      //if (yaw_controller.joint_motor.CheckID(RX_COB.ID)) yaw_controller.joint_motor.update(RX_COB.Data);
     }
     while (xQueueReceive(AK80Motor_QueueHandle, &RX_COB, 0) == pdPASS)
     {
