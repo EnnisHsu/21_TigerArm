@@ -45,8 +45,8 @@ void Service_Communication_Init(void)
   CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
   CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
- // xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
- // xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
+  xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
+  xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
   xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
 }
 
@@ -122,10 +122,12 @@ void Task_CANReceive(void *arg)
   {
     while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0) == pdPASS)
     {
-      //if (yaw_controller.joint_motor.CheckID(RX_COB.ID)) yaw_controller.joint_motor.update(RX_COB.Data);
+      if (yaw_controller.joint_motor.CheckID(RX_COB.ID)) yaw_controller.joint_motor.update(RX_COB.Data);
     }
     while (xQueueReceive(AK80Motor_QueueHandle, &RX_COB, 0) == pdPASS)
     {
+			if (arm_controller.joint_motor.CheckID(RX_COB.ID)) arm_controller.joint_motor.Update(RX_COB.Data);
+			if (elbow_controller.joint_motor.CheckID(RX_COB.ID)) elbow_controller.joint_motor.Update(RX_COB.Data);
       //if (Tigerarm_Shoulder.CheckID(RX_COB.ID)) Tigerarm_Shoulder.Update(RX_COB.Data);
       //if (Tigerarm_Elbow.CheckID(RX_COB.ID)) Tigerarm_Elbow.Update(RX_COB.Data);
     }

@@ -60,12 +60,12 @@ void System_Resource_Init(void)
   //Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
   
   SPI_Init(&hspi1,GPIOA,GPIO_PIN_4,100);
-	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+	/*HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_4);
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_4);*/
   
 #ifdef USE_BMX055
   BMX055_Init(GPIOB, GPIO_PIN_10, GPIO_PIN_11, 10, 11, 0.002f);
