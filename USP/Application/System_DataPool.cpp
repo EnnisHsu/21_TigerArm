@@ -39,6 +39,8 @@ W25Qx_Classdef Flash(&hspi1,W25Q16);
 CLogger SysLog;
 LogFilter_t Filter_List[2];
 
+int error_flag=0;
+
 /* Function ------------------------------------------------------------------*/
 float rad2deg(float x)
 {

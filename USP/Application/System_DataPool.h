@@ -64,6 +64,8 @@ extern QueueHandle_t  IMU_QueueHandle;
 extern QueueHandle_t  NUC_QueueHandle;
 extern QueueHandle_t  Referee_QueueHandle;
 
+extern int error_flag;
+
 /* Semaphores */
 /* Mutexes */
 /* Notifications */
