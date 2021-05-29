@@ -3,22 +3,21 @@
 Godzilla_Yaw_Controller yaw_controller(1, 135.0f);
 Godzilla_Arm_Controller arm_controller(0x02,&hcan2,1.0f);
 Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,1.0f);
+Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2),wristpitch_controller(&htim3,TIM_CHANNEL_1),wristyaw_controller(&htim3,TIM_CHANNEL_2);
 
 float arm_kp=75.0f,arm_kd=2.0f,elbow_kp=100.0f,elbow_kd=1.0f;
 float Motor_Max_Speed=10.0f;
 
-float Wrist_Roll_pos, Wrist_Pitch_pos, Wrist_Yaw_pos;	//deg
-
 TaskHandle_t ServiceMotoCtrl_Handle;
-TaskHandle_t LinearTargetCtrl_Handle;
+TaskHandle_t MotorInit_Handle;
 TaskHandle_t ServoCtrl_Handle;
 
 void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &ServiceMotoCtrl_Handle);
-  xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &LinearTargetCtrl_Handle);
-  //xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&ServoCtrl_Handle);
+  xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
+  xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&ServoCtrl_Handle);
 }
 
 void Task_ArmMotorInit(void *arg)
@@ -47,21 +46,43 @@ void Task_ArmMotorInit(void *arg)
 	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
 	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
 	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+270.0f);
-	/*vTaskDelay(2000);*/
+	vTaskDelay(2000);
+	yaw_controller.setCurrentAsZero();
+	elbow_controller.setCurrentAsZero();
+	arm_controller.setCurrentAsZero();
+	vTaskDelete(MotorInit_Handle);
 	for (;;)
 	{
 		vTaskDelay(1);
 	}
 }
 
-int bulletBayDelay,ang=2000;
 
-void TestServo()
+
+
+
+
+
+void Task_ServoCtrl(void *arg)
 {
-	if (bulletBayDelay==0) 
-		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_1,ang);
-	bulletBayDelay++;
-	bulletBayDelay%=500;
+  /* Cache for Task */
+	
+  /* Pre-Load for task */
+
+  /* Infinite loop */
+  TickType_t xLastWakeTime_t;
+  xLastWakeTime_t = xTaskGetTickCount();
+
+  for(;;)
+  {
+    wristroll_controller.Output();
+		vTaskDelayUntil(&xLastWakeTime_t, 20);
+		wristpitch_controller.Output();
+		vTaskDelayUntil(&xLastWakeTime_t, 20);
+		wristyaw_controller.Output();
+		vTaskDelayUntil(&xLastWakeTime_t, 20);
+		
+  }	
 }
 
 void Task_ArmMotorCtrl(void *arg)

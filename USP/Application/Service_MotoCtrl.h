@@ -17,7 +17,7 @@
 void Service_MotoCtrl_Init();
 void Task_ArmMotorInit(void *arg);
 void Task_ArmMotorCtrl(void *arg);
-//void Task_ServoCtrl(void *arg);
+void Task_ServoCtrl(void *arg);
 
 class Asynchronous_Controller;
 	
@@ -121,16 +121,53 @@ public:
     /* Please rewrite on your child class */
     return 0;
   }
-  void setCurrentAsZero();
+  void setCurrentAsZero()
+	{
+		this->zero_offset=this->getCurrentAngle();
+	}
   void setStepTarget(float target)
   {
     this->async_controller.resetStepTarget(target, this->getCurrentAngle());
   }
+	float getZeroOffset(){return this->zero_offset;}
   void spinOnce();
   motor joint_motor;
   Asynchronous_Controller async_controller;
 protected:
   float zero_offset;
+};
+
+class Godzilla_Servo_Controller{
+	public:
+		Godzilla_Servo_Controller(TIM_HandleTypeDef* HTIM,uint8_t TIM_CHANNEL)
+		{
+			this->htim=HTIM;
+			this->tim_channel=TIM_CHANNEL;
+		}
+		
+		void SetTargetAngle(float target)
+		{
+			this->o_target=target;
+		}
+		
+		void Output()
+		{
+			__HAL_TIM_SetCompare(htim,tim_channel,deg2pwm(this->o_target));
+		}
+		
+		void ResetOutputConfig(float c_min,float c_max,float c_offset)
+		{
+			this->o_max=c_max;
+			this->o_min=c_min;
+			this->zero_offset=c_offset;
+		}
+		
+	private:
+		uint16_t deg2pwm(float ang){return (uint16_t)((1000.0f/90.0f)*ang+1500.0f);}
+		TIM_HandleTypeDef* htim;
+		uint32_t tim_channel;
+		float o_target;
+		float o_max=2500.0f,o_min=500.0f,zero_offset=1500.0f;
 };
 
 class Godzilla_Yaw_Controller : public Godzilla_Joint_Controller<Motor_GM6020>
@@ -286,9 +323,12 @@ class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
 
 
 
+
+
 extern Godzilla_Yaw_Controller yaw_controller;
 extern Godzilla_Arm_Controller arm_controller;
 extern Godzilla_Elbow_Controller elbow_controller;
+extern Godzilla_Servo_Controller wristroll_controller,wristpitch_controller,wristyaw_controller;
 
 
 

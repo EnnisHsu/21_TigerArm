@@ -121,12 +121,14 @@ void Task_ROSCtrl(void *arg)
 	  {
 		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 		{
-		  /*
+		  
 			memcpy(deg,_buffer.address,_buffer.len);
-			Yaw_target_pos=Yaw_Zero_Offset + rad2deg(deg[0]);
-			Shoulder_target_pos=Shoulder_Zero_Offset + deg[1];
-			Elbow_target_pos=Elbow_Zero_Offset + deg[2];
-			*/
+			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+rad2deg(deg[0]));
+			arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]);
+			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]);
+			wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
+			wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
+			wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
 		}
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
