@@ -43,6 +43,7 @@
 //#include "Service_SwerveChassis.h"
 #include "Service_Communication.h"
 #include "Service_MotoCtrl.h"
+#include "Service_RobotCtrl.h"
 //extern float debug_term1,debug_term2;
 
 /***********************上位机调参使用***********************/
@@ -94,12 +95,26 @@ void UpperMonitor_Sent_Choose(float * data)
     switch(USART0_Sent_Choose_Data[i])
     {
       /* 以下部分用于观察参数曲线 */
-      case 0:data[i] = yaw_controller.joint_motor.getAngle();
+      /*case 0:data[i] = yaw_controller.joint_motor.getAngle();
         break;
       case 1:data[i] = yaw_controller.async_controller.getTarget();
         break;
       case 2:data[i] = yaw_controller.async_controller.getSteppingTarget();
-        break;
+        break;*/
+			case 0:data[i] = yaw_controller.async_controller.getTarget();
+				break;
+			case 1:data[i] = yaw_controller.async_controller.getSteppingTarget();
+				break;
+			case 2:data[i] = yaw_controller.getCurrentAngle();
+				break;
+			case 3:data[i] = arm_controller.async_controller.getTarget();
+				break;
+			case 4:data[i] = arm_controller.async_controller.getSteppingTarget();
+				break;
+			case 5:data[i] = elbow_controller.async_controller.getTarget();
+				break;
+			case 6:data[i] = elbow_controller.async_controller.getSteppingTarget();
+				break;
 
       default:break;
 	  /* 以上部分用于观察参数曲线 */

@@ -36,13 +36,13 @@ float deg[6];
 TaskHandle_t Robot_ROSCtrl;
 TaskHandle_t Robot_ArmSingleCtrl;
 TaskHandle_t Robot_DR16Ctrl;
-TaskHandle_t Robot_KeyboardCtrl;
+TaskHandle_t Robot_KeyboardCtrl; 
 
 void Service_RobotCtrl_Init()
 {
 	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
-	//xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
+	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -123,7 +123,7 @@ void Task_ROSCtrl(void *arg)
 		{
 		  
 			memcpy(deg,_buffer.address,_buffer.len);
-			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+rad2deg(deg[0]));
+			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]);
 			arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]);
 			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]);
 			wristroll_controller.SetTargetAngle(rad2deg(deg[3]));

@@ -43,9 +43,9 @@ public:
     uint32_t interval_time = time_stamp - last_time_stamp;			//时间间隔
     float target_delta = getSpeedWithDirection() * float(interval_time) / 1000.0f;//计算目标值
     float stepping_target_temp;
-    if (fabs(stepping_target)>=fabs(set_target) && fabs(stepping_target+target_delta)<=fabs(set_target))
+    if (stepping_target>set_target && stepping_target+target_delta<set_target)
       stepping_target_temp=set_target;
-    else if (fabs(stepping_target)<=fabs(set_target) && fabs(stepping_target+target_delta)>=fabs(set_target))
+    else if (stepping_target<set_target && stepping_target+target_delta>set_target)
       stepping_target_temp=set_target;
     else stepping_target_temp=stepping_target+target_delta;
     //stepping_target = fabs(stepping_target + target_delta) >= fabs(set_target) ? set_target : stepping_target + target_delta;
@@ -57,7 +57,6 @@ public:
   void resetStepTarget(float target, float current)
   {
     setTarget(target);
-    setCurrent(current);
     last_time_stamp = xTaskGetTickCount();
   }
   void setSpeedConstrain(float val)	//设置最大速度 单位rad/s
@@ -81,22 +80,23 @@ public:
   {
     return actual_current;
   }
+	void setCurrent(float val)
+  {
+    actual_current = val;
+    stepping_target = val;
+  }
 private:
   float getSpeedWithDirection()
   {
-		if (fabs(set_target-actual_current)>1e-5)
-			return max_speed * (set_target - actual_current) / fabs(set_target - actual_current);
+		if (fabs(set_target-stepping_target)>1e-5)
+			return max_speed * (set_target - stepping_target) / fabs(set_target - stepping_target);
 		else return 0.0f;
   }
   void setTarget(float val)
   {
     set_target = val;
   }
-  void setCurrent(float val)
-  {
-    actual_current = val;
-    stepping_target = val;
-  }
+
   float actual_current;	//当前实际值
   float set_target;		//设置的目标值
   float stepping_target;	//计算的目标值
@@ -134,7 +134,7 @@ public:
   motor joint_motor;
   Asynchronous_Controller async_controller;
 protected:
-  float zero_offset;
+  float zero_offset=0.0f;
 };
 
 class Godzilla_Servo_Controller{
@@ -176,7 +176,7 @@ public:
   Godzilla_Yaw_Controller(uint8_t id, float speed) : Godzilla_Joint_Controller{id, speed}, joint_ctrl(&joint_motor){}
   void init(PID_Param_Typedef spd_pid_param, PID_Param_Typedef ang_pid_param)
   {
-    this->async_controller.setSpeedConstrain(135.0f);
+    //this->async_controller.setSpeedConstrain(3.14f);
 		this->setStepTarget(this->getCurrentAngle());
     this->joint_ctrl.SpeedPID.SetPIDParam(spd_pid_param.kp, spd_pid_param.ki, spd_pid_param.kd, \
                                           spd_pid_param.i_term_max, spd_pid_param.o_max);
@@ -185,19 +185,19 @@ public:
   }
   void slowlyMoveToLimit()
   {
-    float slowly_moving_target = this->joint_motor.getAngle();
+    float slowly_moving_target = deg2rad(this->joint_motor.getAngle());
     auto xLastSetTime = xTaskGetTickCount();
     while (xTaskGetTickCount() - xLastSetTime < 500)
     {
       /* slowly change target */
-      if (fabs(slowly_moving_target - this->joint_motor.getAngle()) < 1.0f)
+      if (fabs(slowly_moving_target - this->getCurrentAngle()) < 0.05f)
       {
         xLastSetTime = xTaskGetTickCount();
-        slowly_moving_target -= 1.0f;
+        slowly_moving_target -= 0.05f;
       }
 
       /* Adjust PID */
-      joint_ctrl.setTarget(slowly_moving_target);
+      joint_ctrl.setTarget(rad2deg(slowly_moving_target));
       joint_ctrl.Adjust();
 			Motor_CAN_COB Motor_TxMsg;
       MotorMsgPack(Motor_TxMsg, this->joint_motor);
@@ -207,12 +207,12 @@ public:
   }
   float getCurrentAngle()
   {
-    return this->joint_motor.getAngle();
+    return deg2rad(this->joint_motor.getAngle());
   }
   void spinOnce()
   {
     this->async_controller.spinOnce(xTaskGetTickCount());
-    this->joint_ctrl.setTarget(this->async_controller.getSteppingTarget());
+    this->joint_ctrl.setTarget(rad2deg(this->async_controller.getSteppingTarget()));
     this->joint_ctrl.Adjust();
   }
 private:
