@@ -19,6 +19,7 @@ extern "C"
 #endif
 	
 extern float deg[6];
+extern TaskHandle_t Robot_ROSCtrl;
 
 void Service_RobotCtrl_Init();
 void Task_ArmSingleCtrl(void *arg);

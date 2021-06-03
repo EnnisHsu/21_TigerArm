@@ -109,6 +109,7 @@ void Task_ArmSingleCtrl(void *arg)
 
 void Task_ROSCtrl(void *arg)
 {
+	vTaskSuspend(Robot_ROSCtrl);
 	  /* Cache for Task */
 	USART_COB _buffer;
 	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
