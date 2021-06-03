@@ -43,9 +43,9 @@ public:
     uint32_t interval_time = time_stamp - last_time_stamp;			//时间间隔
     float target_delta = getSpeedWithDirection() * float(interval_time) / 1000.0f;//计算目标值
     float stepping_target_temp;
-    if (stepping_target>set_target && stepping_target+target_delta<set_target)
+    if (stepping_target>=set_target && stepping_target+target_delta<=set_target)
       stepping_target_temp=set_target;
-    else if (stepping_target<set_target && stepping_target+target_delta>set_target)
+    else if (stepping_target<=set_target && stepping_target+target_delta>=set_target)
       stepping_target_temp=set_target;
     else stepping_target_temp=stepping_target+target_delta;
     //stepping_target = fabs(stepping_target + target_delta) >= fabs(set_target) ? set_target : stepping_target + target_delta;
@@ -57,6 +57,7 @@ public:
   void resetStepTarget(float target, float current)
   {
     setTarget(target);
+		this->actual_current=current;
     last_time_stamp = xTaskGetTickCount();
   }
   void setSpeedConstrain(float val)	//设置最大速度 单位rad/s
@@ -108,14 +109,22 @@ private:
 template <class motor>
 class Godzilla_Joint_Controller{
 public:
-  Godzilla_Joint_Controller(int id, float speed) : joint_motor(id){
+  Godzilla_Joint_Controller(int id, float speed, float i_min,float i_max,float reduction) : joint_motor(id){
     this->async_controller.setSpeedConstrain(speed);
+		this->o_min=i_min;
+		this->o_max=i_max;
+		this->reduction_ratio=reduction;
   }
-  Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed) : joint_motor(id, hcan){
+  Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : joint_motor(id, hcan){
     this->async_controller.setSpeedConstrain(speed);
+		this->o_min=i_min;
+		this->o_max=i_max;
+		this->reduction_ratio=reduction;
   }
   void init();
   void slowlyMoveToLimit();
+	float getReductionRatio() {return this->reduction_ratio;}
+	float getZeroOffset(){return this->zero_offset;}
   virtual float getCurrentAngle()
   {
     /* Please rewrite on your child class */
@@ -125,16 +134,23 @@ public:
 	{
 		this->zero_offset=this->getCurrentAngle();
 	}
+	void setCurrentAsTarget()
+	{
+		//float curAng=this->getCurrentAngle();
+		this->async_controller.resetStepTarget(this->getCurrentAngle(),this->getCurrentAngle());
+	}
   void setStepTarget(float target)
   {
-    this->async_controller.resetStepTarget(target, this->getCurrentAngle());
+		if (target>=this->zero_offset+this->o_min && target<=this->zero_offset+this->o_max)
+			this->async_controller.resetStepTarget(target, this->getCurrentAngle());
+		else return;
   }
-	float getZeroOffset(){return this->zero_offset;}
   void spinOnce();
   motor joint_motor;
   Asynchronous_Controller async_controller;
 protected:
-  float zero_offset=0.0f;
+  float zero_offset,o_min,o_max;
+	float reduction_ratio;
 };
 
 class Godzilla_Servo_Controller{
@@ -173,7 +189,7 @@ class Godzilla_Servo_Controller{
 class Godzilla_Yaw_Controller : public Godzilla_Joint_Controller<Motor_GM6020>
 {
 public:
-  Godzilla_Yaw_Controller(uint8_t id, float speed) : Godzilla_Joint_Controller{id, speed}, joint_ctrl(&joint_motor){}
+  Godzilla_Yaw_Controller(uint8_t id, float speed, float i_min,float i_max,float reduction) : Godzilla_Joint_Controller{id, speed, i_min,i_max,reduction}, joint_ctrl(&joint_motor){}
   void init(PID_Param_Typedef spd_pid_param, PID_Param_Typedef ang_pid_param)
   {
     //this->async_controller.setSpeedConstrain(3.14f);
@@ -185,7 +201,7 @@ public:
   }
   void slowlyMoveToLimit()
   {
-    float slowly_moving_target = deg2rad(this->joint_motor.getAngle());
+    float slowly_moving_target = this->getCurrentAngle();
     auto xLastSetTime = xTaskGetTickCount();
     while (xTaskGetTickCount() - xLastSetTime < 500)
     {
@@ -215,14 +231,15 @@ public:
     this->joint_ctrl.setTarget(rad2deg(this->async_controller.getSteppingTarget()));
     this->joint_ctrl.Adjust();
   }
+	MotorCascadeCtrl<myPID, myPID> joint_ctrl;
 private:
-  MotorCascadeCtrl<myPID, myPID> joint_ctrl;
+  
 };
 
 class Godzilla_Elbow_Controller : public Godzilla_Joint_Controller<AK80_V3>
 {
 	public:
-		Godzilla_Elbow_Controller(int id, CAN_HandleTypeDef* hcan, float speed) : Godzilla_Joint_Controller(id, hcan, speed){}
+		Godzilla_Elbow_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : Godzilla_Joint_Controller(id, hcan, speed, i_min,i_max,reduction){}
 		void init()
 		{
 			this->joint_motor.To_Into_Control();
@@ -262,6 +279,7 @@ class Godzilla_Elbow_Controller : public Godzilla_Joint_Controller<AK80_V3>
 			this->async_controller.spinOnce(xTaskGetTickCount());
 			//this->joint_motor.Out_Mixed_Control(this->async_controller.getSteppingTarget(),10.0f,mot_kp,mot_kd);
 		}
+	float Output;
 		
 	private:
 		float mot_kp=30.0f,mot_kd=1.0f;
@@ -270,7 +288,7 @@ class Godzilla_Elbow_Controller : public Godzilla_Joint_Controller<AK80_V3>
 class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
 {
 	public:
-		Godzilla_Arm_Controller(int id, CAN_HandleTypeDef* hcan, float speed) : Godzilla_Joint_Controller(id, hcan, speed){}
+		Godzilla_Arm_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : Godzilla_Joint_Controller(id, hcan, speed, i_min,i_max,reduction){}
 		void init(Godzilla_Elbow_Controller* elbow_controller)
 		{
 			this->joint_motor.To_Into_Control();

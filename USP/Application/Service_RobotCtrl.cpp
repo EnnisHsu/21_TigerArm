@@ -121,11 +121,13 @@ void Task_ROSCtrl(void *arg)
 	  {
 		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 		{
-		  
+		  yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+			elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
+			arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
 			memcpy(deg,_buffer.address,_buffer.len);
-			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]);
-			arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]);
-			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]);
+			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
+			arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
+			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
 			wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
 			wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
 			wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));

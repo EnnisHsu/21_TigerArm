@@ -107,13 +107,29 @@ void UpperMonitor_Sent_Choose(float * data)
 				break;
 			case 2:data[i] = yaw_controller.getCurrentAngle();
 				break;
-			case 3:data[i] = arm_controller.async_controller.getTarget();
+			case 3:data[i] = deg[0];
 				break;
-			case 4:data[i] = arm_controller.async_controller.getSteppingTarget();
+			case 4:data[i] = yaw_controller.getZeroOffset();
 				break;
-			case 5:data[i] = elbow_controller.async_controller.getTarget();
+			case 5:data[i] = arm_controller.async_controller.getTarget();
 				break;
-			case 6:data[i] = elbow_controller.async_controller.getSteppingTarget();
+			case 6:data[i] = arm_controller.async_controller.getSteppingTarget();
+				break;
+			case 7:data[i] = arm_controller.getCurrentAngle();
+				break;
+			case 8:data[i] = deg[1];
+				break;
+			case 9:data[i] = arm_controller.getZeroOffset();
+				break;
+			case 10:data[i] = elbow_controller.Output;
+				break;
+			case 11:data[i] = elbow_controller.async_controller.getSteppingTarget();
+				break;
+			case 12:data[i] = elbow_controller.getCurrentAngle();
+				break;
+			case 13:data[i] = deg[2];
+				break;
+			case 14:data[i] = elbow_controller.getZeroOffset();
 				break;
 
       default:break;
@@ -130,13 +146,34 @@ void UpperMonitor_Sent_Choose(float * data)
 void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 {
   float float_param;
+	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
+	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
   switch(PARAMETER[0])
   {
     /* 以下部分用于修改参数内容 */
     case 0x00:
 	    float_param = PARAMETER_Change_float(PARAMETER+1);
-	    yaw_controller.setStepTarget(float_param);
+	    yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+yaw_controller.getReductionRatio()*float_param);
 	    break;
+		case 0x01:
+			float_param = PARAMETER_Change_float(PARAMETER+1);
+			arm_controller.setStepTarget(arm_controller.getZeroOffset()+arm_controller.getReductionRatio()*float_param);
+			break;
+		case 0x02:
+			
+			float_param = PARAMETER_Change_float(PARAMETER+1);
+			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+elbow_controller.getReductionRatio()*float_param);
+			break;
+		case 0x03:
+			yaw_controller.joint_ctrl.AnglePID.Kp= PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x04:
+			yaw_controller.joint_ctrl.AnglePID.Ki= PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x05:
+			yaw_controller.joint_ctrl.SpeedPID.Kp= PARAMETER_Change_float(PARAMETER+1);
+			break;
 	  default:
 	    break;
 	/* 以上部分用于修改参数内容 */
