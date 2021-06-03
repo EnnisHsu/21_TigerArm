@@ -45,16 +45,28 @@ void Task_ArmMotorInit(void *arg)
 	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
 	elbow_controller.setCurrentAsTarget();
 	arm_controller.setCurrentAsTarget();
-
 	yaw_controller.setCurrentAsTarget();
+	
+	yaw_controller.setCurrentAsZero();
+	elbow_controller.setCurrentAsZero();
+	arm_controller.setCurrentAsZero();
 	vTaskResume(ServiceMotoCtrl_Handle);
 	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
 	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
 	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
 	vTaskDelay(2000);
+	vTaskSuspend(ServiceMotoCtrl_Handle);
+	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
+	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
+	elbow_controller.setCurrentAsTarget();
+	arm_controller.setCurrentAsTarget();
+	yaw_controller.setCurrentAsTarget();
 	yaw_controller.setCurrentAsZero();
 	elbow_controller.setCurrentAsZero();
 	arm_controller.setCurrentAsZero();
+	vTaskDelay(500);
+	vTaskResume(ServiceMotoCtrl_Handle);
 	Service_RobotCtrl_Init();
 	vTaskDelete(MotorInit_Handle);
 	for (;;)
@@ -112,7 +124,7 @@ void Task_ArmMotorCtrl(void *arg)
 
     MotorMsgPack(Motor_TxMsg, yaw_controller.joint_motor);
     xQueueSendFromISR(CAN2_TxPort, &Motor_TxMsg.Low, 0);
-		elbow_controller.Output=elbow_controller.async_controller.getSteppingTarget()-(arm_controller.async_controller.getSteppingTarget()-arm_controller.async_controller.getActCur());
+		elbow_controller.Output=elbow_controller.async_controller.getSteppingTarget()-(arm_controller.async_controller.getSteppingTarget()-arm_controller.getZeroOffset());
 		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.getSteppingTarget(),Motor_Max_Speed,arm_kp,arm_kd);
 		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
 		//TestServo();

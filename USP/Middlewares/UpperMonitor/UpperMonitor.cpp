@@ -146,9 +146,9 @@ void UpperMonitor_Sent_Choose(float * data)
 void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 {
   float float_param;
-	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
-	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
-	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
+//	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+//	elbow_controller.async_controller.setCurrent(elbow_controller.Output);
+//	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
   switch(PARAMETER[0])
   {
     /* 以下部分用于修改参数内容 */
