@@ -131,6 +131,12 @@ void UpperMonitor_Sent_Choose(float * data)
 				break;
 			case 14:data[i] = elbow_controller.getZeroOffset();
 				break;
+			case 15:data[i] = wristroll_controller.GetCurrentAngle();
+				break;
+			case 16:data[i] = wristpitch_controller.GetCurrentAngle();
+				break;
+			case 17:data[i] = wristyaw_controller.GetCurrentAngle();
+				break;
 
       default:break;
 	  /* 以上部分用于观察参数曲线 */
@@ -173,6 +179,18 @@ void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 			break;
 		case 0x05:
 			yaw_controller.joint_ctrl.SpeedPID.Kp= PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x06:
+			float_param = PARAMETER_Change_float(PARAMETER+1);
+			wristroll_controller.SetTargetAngle(float_param);
+			break;
+		case 0x07:
+			float_param = PARAMETER_Change_float(PARAMETER+1);
+			wristpitch_controller.SetTargetAngle(float_param);
+			break;
+		case 0x08:
+			float_param = PARAMETER_Change_float(PARAMETER+1);
+			wristyaw_controller.SetTargetAngle(float_param);
 			break;
 	  default:
 	    break;

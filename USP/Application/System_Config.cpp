@@ -65,6 +65,7 @@ void System_Resource_Init(void)
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
 
   
+	
 #ifdef USE_BMX055
   BMX055_Init(GPIOB, GPIO_PIN_10, GPIO_PIN_11, 10, 11, 0.002f);
 #else

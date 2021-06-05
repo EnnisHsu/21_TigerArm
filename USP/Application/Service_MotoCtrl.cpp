@@ -17,13 +17,14 @@ void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &ServiceMotoCtrl_Handle);
-  xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
+  //xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&ServoCtrl_Handle);
 }
 
 void Task_ArmMotorInit(void *arg)
 {
 	/* Tigerarm Motor Init */
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_SET);
 	vTaskDelay(2000);
   PID_Param_Typedef spd_pid_param = {50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 20000.0f};
   PID_Param_Typedef ang_pid_param = { 25.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
@@ -96,10 +97,11 @@ void Task_ServoCtrl(void *arg)
 
   for(;;)
   {
+		//HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_RESET);
     wristroll_controller.Output();
-		vTaskDelayUntil(&xLastWakeTime_t, 20);
+		//vTaskDelayUntil(&xLastWakeTime_t, 20);
 		wristpitch_controller.Output();
-		vTaskDelayUntil(&xLastWakeTime_t, 20);
+		//vTaskDelayUntil(&xLastWakeTime_t, 20);
 		wristyaw_controller.Output();
 		vTaskDelayUntil(&xLastWakeTime_t, 20);
 		
@@ -109,7 +111,8 @@ void Task_ServoCtrl(void *arg)
 void Task_ArmMotorCtrl(void *arg)
 {
 	vTaskSuspend(ServiceMotoCtrl_Handle);
-  /* Cache for Task */
+  
+	/* Cache for Task */
   Motor_CAN_COB Motor_TxMsg;
 
   /* Pre-Load for task */
@@ -121,6 +124,7 @@ void Task_ArmMotorCtrl(void *arg)
   for(;;)
   {
     /* Spin linear interpolation */
+		
     yaw_controller.spinOnce();
 		arm_controller.spinOnce();
 		elbow_controller.spinOnce();

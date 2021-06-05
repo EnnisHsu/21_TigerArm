@@ -166,6 +166,11 @@ class Godzilla_Servo_Controller{
 			this->o_target=target;
 		}
 		
+		float GetCurrentAngle()
+		{
+			return this->o_target;
+		}
+		
 		void Output()
 		{
 			__HAL_TIM_SetCompare(htim,tim_channel,deg2pwm(this->o_target));

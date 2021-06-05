@@ -4,3 +4,6 @@ elb目标	0	2
 位置kp	0	3
 位置ki	0	4
 速度kp	0	5
+wrol目标	0	6
+wpit目标	0	7
+wyaw目标	0	8
