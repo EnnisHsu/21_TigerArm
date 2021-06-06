@@ -155,8 +155,21 @@ protected:
 
 class Godzilla_Servo_Controller{
 	public:
-		Godzilla_Servo_Controller(TIM_HandleTypeDef* HTIM,uint8_t TIM_CHANNEL)
+		enum Servo_Typedef
 		{
+			Servo180,
+			Servo360
+		};
+		Godzilla_Servo_Controller(TIM_HandleTypeDef* HTIM,uint8_t TIM_CHANNEL,Servo_Typedef Servo_T)
+		{
+			this->Servo_Type=Servo_T;
+			this->htim=HTIM;
+			this->tim_channel=TIM_CHANNEL;
+		}
+		Godzilla_Servo_Controller(TIM_HandleTypeDef* HTIM,uint8_t TIM_CHANNEL,Servo_Typedef Servo_T,uint16_t zerop)
+		{
+			this->zero_offset=zerop;
+			this->Servo_Type=Servo_T;
 			this->htim=HTIM;
 			this->tim_channel=TIM_CHANNEL;
 		}
@@ -173,7 +186,8 @@ class Godzilla_Servo_Controller{
 		
 		void Output()
 		{
-			__HAL_TIM_SetCompare(htim,tim_channel,deg2pwm(this->o_target));
+			if (this->Servo_Type==Servo360) __HAL_TIM_SetCompare(htim,tim_channel,deg2pwm360(this->o_target));
+				else __HAL_TIM_SetCompare(htim,tim_channel,deg2pwm180(this->o_target));
 		}
 		
 		void ResetOutputConfig(float c_min,float c_max,float c_offset)
@@ -184,9 +198,11 @@ class Godzilla_Servo_Controller{
 		}
 		
 	private:
-		uint16_t deg2pwm(float ang){return (uint16_t)((1000.0f/90.0f)*ang+1500.0f);}
+		uint16_t deg2pwm180(float ang){return (uint16_t)(std_lib::constrain((1000.0f/90.0f)*ang+this->zero_offset,o_min,o_max));}
+		uint16_t deg2pwm360(float ang){return (uint16_t)(std_lib::constrain((1000.0f/180.0f)*ang+this->zero_offset,o_min,o_max));}
 		TIM_HandleTypeDef* htim;
 		uint32_t tim_channel;
+		Servo_Typedef Servo_Type;
 		float o_target;
 		float o_max=2500.0f,o_min=500.0f,zero_offset=1500.0f;
 };

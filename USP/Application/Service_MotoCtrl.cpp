@@ -4,7 +4,9 @@
 Godzilla_Yaw_Controller yaw_controller(1, 6.28f,-4.71f,12.56f,3.0f);
 Godzilla_Arm_Controller arm_controller(0x02,&hcan2,2.5f,-5.25f,2.25f,65.0f/30.0f);
 Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,2.5f,-4.53f,1.32f,65.0f/30.0f);
-Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2),wristpitch_controller(&htim3,TIM_CHANNEL_1),wristyaw_controller(&htim3,TIM_CHANNEL_2);
+Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360,583),
+		wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180),
+		wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1689);
 
 float arm_kp=75.0f,arm_kd=2.0f,elbow_kp=100.0f,elbow_kd=1.0f;
 float Motor_Max_Speed=10.0f;
@@ -17,14 +19,13 @@ void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &ServiceMotoCtrl_Handle);
-  //xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
+  xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityAboveNormal,&ServoCtrl_Handle);
 }
 
 void Task_ArmMotorInit(void *arg)
 {
 	/* Tigerarm Motor Init */
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_SET);
 	vTaskDelay(2000);
   PID_Param_Typedef spd_pid_param = {50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 20000.0f};
   PID_Param_Typedef ang_pid_param = { 25.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
@@ -97,7 +98,7 @@ void Task_ServoCtrl(void *arg)
 
   for(;;)
   {
-		//HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_RESET);
+		 HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_RESET);
     wristroll_controller.Output();
 		//vTaskDelayUntil(&xLastWakeTime_t, 20);
 		wristpitch_controller.Output();
