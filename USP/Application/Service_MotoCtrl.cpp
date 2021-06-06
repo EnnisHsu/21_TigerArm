@@ -1,9 +1,20 @@
 #include "Service_MotoCtrl.h" 
 #include "Service_RobotCtrl.h"
+#define Fast_Mode 
 
-Godzilla_Yaw_Controller yaw_controller(1, 6.28f,-4.71f,12.56f,3.0f);
-Godzilla_Arm_Controller arm_controller(0x02,&hcan2,2.5f,-5.25f,2.25f,65.0f/30.0f);
-Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,2.5f,-4.53f,1.32f,65.0f/30.0f);
+#ifdef Fast_Mode
+	#define Yaw_Limit_Spd 9.42f
+	#define Arm_Limit_Spd 4.71f
+	#define Elbow_Limit_Spd 4.71f
+#else
+	#define Yaw_Limit_Spd 6.28f
+	#define Arm_Limit_Spd 2.5f
+	#define Elbow_Limit_Spd 2.5f
+#endif
+
+Godzilla_Yaw_Controller yaw_controller(1,Yaw_Limit_Spd,-4.71f,12.56f,3.0f);
+Godzilla_Arm_Controller arm_controller(0x02,&hcan2,Arm_Limit_Spd,-5.25f,2.25f,65.0f/30.0f);
+Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,Elbow_Limit_Spd,-4.53f,1.32f,65.0f/30.0f);
 Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360,583),
 		wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180),
 		wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1689);
@@ -29,7 +40,7 @@ void Task_ArmMotorInit(void *arg)
 {
 	/* Tigerarm Motor Init */
 	vTaskDelay(2000);
-  PID_Param_Typedef spd_pid_param = {50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 20000.0f};
+  PID_Param_Typedef spd_pid_param = {50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
   PID_Param_Typedef ang_pid_param = { 25.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
   yaw_controller.init(spd_pid_param, ang_pid_param);
 	elbow_controller.init();

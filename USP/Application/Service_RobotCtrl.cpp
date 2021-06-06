@@ -94,11 +94,11 @@ void Task_ArmSingleCtrl(void *arg)
 		  {
 			  if (DR16.GetS1()==DR16_SW_UP)
 			  {
-				  
+				  pump_controller.SetRelayStatus(pump_controller.Relay_On);
 			  }
-			  if (DR16.GetS1()==DR16_SW_DOWN && DR16.GetS2()==DR16_SW_UP)
+			  if (DR16.GetS1()==DR16_SW_DOWN)
 			  {
-
+					pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 			  }
 		  }
 
