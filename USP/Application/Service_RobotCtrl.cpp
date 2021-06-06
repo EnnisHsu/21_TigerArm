@@ -92,9 +92,9 @@ void Task_ArmSingleCtrl(void *arg)
 	  {
 		  if (DR16.GetStatus()==DR16_ESTABLISHED)
 		  {
-			  if (DR16.GetS1()==DR16_SW_UP && DR16.GetS2()==DR16_SW_DOWN)
+			  if (DR16.GetS1()==DR16_SW_UP)
 			  {
-				  xTaskNotify(Robot_ArmSingleCtrl,(uint32_t)NULL,eSetBits);
+				  
 			  }
 			  if (DR16.GetS1()==DR16_SW_DOWN && DR16.GetS2()==DR16_SW_UP)
 			  {
@@ -146,7 +146,7 @@ void Task_ROSCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-
+			
 
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);

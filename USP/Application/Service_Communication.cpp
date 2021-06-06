@@ -79,9 +79,7 @@ void Task_CAN1Transmit(void *arg)
     {
       do{
         free_can_mailbox = HAL_CAN_GetTxMailboxesFreeLevel(&hcan1);
-				error_flag=101;
       }while(free_can_mailbox == 0);
-			error_flag=100;
       CANx_SendData(&hcan1,CAN_TxMsg.ID,CAN_TxMsg.Data,CAN_TxMsg.DLC);
     }
 	vTaskDelay(1);
@@ -104,9 +102,7 @@ void Task_CAN2Transmit(void *arg)
     {
       do{
         free_can_mailbox = HAL_CAN_GetTxMailboxesFreeLevel(&hcan2);
-				error_flag=99;
       }while(free_can_mailbox == 0);
-			error_flag=100;
       CANx_SendData(&hcan2,CAN_TxMsg.ID,CAN_TxMsg.Data,CAN_TxMsg.DLC);
     }
 	vTaskDelay(1);

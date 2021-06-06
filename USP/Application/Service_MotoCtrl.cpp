@@ -1,4 +1,4 @@
-#include "Service_MotoCtrl.h"
+#include "Service_MotoCtrl.h" 
 #include "Service_RobotCtrl.h"
 
 Godzilla_Yaw_Controller yaw_controller(1, 6.28f,-4.71f,12.56f,3.0f);
@@ -7,6 +7,8 @@ Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,2.5f,-4.53f,1.32f,65.0f/3
 Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360,583),
 		wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180),
 		wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1689);
+Godzilla_Pump_Controller pump_controller(GPIOC,GPIO_PIN_5);
+
 
 float arm_kp=75.0f,arm_kd=2.0f,elbow_kp=100.0f,elbow_kd=1.0f;
 float Motor_Max_Speed=10.0f;
@@ -98,7 +100,6 @@ void Task_ServoCtrl(void *arg)
 
   for(;;)
   {
-		 HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_RESET);
     wristroll_controller.Output();
 		//vTaskDelayUntil(&xLastWakeTime_t, 20);
 		wristpitch_controller.Output();

@@ -95,10 +95,9 @@ void Device_DR16(void *arg)
   for(;;)
   {
     
-
+		DR16.Check_Link(xTaskGetTickCount());
     if (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
     {
-    	DR16.Check_Link(xTaskGetTickCount());
     	DR16.DataCapture(&_buffer);
     }
     /* Pass control to the next task */
