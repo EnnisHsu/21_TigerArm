@@ -40,8 +40,9 @@ TaskHandle_t Robot_KeyboardCtrl;
 
 void Service_RobotCtrl_Init()
 {
+	pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
-	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
+	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 }
 
@@ -92,14 +93,47 @@ void Task_ArmSingleCtrl(void *arg)
 	  {
 		  if (DR16.GetStatus()==DR16_ESTABLISHED)
 		  {
-			  if (DR16.GetS1()==DR16_SW_UP)
-			  {
-				  pump_controller.SetRelayStatus(pump_controller.Relay_On);
-			  }
-			  if (DR16.GetS1()==DR16_SW_DOWN)
-			  {
-					pump_controller.SetRelayStatus(pump_controller.Relay_Off);
-			  }
+				switch (DR16.GetS2())
+				{
+					case DR16_SW_UP:
+						switch (DR16.GetS1())
+						{
+							case DR16_SW_UP:
+								pump_controller.SetRelayStatus(pump_controller.Relay_On);
+								break;
+							case DR16_SW_MID:
+								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
+								break;
+							case DR16_SW_DOWN:
+								break;
+							default:
+								break;
+						}
+					case DR16_SW_MID:
+						switch (DR16.GetS1())
+						{
+							case DR16_SW_UP:
+								break;
+							case DR16_SW_MID:
+								break;
+							case DR16_SW_DOWN:
+								break;
+							default:
+								break;
+						}
+					case DR16_SW_DOWN:
+						switch (DR16.GetS1())
+						{
+							case DR16_SW_UP:
+								break;
+							case DR16_SW_MID:
+								break;
+							case DR16_SW_DOWN:
+								break;
+							default:
+								break;
+						}							
+				}
 		  }
 
 	    /* Pass control to the next task */
@@ -120,6 +154,7 @@ void Task_ROSCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
+			error_flag=99;
 		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 		{
 			memcpy(deg,_buffer.address,_buffer.len);
@@ -151,4 +186,54 @@ void Task_ROSCtrl(void *arg)
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
+ }
+ 
+  /* BoardMsgArr
+	[0][0] Mode:								
+					ForwardChassis = 0xd0,			
+					BackwardChassis =0xd1,		
+					AutoCatch =0xd2,
+					ManualCatch =0xd3,
+					Rescure =0xd4
+	[0][1] _w
+	[0][2] _a
+	[0][3] _s 
+	[0][4] _d
+	[0][5] _ctrl 
+	[0][6] _shift
+	[0][7] CRC 
+	ID:0x600
+*/
+
+ uint8_t* Key_Pack()
+ {
+	 static uint8_t* Msg_Arr;
+	 for (int i=DR16_KEY_W;i<=DR16_KEY_CTRL;i++)
+	 {
+		 Msg_Arr[i+1]=0xff;
+	 }
+	 Msg_Arr[7]=Msg_Arr[0] xor Msg_Arr[1] xor Msg_Arr[2] xor Msg_Arr[3] xor Msg_Arr[4] xor Msg_Arr[5] xor Msg_Arr[6];
+	 return Msg_Arr;
+ }
+ 
+ void Task_BoardCommunication(void *arg)
+ {
+	  /* Cache for Task */
+		USART_COB BoardMsgCOB;
+		uint8_t* TxMsg;
+	  /* Pre-Load for task */
+
+	  /* Infinite loop */
+	  TickType_t xLastWakeTime_t;
+	  xLastWakeTime_t = xTaskGetTickCount();
+	  for(;;)
+	  {
+			TxMsg=Key_Pack();
+			BoardMsgCOB.port_num=6;
+			BoardMsgCOB.len=sizeof(TxMsg);
+			BoardMsgCOB.address=TxMsg;
+			xQueueSendFromISR(USART_TxPort,&BoardMsgCOB,0);
+	    /* Pass control to the next task */
+	    vTaskDelayUntil(&xLastWakeTime_t,1);
+	  }	 
  }

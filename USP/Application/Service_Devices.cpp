@@ -47,9 +47,9 @@ void Device_DR16(void *arg);
 */
 void Service_Devices_Init(void)
 {
-  xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
+  //xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
   xTaskCreate(Device_DR16,      "Dev.DR16"     , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceDR16_Handle);
-  xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
+  //xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
 }
 
 
@@ -84,7 +84,7 @@ void Device_Actuators(void *arg)
 void Device_DR16(void *arg)
 {
   /* Cache for Task */
-	DR16_DataPack_Typedef _buffer;
+	USART_COB _buffer;
 	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
   /* Pre-Load for task */
 
@@ -95,10 +95,11 @@ void Device_DR16(void *arg)
   for(;;)
   {
     
-		DR16.Check_Link(xTaskGetTickCount());
-    if (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+		
+    while (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
     {
-    	DR16.DataCapture(&_buffer);
+			DR16.Check_Link(xTaskGetTickCount());
+    	DR16.DataCapture((DR16_DataPack_Typedef*)_buffer.address);
     }
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);

@@ -154,53 +154,6 @@ private:
 	Negetive_Pressure_Typedef negetive_pressure_signal;
 };
 
-template <class motor>
-class Godzilla_Joint_Controller{
-public:
-  Godzilla_Joint_Controller(int id, float speed, float i_min,float i_max,float reduction) : joint_motor(id){
-    this->async_controller.setSpeedConstrain(speed);
-		this->o_min=i_min;
-		this->o_max=i_max;
-		this->reduction_ratio=reduction;
-  }
-  Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : joint_motor(id, hcan){
-    this->async_controller.setSpeedConstrain(speed);
-		this->o_min=i_min;
-		this->o_max=i_max;
-		this->reduction_ratio=reduction;
-  }
-  void init();
-  void slowlyMoveToLimit();
-	float getReductionRatio() {return this->reduction_ratio;}
-	float getZeroOffset(){return this->zero_offset;}
-  virtual float getCurrentAngle()
-  {
-    /* Please rewrite on your child class */
-    return 0;
-  }
-  void setCurrentAsZero()
-	{
-		this->zero_offset=this->getCurrentAngle();
-	}
-	void setCurrentAsTarget()
-	{
-		//float curAng=this->getCurrentAngle();
-		this->async_controller.resetStepTarget(this->getCurrentAngle(),this->getCurrentAngle());
-	}
-  void setStepTarget(float target)
-  {
-		if (target>=this->zero_offset+this->o_min && target<=this->zero_offset+this->o_max)
-			this->async_controller.resetStepTarget(target, this->getCurrentAngle());
-		else return;
-  }
-  void spinOnce();
-  motor joint_motor;
-  Asynchronous_Controller async_controller;
-protected:
-  float zero_offset,o_min,o_max;
-	float reduction_ratio;
-};
-
 class Godzilla_Servo_Controller{
 	public:
 		enum Servo_Typedef
@@ -254,6 +207,54 @@ class Godzilla_Servo_Controller{
 		float o_target;
 		float o_max=2500.0f,o_min=500.0f,zero_offset=1500.0f;
 };
+
+template <class motor>
+class Godzilla_Joint_Controller{
+public:
+  Godzilla_Joint_Controller(int id, float speed, float i_min,float i_max,float reduction) : joint_motor(id){
+    this->async_controller.setSpeedConstrain(speed);
+		this->o_min=i_min;
+		this->o_max=i_max;
+		this->reduction_ratio=reduction;
+  }
+  Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : joint_motor(id, hcan){
+    this->async_controller.setSpeedConstrain(speed);
+		this->o_min=i_min;
+		this->o_max=i_max;
+		this->reduction_ratio=reduction;
+  }
+  void init();
+  void slowlyMoveToLimit();
+	float getReductionRatio() {return this->reduction_ratio;}
+	float getZeroOffset(){return this->zero_offset;}
+  virtual float getCurrentAngle()
+  {
+    /* Please rewrite on your child class */
+    return 0;
+  }
+  void setCurrentAsZero()
+	{
+		this->zero_offset=this->getCurrentAngle();
+	}
+	void setCurrentAsTarget()
+	{
+		//float curAng=this->getCurrentAngle();
+		this->async_controller.resetStepTarget(this->getCurrentAngle(),this->getCurrentAngle());
+	}
+  void setStepTarget(float target)
+  {
+		if (target>=this->zero_offset+this->o_min && target<=this->zero_offset+this->o_max)
+			this->async_controller.resetStepTarget(target, this->getCurrentAngle());
+		else return;
+  }
+  void spinOnce();
+  motor joint_motor;
+  Asynchronous_Controller async_controller;
+protected:
+  float zero_offset,o_min,o_max;
+	float reduction_ratio;
+};
+
 
 class Godzilla_Yaw_Controller : public Godzilla_Joint_Controller<Motor_GM6020>
 {
