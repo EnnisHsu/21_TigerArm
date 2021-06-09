@@ -46,7 +46,7 @@ extern UART_HandleTypeDef huart5;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
-//extern UART_HandleTypeDef huart6;
+extern UART_HandleTypeDef huart6;
 
 extern SPI_HandleTypeDef hspi1;
 /* RTOS Resources ------------------------------------------------------------*/
@@ -82,7 +82,7 @@ extern uint8_t Uart2_Rx_Buff[USART2_RX_BUFFER_SIZE];
 extern uint8_t Uart3_Rx_Buff[USART3_RX_BUFFER_SIZE];
 extern uint8_t Uart4_Rx_Buff[USART4_RX_BUFFER_SIZE];
 extern uint8_t Uart5_Rx_Buff[USART5_RX_BUFFER_SIZE];
-//extern uint8_t Uart6_Rx_Buff[USART6_RX_BUFFER_SIZE];
+extern uint8_t Uart6_Rx_Buff[USART6_RX_BUFFER_SIZE];
 
 extern DR16_Classdef DR16;
 extern W25Qx_Classdef Flash;

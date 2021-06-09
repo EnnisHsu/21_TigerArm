@@ -1,6 +1,7 @@
 #include "Service_MotoCtrl.h" 
 #include "Service_RobotCtrl.h"
 #define Fast_Mode 
+#define _DebugAutoMode_
 
 #ifdef Fast_Mode
 	#define Yaw_Limit_Spd 9.42f
@@ -85,8 +86,10 @@ void Task_ArmMotorInit(void *arg)
 	vTaskDelay(100);
 	vTaskResume(ServiceMotoCtrl_Handle);
 	
-	/* Start ROS Ctrl Task */
-	vTaskResume(Robot_ROSCtrl);
+	#ifdef _DebugAutoMode_
+		TigerArm.Switch_Mode(TigerArm.AutoCatch);
+	#endif
+	
 	vTaskDelete(MotorInit_Handle);
 	for (;;)
 	{

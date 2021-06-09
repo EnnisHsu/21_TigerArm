@@ -57,7 +57,7 @@ void System_Resource_Init(void)
   Uart_Init(&huart3, Uart3_Rx_Buff, USART3_RX_BUFFER_SIZE,User_UART3_RxCpltCallback);
   Uart_Init(&huart4, Uart4_Rx_Buff, USART4_RX_BUFFER_SIZE,User_UART4_RxCpltCallback);
   Uart_Init(&huart5, Uart5_Rx_Buff, USART5_RX_BUFFER_SIZE,User_UART5_RxCpltCallback);
-  //Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
+  Uart_Init(&huart6, Uart6_Rx_Buff, USART6_RX_BUFFER_SIZE,NULL);
   
   SPI_Init(&hspi1,GPIOA,GPIO_PIN_4,100);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);

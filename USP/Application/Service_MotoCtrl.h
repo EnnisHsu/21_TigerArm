@@ -244,7 +244,10 @@ public:
   void setStepTarget(float target)
   {
 		if (target>=this->zero_offset+this->o_min && target<=this->zero_offset+this->o_max)
+		{
 			this->async_controller.resetStepTarget(target, this->getCurrentAngle());
+			this->current_target=target;
+		}
 		else return;
   }
   void spinOnce();
@@ -252,7 +255,7 @@ public:
   Asynchronous_Controller async_controller;
 protected:
   float zero_offset,o_min,o_max;
-	float reduction_ratio;
+	float reduction_ratio,current_target;
 };
 
 
@@ -298,7 +301,11 @@ public:
   void spinOnce()
   {
     this->async_controller.spinOnce(xTaskGetTickCount());
-    this->joint_ctrl.setTarget(rad2deg(this->async_controller.getSteppingTarget()));
+		#ifdef _USE_ASYNCHRONOUS_
+			this->joint_ctrl.setTarget(rad2deg(this->async_controller.getSteppingTarget()));
+		#else
+			this->joint_ctrl.setTarget(rad2deg(this->current_target));
+		#endif
     this->joint_ctrl.Adjust();
   }
 	MotorCascadeCtrl<myPID, myPID> joint_ctrl;

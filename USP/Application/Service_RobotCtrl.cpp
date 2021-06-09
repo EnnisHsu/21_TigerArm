@@ -33,6 +33,7 @@
 #include "Service_MotoCtrl.h"
 
 float deg[6];
+CEngineer TigerArm;
 TaskHandle_t Robot_ROSCtrl;
 TaskHandle_t Robot_ArmSingleCtrl;
 TaskHandle_t Robot_DR16Ctrl;
@@ -44,6 +45,7 @@ void Service_RobotCtrl_Init()
 	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
+	xTaskCreate(Task_KeyboardCtrl,"Robot.KeyboardCtrl",Tiny_Stack_Size,NULL,PrioritySuperHigh,&Robot_KeyboardCtrl);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -95,16 +97,19 @@ void Task_ArmSingleCtrl(void *arg)
 		  {
 				switch (DR16.GetS2())
 				{
-					case DR16_SW_UP:
+					case DR16_SW_UP:				
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
+								//TigerArm.Switch_Mode(TigerArm.ManualCatch);
 								pump_controller.SetRelayStatus(pump_controller.Relay_On);
 								break;
 							case DR16_SW_MID:
+								//TigerArm.Switch_Mode(TigerArm.ManualCatch);
 								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_DOWN:
+								TigerArm.Switch_Mode(TigerArm.AutoCatch);
 								break;
 							default:
 								break;
@@ -115,13 +120,16 @@ void Task_ArmSingleCtrl(void *arg)
 							case DR16_SW_UP:
 								break;
 							case DR16_SW_MID:
+								TigerArm.Switch_Mode(TigerArm.ForwardChassis);
 								break;
 							case DR16_SW_DOWN:
+								TigerArm.Switch_Mode(TigerArm.BackwardChassis);
 								break;
 							default:
 								break;
 						}
 					case DR16_SW_DOWN:
+						
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
@@ -129,6 +137,7 @@ void Task_ArmSingleCtrl(void *arg)
 							case DR16_SW_MID:
 								break;
 							case DR16_SW_DOWN:
+								xTaskNotify(Robot_KeyboardCtrl,NULL,eNoAction);
 								break;
 							default:
 								break;
@@ -143,7 +152,6 @@ void Task_ArmSingleCtrl(void *arg)
 
 void Task_ROSCtrl(void *arg)
 {
-	vTaskSuspend(Robot_ROSCtrl);
 	  /* Cache for Task */
 	USART_COB _buffer;
 	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
@@ -155,16 +163,19 @@ void Task_ROSCtrl(void *arg)
 	  for(;;)
 	  {
 			error_flag=99;
-		if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
-		{
-			memcpy(deg,_buffer.address,_buffer.len);
-			yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
-			arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
-			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
-			wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
-			wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
-			wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
-		}
+			if (TigerArm.Get_Current_Mode()==TigerArm.AutoCatch)
+			{
+				if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+				{
+					memcpy(deg,_buffer.address,_buffer.len);
+					yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
+					arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
+					elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
+					wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
+					wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
+					wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
+				}
+			}
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }	
@@ -181,7 +192,26 @@ void Task_ROSCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-			
+			if (xTaskNotifyWait(0x00,0xffffffff,NULL,0)==pdTRUE)
+			{
+				if (DR16.IsKeyPress(DR16_KEY_CTRL) && (DR16.IsKeyPress(DR16_KEY_Q) || DR16.IsKeyPress(DR16_KEY_E)))
+				{
+					if (DR16.IsKeyPress(DR16_KEY_Q)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xd1)%5+0xd0));
+				}
+				/*switch (TigerArm.Get_Current_Mode())
+				{
+					case TigerArm.ManualCatch:
+						//(DR16.IsKeyPress(DR16_KEY_W))?
+							
+						
+						break;
+					case TigerArm.Rescure:
+						
+						break;
+					default:
+						break;
+				}*/
+			}
 
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
@@ -208,6 +238,7 @@ void Task_ROSCtrl(void *arg)
  uint8_t* Key_Pack()
  {
 	 static uint8_t* Msg_Arr;
+	 Msg_Arr[0]=TigerArm.Get_Current_Mode();
 	 for (int i=DR16_KEY_W;i<=DR16_KEY_CTRL;i++)
 	 {
 		 Msg_Arr[i+1]=0xff;
@@ -228,12 +259,15 @@ void Task_ROSCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-			TxMsg=Key_Pack();
-			BoardMsgCOB.port_num=6;
-			BoardMsgCOB.len=sizeof(TxMsg);
-			BoardMsgCOB.address=TxMsg;
-			xQueueSendFromISR(USART_TxPort,&BoardMsgCOB,0);
-	    /* Pass control to the next task */
+			if (TigerArm.Get_Current_Mode()!=TigerArm.AutoCatch)
+			{
+				TxMsg=Key_Pack();
+				BoardMsgCOB.port_num=6;
+				BoardMsgCOB.len=sizeof(TxMsg);
+				BoardMsgCOB.address=TxMsg;
+				xQueueSendFromISR(USART_TxPort,&BoardMsgCOB,0);
+	    }
+			/* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }	 
  }

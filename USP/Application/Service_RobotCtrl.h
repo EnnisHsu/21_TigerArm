@@ -20,6 +20,34 @@ extern "C"
 	
 extern float deg[6];
 extern TaskHandle_t Robot_ROSCtrl;
+	
+class CEngineer
+{
+	public:
+		enum Engineer_Mode_Typedef
+		{
+					ForwardChassis = 0xd0,			
+					BackwardChassis =0xd1,		
+					AutoCatch =0xd2,
+					ManualCatch =0xd3,
+					Rescure =0xd4,
+					Auto_Obstacles =0xd5,
+		};
+		void Switch_Mode(Engineer_Mode_Typedef Target_Mode)
+		{
+			this->Engineer_Mode=Target_Mode;
+		}
+		Engineer_Mode_Typedef Get_Current_Mode()
+		{
+			return this->Engineer_Mode;
+		}
+	private:
+		Engineer_Mode_Typedef Engineer_Mode=this->ForwardChassis;
+		
+	
+};
+
+extern CEngineer TigerArm;
 
 void Service_RobotCtrl_Init();
 void Task_ArmSingleCtrl(void *arg);
