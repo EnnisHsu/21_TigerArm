@@ -17,7 +17,7 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Devices.h"
-
+#include "Service_RobotCtrl.h"
 
 /* Private define ------------------------------------------------------------*/
 TaskHandle_t DeviceActuators_Handle;
@@ -85,7 +85,7 @@ void Device_Actuators(void *arg)
 void Device_DR16(void *arg)
 {
   /* Cache for Task */
-	DR16_DataPack_Typedef _buffer;
+	USART_COB _buffer;
 	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
   /* Pre-Load for task */
 
@@ -100,7 +100,12 @@ void Device_DR16(void *arg)
     if (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
     {
     	DR16.Check_Link(xTaskGetTickCount());
-    	DR16.DataCapture(&_buffer);
+			static uint8_t* msg;
+			memcpy(msg,_buffer.address,19);
+			static uint8_t* dr16_msg;
+			memcpy(dr16_msg,_buffer.address,18);
+    	DR16.DataCapture((DR16_DataPack_Typedef*)dr16_msg);
+			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)msg[19]);
     }
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);

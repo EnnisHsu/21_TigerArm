@@ -17,6 +17,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Communication.h"
 #include "Service_MotoCtrl.h"
+#include "Service_RobotCtrl.h"
 #include <vector>
 /* Private define ------------------------------------------------------------*/
 void Task_CAN1Transmit(void *arg);
@@ -126,6 +127,23 @@ void Task_CANReceive(void *arg)
 	}
 }
 
+void Update_ChassisCurrent(uint8_t *msg_rece,uint8_t motor)
+{
+	/*The feedback and output values of the right two wheels should be reversed*/
+		if(motor == RF || motor == RB)
+		{
+			
+			Engineer_chassis.wheel_rpm[motor] = -(short)((unsigned char)msg_rece[2]<<8|(unsigned char)msg_rece[3]);	
+			Engineer_chassis.wheel_torque[motor] = -(short)((unsigned char)msg_rece[4]<<8|(unsigned char)msg_rece[5]);
+		}
+		else 
+		{
+			Engineer_chassis.wheel_rpm[motor] = (short)((unsigned char)msg_rece[2]<<8|(unsigned char)msg_rece[3]);	
+			Engineer_chassis.wheel_torque[motor] = (short)((unsigned char)msg_rece[4]<<8|(unsigned char)msg_rece[5]);			
+		}
+
+}
+
 /**
 * @brief  Callback function in CAN Interrupt
 * @param  None.
@@ -136,8 +154,12 @@ void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage)
   static CAN_COB   CAN_RxCOB;
   Convert_Data(CAN_RxMessage,&CAN_RxCOB);
   //Send To CAN Receive Queue
-  if(RMMotor_QueueHandle != NULL)
-    xQueueSendFromISR(RMMotor_QueueHandle,&CAN_RxCOB,0);
+  if(((CAN_RxMessage->header.StdId)&0x200) == 0x200)
+	{
+		/* Calculate motor ID,and get the data of motor */
+		uint8_t Motor_ID=CAN_RxMessage->header.StdId-0x201;	
+		Update_ChassisCurrent(CAN_RxMessage->data, Motor_ID); 
+	}
 
 }
 
@@ -248,6 +270,12 @@ uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
+  return 0;
+}
+
+uint32_t User_UART6_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
+{
+	
   return 0;
 }
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
