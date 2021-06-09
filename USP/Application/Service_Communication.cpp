@@ -17,6 +17,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Communication.h"
 #include "Service_MotoCtrl.h"
+#include "Service_RobotCtrl.h"
 #include <vector>
 /* Private define ------------------------------------------------------------*/
 void Task_CAN1Transmit(void *arg);
@@ -215,6 +216,9 @@ void Task_UsartTransmit(void *arg)
         case 4:
           pUart_x = &huart4;
           break;
+				case 6:
+					pUart_x = &huart6;
+					break;
       }
       /* User Code End Here ---------------------------------*/
       HAL_UART_Transmit_DMA(pUart_x,(uint8_t*)Usart_TxCOB.address,Usart_TxCOB.len);
@@ -240,6 +244,9 @@ uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data,uint16_t ReceiveLen)
     Usart_RxCOB.len      = ReceiveLen;
     Usart_RxCOB.address  = Recv_Data;
     xQueueSendFromISR(DR16_QueueHandle,&Usart_RxCOB,0);
+		Recv_Data[19]=TigerArm.Get_Current_Mode();
+		Usart_RxCOB.port_num = 6;
+		xQueueSendFromISR(USART_TxPort,&Usart_RxCOB,0);
   }
   return 0;
 }

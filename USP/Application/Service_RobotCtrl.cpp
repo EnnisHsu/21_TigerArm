@@ -196,21 +196,24 @@ void Task_ROSCtrl(void *arg)
 			{
 				if (DR16.IsKeyPress(DR16_KEY_CTRL) && (DR16.IsKeyPress(DR16_KEY_Q) || DR16.IsKeyPress(DR16_KEY_E)))
 				{
-					if (DR16.IsKeyPress(DR16_KEY_Q)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xd1)%5+0xd0));
+					if (DR16.IsKeyPress(DR16_KEY_Q)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xd1)%6+0xd0));
+					if (DR16.IsKeyPress(DR16_KEY_E)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xcf)%6+0xd0));
 				}
-				/*switch (TigerArm.Get_Current_Mode())
+				else
 				{
-					case TigerArm.ManualCatch:
-						//(DR16.IsKeyPress(DR16_KEY_W))?
+					switch (TigerArm.Get_Current_Mode())
+					{
+						case CEngineer::ManualCatch:
+							//(DR16.IsKeyPress(DR16_KEY_W))?
 							
-						
-						break;
-					case TigerArm.Rescure:
-						
-						break;
-					default:
-						break;
-				}*/
+							break;
+						case CEngineer::Rescure:
+							
+							break;
+						default:
+							break;
+					}
+				}
 			}
 
 	    /* Pass control to the next task */
@@ -218,56 +221,3 @@ void Task_ROSCtrl(void *arg)
 	  }
  }
  
-  /* BoardMsgArr
-	[0][0] Mode:								
-					ForwardChassis = 0xd0,			
-					BackwardChassis =0xd1,		
-					AutoCatch =0xd2,
-					ManualCatch =0xd3,
-					Rescure =0xd4
-	[0][1] _w
-	[0][2] _a
-	[0][3] _s 
-	[0][4] _d
-	[0][5] _ctrl 
-	[0][6] _shift
-	[0][7] CRC 
-	ID:0x600
-*/
-
- uint8_t* Key_Pack()
- {
-	 static uint8_t* Msg_Arr;
-	 Msg_Arr[0]=TigerArm.Get_Current_Mode();
-	 for (int i=DR16_KEY_W;i<=DR16_KEY_CTRL;i++)
-	 {
-		 Msg_Arr[i+1]=0xff;
-	 }
-	 Msg_Arr[7]=Msg_Arr[0] xor Msg_Arr[1] xor Msg_Arr[2] xor Msg_Arr[3] xor Msg_Arr[4] xor Msg_Arr[5] xor Msg_Arr[6];
-	 return Msg_Arr;
- }
- 
- void Task_BoardCommunication(void *arg)
- {
-	  /* Cache for Task */
-		USART_COB BoardMsgCOB;
-		uint8_t* TxMsg;
-	  /* Pre-Load for task */
-
-	  /* Infinite loop */
-	  TickType_t xLastWakeTime_t;
-	  xLastWakeTime_t = xTaskGetTickCount();
-	  for(;;)
-	  {
-			if (TigerArm.Get_Current_Mode()!=TigerArm.AutoCatch)
-			{
-				TxMsg=Key_Pack();
-				BoardMsgCOB.port_num=6;
-				BoardMsgCOB.len=sizeof(TxMsg);
-				BoardMsgCOB.address=TxMsg;
-				xQueueSendFromISR(USART_TxPort,&BoardMsgCOB,0);
-	    }
-			/* Pass control to the next task */
-	    vTaskDelayUntil(&xLastWakeTime_t,1);
-	  }	 
- }

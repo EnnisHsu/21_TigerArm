@@ -26,6 +26,7 @@ class CEngineer
 	public:
 		enum Engineer_Mode_Typedef
 		{
+					TigerarmNone = 0xee,
 					ForwardChassis = 0xd0,			
 					BackwardChassis =0xd1,		
 					AutoCatch =0xd2,
@@ -54,6 +55,7 @@ void Task_ArmSingleCtrl(void *arg);
 void Task_DR16Ctrl(void *arg);
 void Task_ROSCtrl(void *arg);
 void Task_KeyboardCtrl(void *arg);
+ void Task_BoardCommunication(void *arg);
 
 #ifdef __cplusplus
 }
