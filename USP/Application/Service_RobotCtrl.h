@@ -52,6 +52,16 @@ extern CChassis Engineer_chassis;
 extern float TargetVelocity_X,TargetVelocity_Y,TargetVelocity_Z;
 
 void Service_RobotCtrl_Init();
+void Controller_PID_ParamTnit();
+void Engineer_Chassis_Init();
+int* SpeedController(const int16_t* current,const int16_t* target);
+_chassis_Velocity* AttitudeController(const _chassis_GlobalPos* Current_Pos,const _chassis_GlobalPos* Command_Pos);
+_chassis_Velocity* PositionController(const _chassis_GlobalPos Current,const _chassis_GlobalPos Target);
+
+void Offline_Ctrl(void*arg);
+void Gamepad_Ctrl(void*arg);
+void Motor_SendESC();
+void Chassis_Ctrl(void *arg);
 
 
 #ifdef __cplusplus

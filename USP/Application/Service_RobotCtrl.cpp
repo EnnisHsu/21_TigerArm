@@ -41,6 +41,19 @@ myPID Chassis_Spd[4];
 myPID Chassis_Pos[4];
 myPID Chassis_Attitude_Yaw;
 
+TaskHandle_t Robot_ChassisCtrl;
+TaskHandle_t Robot_OfflineCtrl;
+TaskHandle_t Robot_GamepadCtrl;
+
+
+
+void Service_RobotCtrl_Init()
+{
+	xTaskCreate(Chassis_Ctrl, "Robot.ChassisCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ChassisCtrl);
+	xTaskCreate(Offline_Ctrl, "Robot.OfflineCtrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_OfflineCtrl);
+	xTaskCreate(Gamepad_Ctrl, "Robot.GamepadCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_GamepadCtrl);
+}
+
 void Controller_PID_ParamTnit()
 {
 	
@@ -61,6 +74,20 @@ void Controller_PID_ParamTnit()
 	/* attitude controller */
 	Chassis_Attitude_Yaw.SetPIDParam(80.0f,0,0,0,1000);
 
+}
+
+void Engineer_Chassis_Init()
+{
+	Engineer_chassis.Set_AccelerationParam(12000,30000,2000);
+	Engineer_chassis.Set_SpeedGear(FAST_GEAR);
+	Engineer_chassis.Set_TorqueOptimizeFlag(1);
+	Engineer_chassis.Set_AttitudeOptimizeFlag(1);
+	Engineer_chassis.Set_SpeedParam(0.35f,0.5f,1.0f,1.0f);
+	Engineer_chassis.Switch_Mode(Normal_Speed);
+	Engineer_chassis.Load_SpeedController(SpeedController);
+	Engineer_chassis.Load_AttitudeController(AttitudeController);
+	
+	Controller_PID_ParamTnit();
 }
 
 int* SpeedController(const int16_t* current,const int16_t* target)
@@ -91,20 +118,6 @@ _chassis_Velocity* PositionController(const _chassis_GlobalPos Current,const _ch
 	//static _chassis_Velocity chassis_
 }
 
-void Engineer_Chassis_Init()
-{
-	Engineer_chassis.Set_AccelerationParam(12000,30000,2000);
-	Engineer_chassis.Set_SpeedGear(FAST_GEAR);
-	Engineer_chassis.Set_TorqueOptimizeFlag(1);
-	Engineer_chassis.Set_AttitudeOptimizeFlag(1);
-	Engineer_chassis.Set_SpeedParam(0.35f,0.5f,1.0f,1.0f);
-	Engineer_chassis.Switch_Mode(Normal_Speed);
-	Engineer_chassis.Load_SpeedController(SpeedController);
-	Engineer_chassis.Load_AttitudeController(AttitudeController);
-	
-	Controller_PID_ParamTnit();
-}
-
 void Offline_Ctrl(void*arg)
 {
   static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
@@ -127,13 +140,73 @@ void Offline_Ctrl(void*arg)
   }
 }
 
-
-void Service_RobotCtrl_Init()
-{
-	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
-	//xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
-//	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
+void Gamepad_Ctrl(void*arg)
+{  
+	/*Gamepad Mode*/
+  static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
+  static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
+  for (;;)
+  {
+    if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
+    {
+      TargetVelocity_X=-DR16.Get_LX_Norm();
+			TargetVelocity_Y=-DR16.Get_LY_Norm();
+			TargetVelocity_Z=DR16.Get_RX_Norm()*0.7f;
+			
+			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+    }
+  }
 }
+
+void Motor_SendESC()
+{
+	/*The feedback and output values of the right two wheels should be reversed*/
+  Engineer_chassis.wheel_Out[1]= -Engineer_chassis.wheel_Out[1];
+	Engineer_chassis.wheel_Out[2]= -Engineer_chassis.wheel_Out[2];
+	
+	uint8_t msg_send[8] = {0};	
+	if(DR16.GetStatus() == DR16_ESTABLISHED)
+	{
+			msg_send[0] = (unsigned char)((short)Engineer_chassis.wheel_Out[0] >> 8);//ตอ8ฮป
+			msg_send[1] = (unsigned char)(short)Engineer_chassis.wheel_Out[0];
+			msg_send[2] = (unsigned char)((short)Engineer_chassis.wheel_Out[1]>> 8);
+			msg_send[3] = (unsigned char)(short)Engineer_chassis.wheel_Out[1];
+			msg_send[4] = (unsigned char)((short)Engineer_chassis.wheel_Out[2] >> 8);
+			msg_send[5] = (unsigned char)(short)Engineer_chassis.wheel_Out[2];
+			msg_send[6] = (unsigned char)((short)Engineer_chassis.wheel_Out[3] >> 8);
+			msg_send[7] = (unsigned char)(short)Engineer_chassis.wheel_Out[3];	
+	}
+	else
+	{
+		msg_send[0] = 0;//ตอ8ฮป
+		msg_send[1] = 0;
+		msg_send[2] = 0;
+		msg_send[3] = 0;
+		msg_send[4] =	0;
+		msg_send[5] = 0;
+		msg_send[6] = 0;
+		msg_send[7] = 0;			
+	}
+	
+	CANx_SendData(&hcan1,0x200,msg_send,8);		
+}
+
+void Chassis_Ctrl(void *arg)
+{
+  static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
+  static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
+	
+	for (;;)
+  {
+		Engineer_chassis.Set_Target(TargetVelocity_X,TargetVelocity_Y,-TargetVelocity_Z);				
+		Engineer_chassis.Chassis_Control();
+		Motor_SendESC();
+    vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+  }
+}
+
+
 
 
 
