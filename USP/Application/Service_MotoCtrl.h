@@ -301,15 +301,23 @@ public:
   void spinOnce()
   {
     this->async_controller.spinOnce(xTaskGetTickCount());
+		
 		#ifdef _USE_ASYNCHRONOUS_
-			this->joint_ctrl.setTarget(rad2deg(this->async_controller.getSteppingTarget()));
+			this->Yaw_MF << rad2deg(this->async_controller.getSteppingTarget());
+			static float joint_target;
+			this->Yaw_MF >> joint_target;
+			this->joint_ctrl.setTarget(joint_target);
 		#else
-			this->joint_ctrl.setTarget(rad2deg(this->current_target));
+			this->Yaw_MF << rad2deg(this->current_target);
+			static float joint_target;
+			this->Yaw_MF >> joint_target;
+			this->joint_ctrl.setTarget(joint_target);
 		#endif
     this->joint_ctrl.Adjust();
   }
 	MotorCascadeCtrl<myPID, myPID> joint_ctrl;
 private:
+	MeanFilter<50> Yaw_MF;
   
 };
 
