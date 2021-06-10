@@ -49,6 +49,7 @@ TaskHandle_t Robot_GamepadCtrl;
 
 void Service_RobotCtrl_Init()
 {
+	Engineer_Chassis_Init();
 	xTaskCreate(Chassis_Ctrl, "Robot.ChassisCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ChassisCtrl);
 	xTaskCreate(Offline_Ctrl, "Robot.OfflineCtrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_OfflineCtrl);
 	xTaskCreate(Gamepad_Ctrl, "Robot.GamepadCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_GamepadCtrl);
