@@ -207,6 +207,48 @@ void Chassis_Ctrl(void *arg)
   }
 }
 
+void Camera_Toggle()
+{
+	return;
+}
+
+void Keyboard_Ctrl(void*arg)
+{
+	/*Keyboard Mode*/
+	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
+  static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
+	 for (;;)
+  {
+		    if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
+    {
+			static float Speed_Gear=0.5;
+			static float Mouse_Sensitivity_Gear=0.5;
+			static uint8_t F_KeyFlag=0;
+			static uint8_t G_KeyFlag=0;
+			static uint8_t Z_KeyFlag=0;
+			static uint8_t F_Ctrl_KeyFlag=0;
+			static uint8_t G_Ctrl_KeyFlag=0;
+
+			DR16.IsKeyPress(DR16_KEY_S) ? (TargetVelocity_Y=-Speed_Gear):(TargetVelocity_Y=0);                  /*后*/
+			DR16.IsKeyPress(DR16_KEY_W) ? (TargetVelocity_Y=Speed_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
+      DR16.IsKeyPress(DR16_KEY_A) ? (TargetVelocity_X=-Speed_Gear):(TargetVelocity_X=0);                  /*左*/
+			DR16.IsKeyPress(DR16_KEY_D) ? (TargetVelocity_X=Speed_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+			
+			TargetVelocity_Z=2.5f*DR16.Get_MouseX_Norm()*Mouse_Sensitivity_Gear;                        /*旋转*/
+			//DR16.IsKeyPress(_V) ? (TargetVelocity_Z=TargetVelocity_Z-Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制逆时针旋转*/
+			//DR16.IsKeyPress(_B) ? (TargetVelocity_Z=TargetVelocity_Z+Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制顺时针旋转*/
+      TargetVelocity_Z=std_lib::constrain(TargetVelocity_Z,1.0f,-1.0f);
+			
+			
+			if(DR16.IsKeyPress(DR16_KEY_Z) && DR16.IsKeyPress(DR16_KEY_CTRL))  {Camera_Toggle();Z_KeyFlag=0;}        /*相机翻转*/
+			
+		  //if(DR16.IsKeyPress(_Z)&&!DR16.IsKeyPress(_CTRL)) {Z_KeyFlag=1;}
+			
+			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+    }
+	}
+}
 
 
 
