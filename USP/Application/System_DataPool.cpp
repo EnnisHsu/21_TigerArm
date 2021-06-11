@@ -41,6 +41,8 @@ CLogger SysLog;
 LogFilter_t Filter_List[2];
 
 CAnalyzer Analyzer;
+
+_BoardComRx BoardComRxData;
 /* Function ------------------------------------------------------------------*/
 float rad2deg(float x)
 {

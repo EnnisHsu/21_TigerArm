@@ -24,7 +24,7 @@ void Task_CAN1Transmit(void *arg);
 void Task_CAN2Transmit(void *arg);
 void Task_UsartTransmit(void *arg);
 void Task_CANReceive(void *arg);
-
+void Task_BoardComRx(void *arg);
 /**
 * @brief  Initialization of communication service
 * @param  None.
@@ -42,6 +42,7 @@ void Service_Communication_Init(void)
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
 	CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
+	xTaskCreate(Task_BoardComRx,"Com.Board Commu" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
   xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
   xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
   xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
@@ -126,7 +127,33 @@ void Task_CANReceive(void *arg)
 		vTaskDelayUntil(&xLastWakeTime, 1);
 	}
 }
+void Task_BoardComRx(void *arg)
+{
+  /* Cache for Task */
+	USART_COB _buffer;
+	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+  /* Pre-Load for task */
 
+  /* Infinite loop */
+  TickType_t xLastWakeTime_t;
+  xLastWakeTime_t = xTaskGetTickCount();
+	extern _BoardComRx BoardComRxData;
+  for(;;)
+  {
+    
+
+    if (xQueueReceive(BodCom_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+    {
+
+			static uint8_t* dr16_msg;
+			memcpy(&BoardComRxData,_buffer.address,22);
+    	DR16.DataCapture(&BoardComRxData.dr16Data);
+			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
+    }
+    /* Pass control to the next task */
+    vTaskDelayUntil(&xLastWakeTime_t,1);
+  }
+}
 void Update_ChassisCurrent(uint8_t *msg_rece,uint8_t motor)
 {
 	/*The feedback and output values of the right two wheels should be reversed*/

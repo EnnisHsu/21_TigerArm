@@ -17,7 +17,6 @@
 #include <queue.h>
 #include <stm32f4xx.h>
 #include <SRML.h>
-
 /* Macro Definitions ---------------------------------------------------------*/
 #define Tiny_Stack_Size       64
 #define Small_Stack_Size      128
@@ -89,6 +88,17 @@ extern CAnalyzer Analyzer;
 
 float rad2deg(float x);
 float deg2rad(float x);
+
+typedef struct BoardComRx_Typedef
+{
+  DR16_DataPack_Typedef dr16Data;
+	uint8_t CtrlMode;
+	uint8_t TarSpdX;
+	uint8_t TarSpdY;
+	uint8_t TarSpdZ;
+}_BoardComRx;
+
+
 //暂时被遗忘在这,统一标准接口制定后再集中回收
 //#ifndef __UUCOBTypeDef_DEFINED
 //#define __UUCOBTypeDef_DEFINED

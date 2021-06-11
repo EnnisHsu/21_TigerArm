@@ -147,13 +147,14 @@ void Gamepad_Ctrl(void*arg)
   static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
 	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
   static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
+	extern _BoardComRx BoardComRxData;
   for (;;)
   {
     if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
     {
-      TargetVelocity_X=-DR16.Get_LX_Norm();
-			TargetVelocity_Y=-DR16.Get_LY_Norm();
-			TargetVelocity_Z=DR16.Get_RX_Norm()*0.7f;
+      TargetVelocity_X=BoardComRxData.TarSpdX?BoardComRxData.TarSpdX:-DR16.Get_LX_Norm();
+			TargetVelocity_Y=BoardComRxData.TarSpdY?BoardComRxData.TarSpdY:-DR16.Get_LY_Norm();
+			TargetVelocity_Z=BoardComRxData.TarSpdZ?BoardComRxData.TarSpdZ:DR16.Get_RX_Norm()*0.7f;
 			
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
     }
