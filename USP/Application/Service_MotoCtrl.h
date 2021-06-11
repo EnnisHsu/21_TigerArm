@@ -7,7 +7,7 @@
 
 #ifndef APPLICATION_SERVICE_MOTOCTRL_H_
 #define APPLICATION_SERVICE_MOTOCTRL_H_
-
+#define _USE_ASYNCHRONOUS_
 #ifdef __cplusplus
 #include "SRML.h"
 #include "System_DataPool.h"
@@ -318,6 +318,7 @@ public:
 	MotorCascadeCtrl<myPID, myPID> joint_ctrl;
 private:
 	MeanFilter<50> Yaw_MF;
+	MeanFilter<10> Yaw_Out_MF;
   
 };
 

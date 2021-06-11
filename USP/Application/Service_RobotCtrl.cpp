@@ -92,7 +92,7 @@ void Task_ArmSingleCtrl(void *arg)
 	  TickType_t xLastWakeTime_t;
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
-	  {
+	  {	
 		  if (DR16.GetStatus()==DR16_ESTABLISHED)
 		  {
 				switch (DR16.GetS2())
@@ -114,6 +114,7 @@ void Task_ArmSingleCtrl(void *arg)
 							default:
 								break;
 						}
+						break;
 					case DR16_SW_MID:
 						switch (DR16.GetS1())
 						{
@@ -128,6 +129,7 @@ void Task_ArmSingleCtrl(void *arg)
 							default:
 								break;
 						}
+						break;
 					case DR16_SW_DOWN:
 						
 						switch (DR16.GetS1())
@@ -141,7 +143,10 @@ void Task_ArmSingleCtrl(void *arg)
 								break;
 							default:
 								break;
-						}							
+						}			
+						break;
+						default:
+							break;
 				}
 		  }
 
