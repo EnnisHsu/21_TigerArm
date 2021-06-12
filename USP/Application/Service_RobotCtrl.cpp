@@ -110,6 +110,12 @@ void Task_ArmSingleCtrl(void *arg)
 								break;
 							case DR16_SW_DOWN:
 								TigerArm.Switch_Mode(TigerArm.AutoCatch);
+								uint8_t data[4]={0,0,0,0};
+								USART_COB Usart_TxCOB;
+								Usart_TxCOB.address=&data;
+								Usart_TxCOB.len=4;
+								Usart_TxCOB.port_num=4;
+								xQueueSendFromISR(USART_TxPort,&Usart_TxCOB,0);
 								break;
 							default:
 								break;

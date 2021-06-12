@@ -66,6 +66,15 @@ extern QueueHandle_t  Referee_QueueHandle;
 
 extern int error_flag;
 
+typedef struct BoardComRx_Typedef
+{
+  DR16_DataPack_Typedef dr16Data;
+	uint8_t CtrlMode;
+	uint8_t TarSpdX;
+	uint8_t TarSpdY;
+	uint8_t TarSpdZ;
+}_BoardComRx;
+
 /* Semaphores */
 /* Mutexes */
 /* Notifications */
