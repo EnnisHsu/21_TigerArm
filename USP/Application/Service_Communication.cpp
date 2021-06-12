@@ -38,11 +38,8 @@ void Service_Communication_Init(void)
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType, 0x01, 0xff);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-	CAN_Filter_Mask_Config(&hcan2, CanFilter_16|CanFifo_0|Can_STDID|Can_DataType, 0x00, 0xff);
   xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
-	xTaskCreate(Task_BoardComRx,"Com.Board Commu" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
+	xTaskCreate(Task_BoardComRx,"Com.Board Commu" , Normal_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
   xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
   xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
   xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
@@ -265,15 +262,7 @@ void Task_UsartTransmit(void *arg)
 */
 uint32_t User_UART2_RxCpltCallback(uint8_t* Recv_Data,uint16_t ReceiveLen)
 {
-  static USART_COB Usart_RxCOB;
-  //Send To UART Receive Queue
-  if(DR16_QueueHandle != NULL)
-  {
-    Usart_RxCOB.port_num = 2;
-    Usart_RxCOB.len      = ReceiveLen;
-    Usart_RxCOB.address  = Recv_Data;
-    xQueueSendFromISR(DR16_QueueHandle,&Usart_RxCOB,0);
-  }
+  
   return 0;
 }
 
@@ -284,15 +273,7 @@ uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
-	static USART_COB Usart_RxCOB;
-	if (BodCom_QueueHandle!=NULL)
-	{
-		Usart_RxCOB.port_num=4;
-		Usart_RxCOB.len=ReceiveLen;
-		Usart_RxCOB.address=Recv_Data;
-		xQueueSendFromISR(BodCom_QueueHandle,&Usart_RxCOB,0);
-	}
-  return 0;
+	return 0;
 }
 
 uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
@@ -302,7 +283,15 @@ uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART6_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
-	
+		static USART_COB Usart_RxCOB;
+  //Send To UART Receive Queue
+  if(ReceiveLen==22 && BodCom_QueueHandle != NULL)
+  {
+    Usart_RxCOB.port_num = 6;
+    Usart_RxCOB.len      = ReceiveLen;
+    Usart_RxCOB.address  = Recv_Data;
+    xQueueSendFromISR(BodCom_QueueHandle,&Usart_RxCOB,0);
+  }
   return 0;
 }
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

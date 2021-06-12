@@ -108,11 +108,10 @@ extern int flag;
 void System_Tasks_Init(void)
 { 
   /* Syetem Service init --------------*/
-  Service_Debug_Init();
+  //Service_Debug_Init();
   Service_Devices_Init();
   Service_Communication_Init();
   Service_RobotCtrl_Init();
-  Service_MotoCtrl_Init();
   /* Applications Init ----------------*/
   //xTaskCreate(Task_SwerveChassis, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &TestSwerveChassis_Handle);
 }

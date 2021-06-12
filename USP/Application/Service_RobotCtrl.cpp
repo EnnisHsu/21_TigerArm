@@ -50,9 +50,9 @@ TaskHandle_t Robot_GamepadCtrl;
 void Service_RobotCtrl_Init()
 {
 	Engineer_Chassis_Init();
-	xTaskCreate(Chassis_Ctrl, "Robot.ChassisCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ChassisCtrl);
-	xTaskCreate(Offline_Ctrl, "Robot.OfflineCtrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_OfflineCtrl);
-	xTaskCreate(Gamepad_Ctrl, "Robot.GamepadCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_GamepadCtrl);
+	xTaskCreate(Chassis_Ctrl, "Robot.ChassisCtrl", Normal_Stack_Size, NULL, PriorityNormal, &Robot_ChassisCtrl);
+	//xTaskCreate(Offline_Ctrl, "Robot.OfflineCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_OfflineCtrl);
+	xTaskCreate(Gamepad_Ctrl, "Robot.GamepadCtrl", Normal_Stack_Size, NULL, PriorityNormal, &Robot_GamepadCtrl);
 }
 
 void Controller_PID_ParamTnit()
@@ -119,27 +119,6 @@ _chassis_Velocity* PositionController(const _chassis_GlobalPos Current,const _ch
 	//static _chassis_Velocity chassis_
 }
 
-void Offline_Ctrl(void*arg)
-{
-  static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
-	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
-  static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
-	
-  for (;;)
-  {
-    if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
-    {
-			/*Gamepad Offline protection*/
-      TargetVelocity_X =0;
-			TargetVelocity_Y =0;
-			TargetVelocity_Z =0;
-			Engineer_chassis.Switch_Mode(Halt);
-			
-			
-			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
-    }
-  }
-}
 
 void Gamepad_Ctrl(void*arg)
 {  
@@ -147,17 +126,27 @@ void Gamepad_Ctrl(void*arg)
   static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
 	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
   static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
-	extern _BoardComRx BoardComRxData;
   for (;;)
   {
-    if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
-    {
-      TargetVelocity_X=BoardComRxData.TarSpdX?BoardComRxData.TarSpdX:-DR16.Get_LX_Norm();
-			TargetVelocity_Y=BoardComRxData.TarSpdY?BoardComRxData.TarSpdY:-DR16.Get_LY_Norm();
-			TargetVelocity_Z=BoardComRxData.TarSpdZ?BoardComRxData.TarSpdZ:DR16.Get_RX_Norm()*0.7f;
-			
+    //if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
+    //{
+		if (DR16.GetStatus()==DR16_ESTABLISHED)
+		{
+			if (TigerArm.Get_Current_Mode()==TigerArm.ForwardChassis)
+			{
+				TargetVelocity_X=-DR16.Get_LX_Norm();
+				TargetVelocity_Y=-DR16.Get_LY_Norm();
+				TargetVelocity_Z=DR16.Get_RX_Norm()*0.7f;
+			}
+			if (TigerArm.Get_Current_Mode()==TigerArm.BackwardChassis)
+			{
+				TargetVelocity_X=DR16.Get_LX_Norm();
+				TargetVelocity_Y=DR16.Get_LY_Norm();
+				TargetVelocity_Z=-DR16.Get_RX_Norm()*0.7f;
+			}
+		}
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
-    }
+    //}
   }
 }
 
@@ -246,8 +235,9 @@ void Keyboard_Ctrl(void*arg)
 			
 		  //if(DR16.IsKeyPress(_Z)&&!DR16.IsKeyPress(_CTRL)) {Z_KeyFlag=1;}
 			
-			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+			
     }
+		vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
 	}
 }
 

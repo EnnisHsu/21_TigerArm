@@ -48,8 +48,8 @@ void Device_DR16(void *arg);
 */
 void Service_Devices_Init(void)
 {
-  xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
-//  xTaskCreate(Device_DR16,      "Dev.DR16"     , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceDR16_Handle);
+ // xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
+  //xTaskCreate(Device_DR16,      "Dev.DR16"     , Normal_Stack_Size,    NULL, PriorityHigh,        &DeviceDR16_Handle);
   xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
 }
 
@@ -100,12 +100,12 @@ void Device_DR16(void *arg)
     if (xQueueReceive(DR16_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
     {
     	DR16.Check_Link(xTaskGetTickCount());
-			static uint8_t* msg;
-			memcpy(msg,_buffer.address,19);
-			static uint8_t* dr16_msg;
+			static uint8_t msg[22];
+			memcpy(msg,_buffer.address,22);
+			static uint8_t dr16_msg[18];
 			memcpy(dr16_msg,_buffer.address,18);
     	DR16.DataCapture((DR16_DataPack_Typedef*)dr16_msg);
-			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)msg[19]);
+			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)msg[18]);
     }
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);

@@ -67,6 +67,7 @@ struct DR16_DataPack_Typedef
   uint64_t press_l:8;
   uint64_t press_r:8;
   uint64_t key:16;
+	uint16_t resv;
 };
 #pragma pack()
 /**
