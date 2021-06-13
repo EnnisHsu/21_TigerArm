@@ -38,6 +38,28 @@ struct PID_Param_Typedef{
 class Asynchronous_Controller{
 public:
   Asynchronous_Controller(){}
+	/*新加入*/
+	~Asynchronous_Controller(){}
+	int interpolation(uint32_t time_stamp){
+		//将目标点和当前点之间插入100个值
+		//用三次曲线插
+		//theta = a0+a1*theta+a2*theta^2+a3*theta^3
+		float cur = this->getActCur();
+		float tar = this->getTarget();
+		float a0 = cur;
+		float a1 = 0;
+		float a3 = (tar - cur)*2/1000000;
+		float a2 = -a3*100*3/2;
+		for(int i = 0;i<100;i++){
+			this->theta[i] = this->caculTheta(a0,a1,a2,a3,i);
+		}
+		return 0;
+	}
+	
+	float nextStep(int cnt){
+		return theta[cnt];
+	}
+	/*新加入*/
   float spinOnce(uint32_t time_stamp)
   {
     uint32_t interval_time = time_stamp - last_time_stamp;			//时间间隔
@@ -87,6 +109,12 @@ public:
     stepping_target = val;
   }
 private:
+	/**新加入*/
+	float theta[100] = {0};
+	float caculTheta(float a0,float a1,float a2,float a3,float t){
+		return a0+a1*t+a2*t*t+a3*t*t*t;
+	}
+	/**新加入*/
   float getSpeedWithDirection()
   {
 		if (fabs(set_target-stepping_target)>1e-5)
@@ -318,7 +346,6 @@ public:
 	MotorCascadeCtrl<myPID, myPID> joint_ctrl;
 private:
 	MeanFilter<50> Yaw_MF;
-	MeanFilter<10> Yaw_Out_MF;
   
 };
 
