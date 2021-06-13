@@ -50,7 +50,7 @@ void Service_Devices_Init(void)
 {
  // xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
   //xTaskCreate(Device_DR16,      "Dev.DR16"     , Normal_Stack_Size,    NULL, PriorityHigh,        &DeviceDR16_Handle);
-  xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
+  xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Normal_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
 }
 
 
@@ -135,7 +135,7 @@ void Device_Sensors(void *arg)
 			MPUData.gy-=MPUData.gyoffset;
 			MPUData.gz-=MPUData.gzoffset;
 		}
-		
+		Engineer_chassis.Update_CurrentAttitude(MPUData.roll,MPUData.pitch,MPUData.yaw);
     /* Exchange NUC Meaasge */
     
     /* Read Other board Message */

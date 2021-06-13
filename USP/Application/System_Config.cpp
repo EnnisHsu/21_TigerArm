@@ -108,7 +108,7 @@ extern int flag;
 void System_Tasks_Init(void)
 { 
   /* Syetem Service init --------------*/
-  Service_Debug_Init();
+//  Service_Debug_Init();
   Service_Devices_Init();
   Service_Communication_Init();
   Service_RobotCtrl_Init();
