@@ -94,37 +94,12 @@ void UpperMonitor_Sent_Choose(float * data)
     switch(USART0_Sent_Choose_Data[i])
     {
       /* 以下部分用于观察参数曲线 */
-      /*case 0: data[i]= AlphaTest.steer_Set[0].str_angle;
-          break;
-      case 1: data[i]= AlphaTest.steer_Set[0].vect_angle;
-          break;
-      case 2: data[i]= AlphaTest.steer_Set[0].speed_direction;
-          break;*/
-    /*case 0:data[i]=Tigerarm_Shoulder.get_current_position();
-    	break;
-    case 1:data[i]=Shoulder_target_pos;
-    	break;
-	case 2:data[i]=shoulder_async_controller.getSteppingTarget();
-		break;
-	case 3:data[i]=shoulder_async_controller.getTarget();
-		break;
-    case 4:data[i]=Tigerarm_Elbow.get_current_position();
-    	break;
-    case 5:data[i]=Elbow_target_pos;
-    	break;	
-	case 6:data[i]=elbow_async_controller.getSteppingTarget();
-		break;
-	case 7:data[i]=elbow_async_controller.getTarget();
-		break;
-	case 8:data[i]=elbow_async_controller.getActCur();
-		break;
-	case 9:data[i]=flag;
-		break;*/
-//    case 4:data[i]=deg[4];
-//       	break;
-//    case 5:data[i]=deg[5];
-//        break;
-
+			case 0: data[i] = MPUData.roll;
+					break;
+			case 1: data[i] = MPUData.pitch;
+					break;
+			case 2: data[i] = MPUData.yaw;
+					break;
       default:break;
 	  /* 以上部分用于观察参数曲线 */
     }

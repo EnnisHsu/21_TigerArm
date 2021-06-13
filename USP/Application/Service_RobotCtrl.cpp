@@ -132,18 +132,18 @@ void Gamepad_Ctrl(void*arg)
     //{
 		if (DR16.GetStatus()==DR16_ESTABLISHED)
 		{
-			if (TigerArm.Get_Current_Mode()==TigerArm.ForwardChassis)
-			{
+//			if (TigerArm.Get_Current_Mode()==TigerArm.ForwardChassis)
+//			{
 				TargetVelocity_X=-DR16.Get_LX_Norm();
 				TargetVelocity_Y=-DR16.Get_LY_Norm();
 				TargetVelocity_Z=DR16.Get_RX_Norm()*0.7f;
-			}
-			if (TigerArm.Get_Current_Mode()==TigerArm.BackwardChassis)
-			{
-				TargetVelocity_X=DR16.Get_LX_Norm();
-				TargetVelocity_Y=DR16.Get_LY_Norm();
-				TargetVelocity_Z=-DR16.Get_RX_Norm()*0.7f;
-			}
+//			}
+//			if (TigerArm.Get_Current_Mode()==TigerArm.BackwardChassis)
+//			{
+//				TargetVelocity_X=DR16.Get_LX_Norm();
+//				TargetVelocity_Y=DR16.Get_LY_Norm();
+//				TargetVelocity_Z=-DR16.Get_RX_Norm()*0.7f;
+//			}
 		}
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
     //}
