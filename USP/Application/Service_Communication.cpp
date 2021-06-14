@@ -159,6 +159,10 @@ void Update_ChassisCurrent(uint8_t *msg_rece,uint8_t motor)
 			
 			Engineer_chassis.wheel_rpm[motor] = -(short)((unsigned char)msg_rece[2]<<8|(unsigned char)msg_rece[3]);	
 			Engineer_chassis.wheel_torque[motor] = -(short)((unsigned char)msg_rece[4]<<8|(unsigned char)msg_rece[5]);
+		}else if(motor == 4)
+		{
+			Camera_Motor.update(msg_rece);
+
 		}
 		else 
 		{

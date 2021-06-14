@@ -60,6 +60,7 @@ _chassis_Velocity* PositionController(const _chassis_GlobalPos Current,const _ch
 
 void Offline_Ctrl(void*arg);
 void Gamepad_Ctrl(void*arg);
+void Camera_Ctrl(void*arg);
 void Motor_SendESC();
 void Chassis_Ctrl(void *arg);
 

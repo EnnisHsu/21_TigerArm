@@ -43,6 +43,13 @@ LogFilter_t Filter_List[2];
 CAnalyzer Analyzer;
 
 _BoardComRx BoardComRxData;
+
+/* Chassia Camera -------------------------------------------------------------*/
+Motor_GM3510 Camera_Motor(1);
+const float Camera_ForwardAngle=6800.0f;
+const float Camera_BackwardAngle=2600.0f;
+float Camera_Tar_Angle=Camera_ForwardAngle;
+
 /* Function ------------------------------------------------------------------*/
 float rad2deg(float x)
 {

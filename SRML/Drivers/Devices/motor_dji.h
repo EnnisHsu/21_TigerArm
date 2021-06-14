@@ -63,7 +63,11 @@ public:
     const uint8_t ID = 0;
 	
     float Out = 0; /*!< Output ampere value that sent to ESC */
-
+		
+		uint16_t getencoder()
+		{
+		return encoder; }
+		
 protected:
     float angle = 0, encoder_offset = 0, last_encoder = 0;
     bool encoder_is_init = false;
