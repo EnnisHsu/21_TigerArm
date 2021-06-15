@@ -92,7 +92,7 @@ void Task_ArmSingleCtrl(void *arg)
 	  TickType_t xLastWakeTime_t;
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
-	  {	
+	  {
 		  if (DR16.GetStatus()==DR16_ESTABLISHED)
 		  {
 				switch (DR16.GetS2())
@@ -185,6 +185,9 @@ void Task_ROSCtrl(void *arg)
 					wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
 					wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
 					wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
+					yaw_controller.async_controller.interpolation();
+					arm_controller.async_controller.interpolation();
+					elbow_controller.async_controller.interpolation();
 				}
 			}
 	    /* Pass control to the next task */

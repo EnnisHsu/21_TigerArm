@@ -29,11 +29,13 @@ float Motor_Max_Speed=10.0f;
 TaskHandle_t ServiceMotoCtrl_Handle;
 TaskHandle_t MotorInit_Handle;
 TaskHandle_t ServoCtrl_Handle;
+TaskHandle_t ServiceMotorCtrlInit_Handle;
 
 void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PriorityNormal, &ServiceMotoCtrl_Handle);
+  xTaskCreate(Task_ArmMotorInitCtrl, "ArmMotorInitCtrl", Normal_Stack_Size, NULL, PriorityNormal, &ServiceMotorCtrlInit_Handle);
   xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityNormal,&ServoCtrl_Handle);
 }
@@ -67,14 +69,14 @@ void Task_ArmMotorInit(void *arg)
 	yaw_controller.setCurrentAsTarget();
 	
 	/* Turn to Prepare Position */
-	vTaskResume(ServiceMotoCtrl_Handle);
+	vTaskResume(ServiceMotorCtrlInit_Handle);
 	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
 	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
 	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
-	vTaskDelay(1000);
+	vTaskDelay(1500);
 	
 	/* Set Prepare Postion as Target & Zero */
-	vTaskSuspend(ServiceMotoCtrl_Handle);
+	vTaskSuspend(ServiceMotorCtrlInit_Handle);
 	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
 	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
 	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
@@ -85,6 +87,7 @@ void Task_ArmMotorInit(void *arg)
 	arm_controller.setCurrentAsTarget();
 	yaw_controller.setCurrentAsTarget();	
 	vTaskDelay(100);
+	vTaskDelete(ServiceMotorCtrlInit_Handle);
 	vTaskResume(ServiceMotoCtrl_Handle);
 	
 	#ifdef _DebugAutoMode_
@@ -97,11 +100,6 @@ void Task_ArmMotorInit(void *arg)
 		vTaskDelay(1);
 	}
 }
-
-
-
-
-
 
 
 void Task_ServoCtrl(void *arg)
@@ -130,6 +128,43 @@ void Task_ServoCtrl(void *arg)
 void Task_ArmMotorCtrl(void *arg)
 {
 	
+	vTaskSuspend(ServiceMotoCtrl_Handle);
+  
+	/* Cache for Task */
+  Motor_CAN_COB Motor_TxMsg;
+
+  /* Pre-Load for task */
+
+  /* Infinite loop */
+  TickType_t xLastWakeTime_t;
+  xLastWakeTime_t = xTaskGetTickCount();
+	static int cnt = 0;
+  for(;;)
+  {
+    /* Spin linear interpolation */
+		/*error_flag=75;
+    yaw_controller.spinOnce();
+		arm_controller.spinOnce();
+		elbow_controller.spinOnce();*/
+		
+		/* Spin Cubic interpolation */
+		error_flag = 75;
+		yaw_controller.async_controller.nextStep(cnt);
+		elbow_controller.Output = elbow_controller.async_controller.nextStep(cnt)-(arm_controller.async_controller.nextStep(cnt)-arm_controller.getZeroOffset());
+		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.nextStep(cnt),Motor_Max_Speed,arm_kp,arm_kd);
+		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
+
+    MotorMsgPack(Motor_TxMsg, yaw_controller.joint_motor);
+    xQueueSendFromISR(CAN2_TxPort, &Motor_TxMsg.Low, 0);
+		elbow_controller.Output=elbow_controller.async_controller.getSteppingTarget()-(arm_controller.async_controller.getSteppingTarget()-arm_controller.getZeroOffset());
+		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.getSteppingTarget(),Motor_Max_Speed,arm_kp,arm_kd);
+		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
+    /* Pass control to the next task */
+    vTaskDelayUntil(&xLastWakeTime_t, 1);
+  }
+}
+void Task_ArmMotorInitCtrl(void *arg)
+{
 	vTaskSuspend(ServiceMotoCtrl_Handle);
   
 	/* Cache for Task */

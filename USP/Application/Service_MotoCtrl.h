@@ -13,7 +13,7 @@
 #include "System_DataPool.h"
 
 #endif
-
+void Task_ArmMotorInitCtrl(void *arg);
 void Service_MotoCtrl_Init();
 void Task_ArmMotorInit(void *arg);
 void Task_ArmMotorCtrl(void *arg);
@@ -40,7 +40,7 @@ public:
   Asynchronous_Controller(){}
 	/*新加入*/
 	~Asynchronous_Controller(){}
-	int interpolation(uint32_t time_stamp){
+	int interpolation(){
 		//将目标点和当前点之间插入100个值
 		//用三次曲线插
 		//theta = a0+a1*theta+a2*theta^2+a3*theta^3
@@ -133,55 +133,6 @@ private:
   float max_accer;		//加速度限制
   uint32_t last_time_stamp;	//ms
 };
-
-class Godzilla_Relay_Controller{
-public:
-	enum Relay_Status_Typedef
-	{
-		Relay_On=0,
-		Relay_Off,
-	};
-	Godzilla_Relay_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase)
-	{
-		this->GPIO_Base=IOBase;
-		this->GPIO_PIN_Base=IOPinBase;
-	}
-	void SetRelayStatus(Relay_Status_Typedef Target_Status)
-	{
-		this->Relay_Status=Target_Status;
-		HAL_GPIO_WritePin(this->GPIO_Base,this->GPIO_PIN_Base,(GPIO_PinState)this->Relay_Status);
-	}
-	Relay_Status_Typedef GetRelayStatus()
-	{
-		return this->Relay_Status;
-	}
-	
-private:
-	Relay_Status_Typedef Relay_Status;
-	GPIO_TypeDef* GPIO_Base;
-	uint16_t GPIO_PIN_Base;
-};
-
-class Godzilla_Pump_Controller : public Godzilla_Relay_Controller{
-public:
-	enum Negetive_Pressure_Typedef
-	{
-		Negetive,
-		Positive,
-	};
-	Godzilla_Pump_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase) : Godzilla_Relay_Controller(IOBase,IOPinBase){};
-	void Update_PressureValve(Negetive_Pressure_Typedef Valve_Status)
-	{
-		this->negetive_pressure_signal=Valve_Status;
-	}		
-	Negetive_Pressure_Typedef Get_PressureValve()
-	{
-		return this->negetive_pressure_signal;
-	}
-private:
-	Negetive_Pressure_Typedef negetive_pressure_signal;
-};
-
 class Godzilla_Servo_Controller{
 	public:
 		enum Servo_Typedef
@@ -408,7 +359,7 @@ class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
 			//this->setStepTarget(this->getCurrentAngle());
 			elbow=elbow_controller;
 			this->joint_motor.Out_Mixed_Control(this->getCurrentAngle(),10.0f,mot_kp,mot_kd);
-		}			
+		}
 		void slowlyMoveToLimit()
 		{
 			float slowly_moving_target = this->joint_motor.get_current_position();
@@ -452,8 +403,54 @@ class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
 };
 
 
+//Actuator
+class Godzilla_Relay_Controller{
+public:
+	enum Relay_Status_Typedef
+	{
+		Relay_On=0,
+		Relay_Off,
+	};
+	Godzilla_Relay_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase)
+	{
+		this->GPIO_Base=IOBase;
+		this->GPIO_PIN_Base=IOPinBase;
+	}
+	void SetRelayStatus(Relay_Status_Typedef Target_Status)
+	{
+		this->Relay_Status=Target_Status;
+		HAL_GPIO_WritePin(this->GPIO_Base,this->GPIO_PIN_Base,(GPIO_PinState)this->Relay_Status);
+	}
+	Relay_Status_Typedef GetRelayStatus()
+	{
+		return this->Relay_Status;
+	}
+	
+private:
+	Relay_Status_Typedef Relay_Status;
+	GPIO_TypeDef* GPIO_Base;
+	uint16_t GPIO_PIN_Base;
+};
 
-
+class Godzilla_Pump_Controller : public Godzilla_Relay_Controller{
+public:
+	enum Negetive_Pressure_Typedef
+	{
+		Negetive,
+		Positive,
+	};
+	Godzilla_Pump_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase) : Godzilla_Relay_Controller(IOBase,IOPinBase){};
+	void Update_PressureValve(Negetive_Pressure_Typedef Valve_Status)
+	{
+		this->negetive_pressure_signal=Valve_Status;
+	}		
+	Negetive_Pressure_Typedef Get_PressureValve()
+	{
+		return this->negetive_pressure_signal;
+	}
+private:
+	Negetive_Pressure_Typedef negetive_pressure_signal;
+};
 
 
 extern Godzilla_Yaw_Controller yaw_controller;
