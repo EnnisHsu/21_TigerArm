@@ -262,7 +262,7 @@ class CChassis
     
     /* 设置底盘运动参数(后续有需要可继续添加修改其他参数的接口) */
     void Set_SpeedParam(float slow, float normal, float fast, float z);
-    void Set_AccelerationParam(int16_t launch, int16_t normal, uint16_t brake);
+    void Set_AccelerationParam(int16_t launch, int16_t normal, int16_t brake);
     void Set_TorqueOptimizeFlag(bool flag);
     void Set_AttitudeOptimizeFlag(bool flag);
     

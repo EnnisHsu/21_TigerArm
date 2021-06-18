@@ -335,11 +335,11 @@ void CChassis::Set_SpeedParam(float slow, float normal, float fast, float z)
   Param.coefficient_z      = std_lib::constrain(z, 0.0f, 1.0f);
 }
 
-void CChassis::Set_AccelerationParam(int16_t launch, int16_t normal, uint16_t brake)
+void CChassis::Set_AccelerationParam(int16_t launch, int16_t normal, int16_t brake)
 {
 	launch = std_lib::constrain((int16_t)launch, (int16_t)-32765, (int16_t)32765);
 	normal = std_lib::constrain((int16_t)normal, (int16_t)-32765, (int16_t)32765);
-	brake = std_lib::constrain((int16_t)normal, (int16_t)0, (int16_t)65535);
+	brake = std_lib::constrain((int16_t)brake, (int16_t)-32765, (int16_t)32765);
 	
   Param.max_launch_acceleration = std::abs(launch);
   Param.max_normal_acceleration = std::abs(normal);

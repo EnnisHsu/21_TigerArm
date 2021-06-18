@@ -40,12 +40,10 @@ float TargetVelocity_X,TargetVelocity_Y,TargetVelocity_Z;
 myPID Chassis_Spd[4];
 myPID Chassis_Pos[4];
 myPID Chassis_Attitude_Yaw;
-myPID Camera_Attitude;
 
 TaskHandle_t Robot_ChassisCtrl;
 TaskHandle_t Robot_OfflineCtrl;
 TaskHandle_t Robot_GamepadCtrl;
-TaskHandle_t Robot_CameraCtrl;
 
 
 void Service_RobotCtrl_Init()
@@ -54,7 +52,6 @@ void Service_RobotCtrl_Init()
 	xTaskCreate(Chassis_Ctrl, "Robot.ChassisCtrl", Normal_Stack_Size, NULL, PriorityNormal, &Robot_ChassisCtrl);
 	//xTaskCreate(Offline_Ctrl, "Robot.OfflineCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_OfflineCtrl);
 	xTaskCreate(Gamepad_Ctrl, "Robot.GamepadCtrl", Normal_Stack_Size, NULL, PriorityNormal, &Robot_GamepadCtrl);
-	xTaskCreate(Camera_Ctrl, "Robot.CameraCtrl", Normal_Stack_Size, NULL, PriorityNormal, &Robot_CameraCtrl);
 }
 
 void Controller_PID_ParamTnit()
@@ -77,13 +74,11 @@ void Controller_PID_ParamTnit()
 	/* attitude controller */
 	Chassis_Attitude_Yaw.SetPIDParam(80.0f,0,0,0,1000);
 
-	/* camera attitude controller*/
-	Camera_Attitude.SetPIDParam(10.0f, 0, 0, 0, 4000);
 }
 
 void Engineer_Chassis_Init()
 {
-	Engineer_chassis.Set_AccelerationParam(12000,30000,2000);
+	Engineer_chassis.Set_AccelerationParam(12000,30000,14000);
 	Engineer_chassis.Set_SpeedGear(FAST_GEAR);
 	Engineer_chassis.Set_TorqueOptimizeFlag(1);
 	Engineer_chassis.Set_AttitudeOptimizeFlag(1);
@@ -148,45 +143,13 @@ void Gamepad_Ctrl(void*arg)
 //				TargetVelocity_Y=DR16.Get_LY_Norm();
 //				TargetVelocity_Z=-DR16.Get_RX_Norm()*0.7f;
 //			}
-			Engineer_chassis.Set_Target(MPUData.roll,MPUData.pitch,MPUData.yaw);
 		}
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
     //}
   }
 }
 
-void Motor_SendESC()
-{
-	/*The feedback and output values of the right two wheels should be reversed*/
-  Engineer_chassis.wheel_Out[1]= -Engineer_chassis.wheel_Out[1];
-	Engineer_chassis.wheel_Out[2]= -Engineer_chassis.wheel_Out[2];
-	
-	uint8_t msg_send[8] = {0};	
-	if(DR16.GetStatus() == DR16_ESTABLISHED)
-	{
-			msg_send[0] = (unsigned char)((short)Engineer_chassis.wheel_Out[0] >> 8);//低8位
-			msg_send[1] = (unsigned char)(short)Engineer_chassis.wheel_Out[0];
-			msg_send[2] = (unsigned char)((short)Engineer_chassis.wheel_Out[1]>> 8);
-			msg_send[3] = (unsigned char)(short)Engineer_chassis.wheel_Out[1];
-			msg_send[4] = (unsigned char)((short)Engineer_chassis.wheel_Out[2] >> 8);
-			msg_send[5] = (unsigned char)(short)Engineer_chassis.wheel_Out[2];
-			msg_send[6] = (unsigned char)((short)Engineer_chassis.wheel_Out[3] >> 8);
-			msg_send[7] = (unsigned char)(short)Engineer_chassis.wheel_Out[3];	
-	}
-	else
-	{
-		msg_send[0] = 0;//低8位
-		msg_send[1] = 0;
-		msg_send[2] = 0;
-		msg_send[3] = 0;
-		msg_send[4] =	0;
-		msg_send[5] = 0;
-		msg_send[6] = 0;
-		msg_send[7] = 0;			
-	}
-	
-	CANx_SendData(&hcan1,0x200,msg_send,8);		
-}
+
 
 void Chassis_Ctrl(void *arg)
 {
@@ -197,28 +160,12 @@ void Chassis_Ctrl(void *arg)
   {
 		Engineer_chassis.Set_Target(TargetVelocity_X,TargetVelocity_Y,-TargetVelocity_Z);				
 		Engineer_chassis.Chassis_Control();
-		Motor_SendESC();
+		Chassis_MotorMsg_Send();
     vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
   }
 }
 
 
-void Camera_Ctrl(void *arg)
-{
-		static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
-		static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
-		
-		for (;;)
-		{
-			Camera_Attitude.Target = Camera_Tar_Angle;
-//		Chassis_Camera_PID.Target = C;
-			Camera_Attitude.Current = Camera_Motor.getencoder();
-			Camera_Attitude.Adjust();
-			Camera_Motor.Out = Camera_Attitude.Out;
-			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
-		}
-		
-}
 
 void Keyboard_Ctrl(void*arg)
 {
@@ -249,8 +196,11 @@ void Keyboard_Ctrl(void*arg)
       TargetVelocity_Z=std_lib::constrain(TargetVelocity_Z,1.0f,-1.0f);
 			
 			
-			if(DR16.IsKeyPress(DR16_KEY_Z) && DR16.IsKeyPress(DR16_KEY_CTRL))  {Camera_Tar_Angle = (TigerArm.Get_Current_Mode()==TigerArm.ForwardChassis?Camera_ForwardAngle:Camera_BackwardAngle);Z_KeyFlag=0;}        /*相机翻转*/
-			
+			if(DR16.IsKeyPress(DR16_KEY_Z) && DR16.IsKeyPress(DR16_KEY_CTRL))  /*相机翻转*/
+				{
+					__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_1,(TigerArm.Get_Current_Mode()==TigerArm.ForwardChassis?500:2500));//1500
+					Z_KeyFlag=0;
+				}
 		  //if(DR16.IsKeyPress(_Z)&&!DR16.IsKeyPress(_CTRL)) {Z_KeyFlag=1;}
 			
 			

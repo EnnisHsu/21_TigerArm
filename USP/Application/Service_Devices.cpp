@@ -117,7 +117,6 @@ void Device_DR16(void *arg)
 void Device_Sensors(void *arg)
 {
   /* Cache for Task */
-	static float last_yaw,yaw;
   /* Pre-Load for task */
 
   /* Infinite loop */

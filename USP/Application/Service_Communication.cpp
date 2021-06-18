@@ -129,6 +129,7 @@ void Task_BoardComRx(void *arg)
   /* Cache for Task */
 	USART_COB _buffer;
 	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+	static uint32_t LastTime;
   /* Pre-Load for task */
 
   /* Infinite loop */
@@ -137,16 +138,22 @@ void Task_BoardComRx(void *arg)
 	extern _BoardComRx BoardComRxData;
   for(;;)
   {
-    
-
-    if (xQueueReceive(BodCom_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
+   
+		if(Get_SystemTimer()-LastTime < 1000000)
+		{
+			Engineer_chassis.Switch_Mode(Normal_Speed);
+		}else{
+			Engineer_chassis.Switch_Mode(Halt);
+		}
+		
+		if (xQueueReceive(BodCom_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
     {
 
-			static uint8_t* dr16_msg;
 			memcpy(&BoardComRxData,_buffer.address,22);
     	DR16.DataCapture(&BoardComRxData.dr16Data);
 			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
-    }
+			LastTime = Get_SystemTimer();
+		}
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);
   }
@@ -159,9 +166,9 @@ void Update_ChassisCurrent(uint8_t *msg_rece,uint8_t motor)
 			
 			Engineer_chassis.wheel_rpm[motor] = -(short)((unsigned char)msg_rece[2]<<8|(unsigned char)msg_rece[3]);	
 			Engineer_chassis.wheel_torque[motor] = -(short)((unsigned char)msg_rece[4]<<8|(unsigned char)msg_rece[5]);
-		}else if(motor == 4)
-		{
-			Camera_Motor.update(msg_rece);
+//		}else if(motor == 4)
+//		{
+//			Camera_Motor.update(msg_rece);
 
 		}
 		else 

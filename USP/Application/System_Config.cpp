@@ -97,7 +97,7 @@ void System_Resource_Init(void)
   SysLog.global_conf(LOG_LVL_ALL, false);
   
   /* Service configurations -----------*/
-  
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 }  
 
 extern int flag;

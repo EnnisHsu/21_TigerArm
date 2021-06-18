@@ -98,10 +98,6 @@ typedef struct BoardComRx_Typedef
 	uint8_t TarSpdZ;
 }_BoardComRx;
 
-extern Motor_GM3510 Camera_Motor;
-extern const float Camera_ForwardAngle;
-extern const float Camera_BackwardAngle;
-extern float Camera_Tar_Angle;
 
 //暂时被遗忘在这,统一标准接口制定后再集中回收
 //#ifndef __UUCOBTypeDef_DEFINED
