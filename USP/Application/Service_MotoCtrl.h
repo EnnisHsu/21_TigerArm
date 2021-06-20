@@ -21,8 +21,9 @@ void Task_ServoCtrl(void *arg);
 
 class Asynchronous_Controller;
 	
-enum Curve_Type{
+enum Curve_Typedef{
   LINEAR = 0,	//直线
+	Cubic_Polynomial,//三次多项式
 };
 
 struct PID_Param_Typedef{
@@ -34,53 +35,37 @@ struct PID_Param_Typedef{
   float d_term_max;
   float o_max;
 };
+
+struct CubicPoly_Param_Typedef{
+	float a0,a1,a2,a3;
+	float tf;
+};
 		
 class Asynchronous_Controller{
 public:
   Asynchronous_Controller(){}
-	/*新加入*/
 	~Asynchronous_Controller(){}
-	int interpolation(){
-		//将目标点和当前点之间插入100个值
+	int CubicPoly_Init(){
 		//用三次曲线插
 		//theta = a0+a1*theta+a2*theta^2+a3*theta^3
-		float cur = this->getActCur();
-		float tar = this->getTarget();
-		float a0 = cur;
-		float a1 = 0;
-		float a3 = (tar - cur)*2/1000000;
-		float a2 = -a3*100*3/2;
-		for(int i = 0;i<100;i++){
-			this->theta[i] = this->caculTheta(a0,a1,a2,a3,i);
-		}
+		CubicPoly_Config.a0 = this->actual_current;
+		CubicPoly_Config.a1 = 0;
+		CubicPoly_Config.a2 = (this->set_target - this->actual_current)*3/(CubicPoly_Config.tf*CubicPoly_Config.tf);
+		CubicPoly_Config.a3 = (this->set_target - this->actual_current)*2/(CubicPoly_Config.tf*CubicPoly_Config.tf*CubicPoly_Config.tf);
 		return 0;
 	}
-	
-	float nextStep(int cnt){
-		return theta[cnt];
+	void spinOnce(uint32_t time_stamp)
+	{
+		(this->Curve_Type==LINEAR)?(void)LinearSpin(time_stamp):(void)NULL;
+		(this->Curve_Type==Cubic_Polynomial)?(void)CubicPolySpin(time_stamp):(void)NULL;
 	}
-	/*新加入*/
-  float spinOnce(uint32_t time_stamp)
-  {
-    uint32_t interval_time = time_stamp - last_time_stamp;			//时间间隔
-    float target_delta = getSpeedWithDirection() * float(interval_time) / 1000.0f;//计算目标值
-    float stepping_target_temp;
-    if (stepping_target>=set_target && stepping_target+target_delta<=set_target)
-      stepping_target_temp=set_target;
-    else if (stepping_target<=set_target && stepping_target+target_delta>=set_target)
-      stepping_target_temp=set_target;
-    else stepping_target_temp=stepping_target+target_delta;
-    //stepping_target = fabs(stepping_target + target_delta) >= fabs(set_target) ? set_target : stepping_target + target_delta;
-    stepping_target=stepping_target_temp;
-    last_time_stamp = time_stamp;
-
-    return stepping_target;
-  }
   void resetStepTarget(float target, float current)
   {
     setTarget(target);
 		this->actual_current=current;
     last_time_stamp = xTaskGetTickCount();
+		set_time_stamp = xTaskGetTickCount();
+		(this->Curve_Type==Cubic_Polynomial)?(void)CubicPoly_Init():(void)NULL;
   }
   void setSpeedConstrain(float val)	//设置最大速度 单位rad/s
   {
@@ -90,7 +75,7 @@ public:
   {
     max_accer = val;
   }
-  void setCurveType(Curve_Type type);
+  void setCurveType(Curve_Typedef type);
   float getSteppingTarget()
   {
     return stepping_target;
@@ -109,10 +94,28 @@ public:
     stepping_target = val;
   }
 private:
-	/**新加入*/
-	float theta[100] = {0};
-	float caculTheta(float a0,float a1,float a2,float a3,float t){
-		return a0+a1*t+a2*t*t+a3*t*t*t;
+	float LinearSpin(uint32_t time_stamp)
+  {
+    uint32_t interval_time = time_stamp - last_time_stamp;			//时间间隔
+    float target_delta = getSpeedWithDirection() * float(interval_time) / 1000.0f;//计算目标值
+    float stepping_target_temp;
+    if (stepping_target>=set_target && stepping_target+target_delta<=set_target)
+      stepping_target_temp=set_target;
+    else if (stepping_target<=set_target && stepping_target+target_delta>=set_target)
+      stepping_target_temp=set_target;
+    else stepping_target_temp=stepping_target+target_delta;
+    //stepping_target = fabs(stepping_target + target_delta) >= fabs(set_target) ? set_target : stepping_target + target_delta;
+    stepping_target=stepping_target_temp;
+    last_time_stamp = time_stamp;
+
+    return stepping_target;
+  }
+	float CubicPolySpin(uint32_t time_stamp)
+	{
+		uint32_t interval_time = time_stamp - set_time_stamp;
+		stepping_target = CubicPoly_Config.a0+CubicPoly_Config.a1*interval_time+CubicPoly_Config.a2*interval_time*interval_time+CubicPoly_Config.a3*interval_time*interval_time*interval_time;
+		last_time_stamp = time_stamp;
+		return stepping_target;
 	}
 	/**新加入*/
   float getSpeedWithDirection()
@@ -131,8 +134,13 @@ private:
   float stepping_target;	//计算的目标值
   float max_speed;		//速度限制
   float max_accer;		//加速度限制
+	CubicPoly_Param_Typedef CubicPoly_Config;
+	Curve_Typedef Curve_Type;
   uint32_t last_time_stamp;	//ms
+	uint32_t set_time_stamp;
 };
+
+
 class Godzilla_Servo_Controller{
 	public:
 		enum Servo_Typedef

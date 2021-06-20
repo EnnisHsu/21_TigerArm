@@ -31,6 +31,7 @@
   */
 #include "Service_RobotCtrl.h"
 #include "Service_MotoCtrl.h"
+#include "Service_Communication.h"
 
 float deg[6];
 CEngineer TigerArm;
@@ -109,13 +110,6 @@ void Task_ArmSingleCtrl(void *arg)
 								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_DOWN:
-								TigerArm.Switch_Mode(TigerArm.AutoCatch);
-								uint8_t data[4]={0,0,0,0};
-								USART_COB Usart_TxCOB;
-								Usart_TxCOB.address=&data;
-								Usart_TxCOB.len=4;
-								Usart_TxCOB.port_num=4;
-								xQueueSendFromISR(USART_TxPort,&Usart_TxCOB,0);
 								break;
 							default:
 								break;
@@ -127,10 +121,8 @@ void Task_ArmSingleCtrl(void *arg)
 							case DR16_SW_UP:
 								break;
 							case DR16_SW_MID:
-								TigerArm.Switch_Mode(TigerArm.ForwardChassis);
 								break;
 							case DR16_SW_DOWN:
-								TigerArm.Switch_Mode(TigerArm.BackwardChassis);
 								break;
 							default:
 								break;
@@ -174,8 +166,8 @@ void Task_ROSCtrl(void *arg)
 	  for(;;)
 	  {
 			error_flag=99;
-			if (TigerArm.Get_Current_Mode()==TigerArm.AutoCatch)
-			{
+			//if (TigerArm.Get_Current_Mode()==TigerArm.AutoCatch)
+			//{
 				if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 				{
 					memcpy(deg,_buffer.address,_buffer.len);
@@ -185,15 +177,29 @@ void Task_ROSCtrl(void *arg)
 					wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
 					wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
 					wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
-					yaw_controller.async_controller.interpolation();
-					arm_controller.async_controller.interpolation();
-					elbow_controller.async_controller.interpolation();
 				}
-			}
+			//}
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }	
 }
+
+void Send_Command_To_NUC(uint32_t command)
+{
+	static uint32_t Msg=command;
+	Usart_Tx_Pack(USART_TxPort,4,sizeof(Msg),&Msg);
+}
+
+void Tigerarm_Space_Displacement()
+{
+	(DR16.IsKeyPress(DR16_KEY_W) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(119):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_A) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(97):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_S) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(115):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_D) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(100):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_Q) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(87):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_C) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(83):(void)NULL;
+}
+
 
  void Task_KeyboardCtrl(void *arg)
  {
@@ -208,30 +214,73 @@ void Task_ROSCtrl(void *arg)
 	  {
 			if (xTaskNotifyWait(0x00,0xffffffff,NULL,0)==pdTRUE)
 			{
-				if (DR16.IsKeyPress(DR16_KEY_CTRL) && (DR16.IsKeyPress(DR16_KEY_Q) || DR16.IsKeyPress(DR16_KEY_E)))
+				/*if (DR16.IsKeyPress(DR16_KEY_CTRL) && (DR16.IsKeyPress(DR16_KEY_Q) || DR16.IsKeyPress(DR16_KEY_E)))
 				{
 					if (DR16.IsKeyPress(DR16_KEY_Q)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xd1)%6+0xd0));
 					if (DR16.IsKeyPress(DR16_KEY_E)) TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)((TigerArm.Get_Current_Mode()-0xcf)%6+0xd0));
 				}
 				else
+				{*/
+				if (DR16.IsKeyPress(DR16_KEY_B))
 				{
-					switch (TigerArm.Get_Current_Mode())
-					{
-						case CEngineer::ManualCatch:
-							//(DR16.IsKeyPress(DR16_KEY_W))?
-							
-							break;
-						case CEngineer::Rescure:
-							
-							break;
-						default:
-							break;
-					}
+					continue;
 				}
+				if (DR16.IsKeyPress(DR16_KEY_Q) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				{
+					TigerArm.Switch_Mode(TigerArm.DrivingMode);
+					Send_Command_To_NUC(104);
+					continue;
+				}
+				if (DR16.IsKeyPress(DR16_KEY_E) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				{
+					TigerArm.Switch_Mode(TigerArm.TaskingMode);
+					Send_Command_To_NUC(104);
+					continue;
+				}
+				if (DR16.IsKeyPress(DR16_KEY_Z) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))
+				{
+					TigerArm.Switch_Mode(TigerArm.GoldenMineral);
+					Send_Command_To_NUC(114);
+					continue;
+				}
+				if (DR16.IsKeyPress(DR16_KEY_C) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				{
+					TigerArm.Switch_Mode(TigerArm.ExchangeMode);
+					Send_Command_To_NUC(114);
+					continue;
+				}
+				switch (TigerArm.Get_Current_Mode())
+				{
+					case CEngineer::GoldenMineral:
+						Tigerarm_Space_Displacement();
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(84):(void)NULL;
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(118):(void)NULL;
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//左pia
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//右pia
+						break;
+					case CEngineer::ExchangeMode:
+						/* Tigerarm Exchange Control */
+						Tigerarm_Space_Displacement();
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(32):(void)NULL;//拿出矿舱矿石准备兑换
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(120):(void)NULL;//兑换矿石
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//fuck一下
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//翻转一下
+						break;
+					case CEngineer::Rescure:
+							
+						break;
+					case CEngineer::Obstacles:
+						(DR16.IsKeyPress(DR16_KEY_Z))?Send_Command_To_NUC(116):(void)NULL;
+						(DR16.IsKeyPress(DR16_KEY_X))?Send_Command_To_NUC(113):(void)NULL;
+						break;
+					default:
+						break;
+				}
+				
 			}
 
 	    /* Pass control to the next task */
-	    vTaskDelayUntil(&xLastWakeTime_t,1);
+	    vTaskDelayUntil(&xLastWakeTime_t,50);
 	  }
  }
  

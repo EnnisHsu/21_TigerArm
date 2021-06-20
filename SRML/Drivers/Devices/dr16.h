@@ -151,6 +151,7 @@ class DR16_Classdef
 
         /*用于判断某个按键是否按下,按下之后的回调函数*/
         bool IsKeyPress(int _key);
+				bool IsKeyTriggered(int _key);
         void Register_Click_Fun(int _Key, CLICK_EXCE Fun_Ptr);
         void Exce_Click_Fun();
 

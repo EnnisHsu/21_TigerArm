@@ -35,7 +35,6 @@ void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PriorityNormal, &ServiceMotoCtrl_Handle);
-  xTaskCreate(Task_ArmMotorInitCtrl, "ArmMotorInitCtrl", Normal_Stack_Size, NULL, PriorityNormal, &ServiceMotorCtrlInit_Handle);
   xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityNormal,&ServoCtrl_Handle);
 }
@@ -87,11 +86,10 @@ void Task_ArmMotorInit(void *arg)
 	arm_controller.setCurrentAsTarget();
 	yaw_controller.setCurrentAsTarget();	
 	vTaskDelay(100);
-	vTaskDelete(ServiceMotorCtrlInit_Handle);
 	vTaskResume(ServiceMotoCtrl_Handle);
 	
 	#ifdef _DebugAutoMode_
-		TigerArm.Switch_Mode(TigerArm.AutoCatch);
+		
 	#endif
 	
 	vTaskDelete(MotorInit_Handle);
@@ -142,43 +140,6 @@ void Task_ArmMotorCtrl(void *arg)
   for(;;)
   {
     /* Spin linear interpolation */
-		/*error_flag=75;
-    yaw_controller.spinOnce();
-		arm_controller.spinOnce();
-		elbow_controller.spinOnce();*/
-		
-		/* Spin Cubic interpolation */
-		error_flag = 75;
-		yaw_controller.async_controller.nextStep(cnt);
-		elbow_controller.Output = elbow_controller.async_controller.nextStep(cnt)-(arm_controller.async_controller.nextStep(cnt)-arm_controller.getZeroOffset());
-		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.nextStep(cnt),Motor_Max_Speed,arm_kp,arm_kd);
-		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
-
-    MotorMsgPack(Motor_TxMsg, yaw_controller.joint_motor);
-    xQueueSendFromISR(CAN2_TxPort, &Motor_TxMsg.Low, 0);
-		elbow_controller.Output=elbow_controller.async_controller.getSteppingTarget()-(arm_controller.async_controller.getSteppingTarget()-arm_controller.getZeroOffset());
-		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.getSteppingTarget(),Motor_Max_Speed,arm_kp,arm_kd);
-		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
-    /* Pass control to the next task */
-    vTaskDelayUntil(&xLastWakeTime_t, 1);
-  }
-}
-void Task_ArmMotorInitCtrl(void *arg)
-{
-	vTaskSuspend(ServiceMotoCtrl_Handle);
-  
-	/* Cache for Task */
-  Motor_CAN_COB Motor_TxMsg;
-
-  /* Pre-Load for task */
-
-  /* Infinite loop */
-  TickType_t xLastWakeTime_t;
-  xLastWakeTime_t = xTaskGetTickCount();
-
-  for(;;)
-  {
-    /* Spin linear interpolation */
 		error_flag=75;
     yaw_controller.spinOnce();
 		arm_controller.spinOnce();
@@ -193,3 +154,4 @@ void Task_ArmMotorInitCtrl(void *arg)
     vTaskDelayUntil(&xLastWakeTime_t, 1);
   }
 }
+

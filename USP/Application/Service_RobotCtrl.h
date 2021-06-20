@@ -27,12 +27,13 @@ class CEngineer
 		enum Engineer_Mode_Typedef
 		{
 					TigerarmNone = 0xee,
-					ForwardChassis = 0xd0,			
-					BackwardChassis =0xd1,		
-					AutoCatch =0xd2,
-					ManualCatch =0xd3,
-					Rescure =0xd4,
-					Auto_Obstacles =0xd5,
+					DrivingMode = 0xd0,			
+					TaskingMode =0xd1,		
+					GoldenMineral =0xd2,
+					SilverMineral =0xd3,
+					ExchangeMode = 0xd4,
+					Rescure =0xd5,
+					Obstacles =0xd6,
 		};
 		void Switch_Mode(Engineer_Mode_Typedef Target_Mode)
 		{
@@ -43,7 +44,7 @@ class CEngineer
 			return this->Engineer_Mode;
 		}
 	private:
-		Engineer_Mode_Typedef Engineer_Mode=this->ForwardChassis;
+		Engineer_Mode_Typedef Engineer_Mode=this->DrivingMode;
 		
 	
 };

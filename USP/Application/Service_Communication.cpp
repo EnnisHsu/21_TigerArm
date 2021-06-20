@@ -272,4 +272,13 @@ uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
   return 0;
 }
+
+uint8_t Usart_Tx_Pack(QueueHandle_t Queue_Usart_TxPort,uint8_t port_num,uint16_t len,void* address)
+{
+	USART_COB Usart_TxCOB;
+	Usart_TxCOB.port_num=port_num;
+	Usart_TxCOB.address=address;
+	Usart_TxCOB.len=len;
+	xQueueSendFromISR(Queue_Usart_TxPort,&Usart_TxCOB,0);
+}
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

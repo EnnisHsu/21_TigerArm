@@ -122,8 +122,10 @@ void DR16_Classdef::Key_Process(void)
             Key[i].isPressed = true;
         else
         {
+						if (Key[i].isPressed) Key[i].isTriggered = true;
+						else Key[i].isTriggered = false;
             Key[i].isPressed = false;
-            Key[i].isTriggered = false;
+            
         }
     }
     //鼠标左右键处理
@@ -131,15 +133,18 @@ void DR16_Classdef::Key_Process(void)
         Key[DR16_MOUSE_L].isPressed = true;
     else
     {
+				if (Key[DR16_MOUSE_L].isPressed) Key[DR16_MOUSE_L].isTriggered = true;
+				else Key[DR16_MOUSE_L].isTriggered = false;
         Key[DR16_MOUSE_L].isPressed = false;
-        Key[DR16_MOUSE_L].isTriggered = false;
+        
     }
     if(DataPack.press_r == 0x01)
         Key[DR16_MOUSE_R].isPressed = true;
     else
     {
+				if (Key[DR16_MOUSE_R].isPressed) Key[DR16_MOUSE_R].isTriggered = true;
+				else Key[DR16_MOUSE_R].isTriggered = false;
         Key[DR16_MOUSE_R].isPressed = false;
-        Key[DR16_MOUSE_R].isTriggered = false;
     }
 }
 
@@ -275,6 +280,11 @@ float DR16_Classdef::Get_MouseZ_Norm(void)
 bool DR16_Classdef::IsKeyPress(int _key)
 {
     return Key[_key].isPressed;
+}
+
+bool DR16_Classdef::IsKeyTriggered(int _key)
+{
+		return Key[_key].isTriggered;
 }
 
 /**
