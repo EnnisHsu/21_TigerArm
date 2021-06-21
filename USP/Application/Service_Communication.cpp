@@ -139,7 +139,7 @@ void Task_BoardComRx(void *arg)
   for(;;)
   {
    
-		if(Get_SystemTimer()-LastTime < 1000000)
+		if(Get_SystemTimer()-LastTime < 500000)
 		{
 			Engineer_chassis.Switch_Mode(Normal_Speed);
 		}else{
@@ -151,8 +151,9 @@ void Task_BoardComRx(void *arg)
 
 			memcpy(&BoardComRxData,_buffer.address,22);
     	DR16.DataCapture(&BoardComRxData.dr16Data);
-			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
+//			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
 			LastTime = Get_SystemTimer();
+			
 		}
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);

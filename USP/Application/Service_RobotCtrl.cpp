@@ -131,7 +131,7 @@ void Gamepad_Ctrl(void*arg)
   {
     //if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
     //{
-		if (DR16.GetStatus()==DR16_ESTABLISHED)
+		if (DR16.GetS1()!=DR16_SW_DOWN || DR16.GetS2()!=DR16_SW_DOWN)
 		{
 			if (TigerArm.Get_Current_Mode()==TigerArm.DrivingMode)
 			{
@@ -144,11 +144,11 @@ void Gamepad_Ctrl(void*arg)
 				TargetVelocity_Y=DR16.Get_LY_Norm();
 				TargetVelocity_Z=-DR16.Get_RX_Norm()*0.7f;
 			}
-			if(DR16.GetS2() == DR16_SW_MID){
-				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,580);//forward
-			}else if(DR16.GetS2() == DR16_SW_DOWN){
-				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,1550);//screen
-			}
+//			if(DR16.GetS2() == DR16_SW_MID){
+//				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,580);//forward
+//			}else if(DR16.GetS2() == DR16_SW_DOWN){
+//				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,1550);//screen
+//			}
 		}
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
     //}
@@ -180,57 +180,62 @@ void Keyboard_Ctrl(void*arg)
 	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
   static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
 	
-	static bool toggle;
-	static CEngineer::Engineer_Mode_Typedef LastDirMode;
+	static bool CameraisForward = false;
 	static CEngineer::Engineer_Mode_Typedef DirMode;
 	 for (;;)
   {
-		    if (xTaskNotifyWait(0x00000000, 0xFFFFFFFF, NULL, _xTicksToWait) == pdTRUE)
-    {
-			static float Speed_Gear=0.5;
-			static float Mouse_Sensitivity_Gear=0.5;
+			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+		  if(DR16.GetS1()==DR16_SW_DOWN && DR16.GetS2()==DR16_SW_DOWN)
+			{
+				
+			static float Speed_Gear=0.2;
+			static float Mouse_Sensitivity_Gear=0.1;
 			static uint8_t F_KeyFlag=0;
 			static uint8_t G_KeyFlag=0;
 			static uint8_t Z_KeyFlag=0;
 			static uint8_t F_Ctrl_KeyFlag=0;
 			static uint8_t G_Ctrl_KeyFlag=0;
-			
+			if(DR16.IsKeyPress(DR16_KEY_Q)){
+				TigerArm.Switch_Mode(CEngineer::DrivingMode);
+				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,1550);
+			}
+			if(DR16.IsKeyPress(DR16_KEY_C)||DR16.IsKeyPress(DR16_KEY_Z)||DR16.IsKeyPress(DR16_KEY_E)){
+				TigerArm.Switch_Mode(CEngineer::BackMode);
+				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,580);
+			}
 			DirMode = TigerArm.Get_Current_Mode() == CEngineer::DrivingMode?CEngineer::DrivingMode:CEngineer::BackMode;
-			if(TigerArm.Get_Current_Mode()==TigerArm.DrivingMode)
+			if(DirMode==TigerArm.DrivingMode)
 			{
 				DR16.IsKeyPress(DR16_KEY_S) ? (TargetVelocity_Y=-Speed_Gear):(TargetVelocity_Y=0);                  /*后*/
 				DR16.IsKeyPress(DR16_KEY_W) ? (TargetVelocity_Y=Speed_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
 				DR16.IsKeyPress(DR16_KEY_A) ? (TargetVelocity_X=-Speed_Gear):(TargetVelocity_X=0);                  /*左*/
 				DR16.IsKeyPress(DR16_KEY_D) ? (TargetVelocity_X=Speed_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
-			}else
+			}else if(DirMode==TigerArm.BackMode)
 			{
 				DR16.IsKeyPress(DR16_KEY_S) ? (TargetVelocity_Y=Speed_Gear):(TargetVelocity_Y=0);                  /*后*/
 				DR16.IsKeyPress(DR16_KEY_W) ? (TargetVelocity_Y=-Speed_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
 				DR16.IsKeyPress(DR16_KEY_A) ? (TargetVelocity_X=Speed_Gear):(TargetVelocity_X=0);                  /*左*/
 				DR16.IsKeyPress(DR16_KEY_D) ? (TargetVelocity_X=-Speed_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
 			}
-			
-			if(LastDirMode != DirMode){
-				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,(TigerArm.Get_Current_Mode()==TigerArm.DrivingMode?580:1550));
-				toggle = ~toggle;
-			}
-			
+
+
 			TargetVelocity_Z=2.5f*DR16.Get_MouseX_Norm()*Mouse_Sensitivity_Gear;                        /*旋转*/
 			//DR16.IsKeyPress(_V) ? (TargetVelocity_Z=TargetVelocity_Z-Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制逆时针旋转*/
 			//DR16.IsKeyPress(_B) ? (TargetVelocity_Z=TargetVelocity_Z+Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制顺时针旋转*/
-      TargetVelocity_Z=std_lib::constrain(TargetVelocity_Z,1.0f,-1.0f);
+//      TargetVelocity_Z=std_lib::constrain(TargetVelocity_Z,1.0f,-1.0f);
 			
 			
 			if(DR16.IsKeyPress(DR16_KEY_Z) && DR16.IsKeyPress(DR16_KEY_CTRL))  /*相机翻转*/
 				{
-					__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,(toggle?580:1550));//1500
-					toggle = ~toggle;
+					CameraisForward = CameraisForward?false:true;
+					__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,(CameraisForward?580:1550));//1500
+					
 				}
 		  //if(DR16.IsKeyPress(_Z)&&!DR16.IsKeyPress(_CTRL)) {Z_KeyFlag=1;}
-			LastDirMode = (TigerArm.Get_Current_Mode() == CEngineer::DrivingMode?CEngineer::DrivingMode:CEngineer::BackMode);
+
 			
     }
-		vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
+		
 	}
 }
 
