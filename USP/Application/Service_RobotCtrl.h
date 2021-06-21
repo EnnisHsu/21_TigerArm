@@ -17,32 +17,33 @@
 extern "C"
 {
 #endif
-	
 class CEngineer
 {
-	public:
-		enum Engineer_Mode_Typedef
-		{
-					TigerarmNone = 0xee,
-					ForwardChassis = 0xd0,			
-					BackwardChassis =0xd1,		
-					AutoCatch =0xd2,
-					ManualCatch =0xd3,
-					Rescure =0xd4,
-					Auto_Obstacles =0xd5,
-		};
-		void Switch_Mode(Engineer_Mode_Typedef Target_Mode)
-		{
-			this->Engineer_Mode=Target_Mode;
-		}
-		Engineer_Mode_Typedef Get_Current_Mode()
-		{
-			return this->Engineer_Mode;
-		}
-	private:
-		Engineer_Mode_Typedef Engineer_Mode=this->ForwardChassis;
-		
-	
+ public:
+  enum Engineer_Mode_Typedef
+  {
+     TigerarmNone = 0xee,
+     DrivingMode = 0xd0,   //forward
+     TaskingMode =0xd1,  //screen
+     GoldenMineral =0xd2,
+     SilverMineral =0xd3,
+     ExchangeMode = 0xd4,
+     Rescure =0xd5,
+     Obstacles =0xd6,
+			BackMode = 0xff,
+  };
+  void Switch_Mode(Engineer_Mode_Typedef Target_Mode)
+  {
+   this->Engineer_Mode=Target_Mode;
+  }
+  Engineer_Mode_Typedef Get_Current_Mode()
+  {
+   return this->Engineer_Mode;
+  }
+ private:
+  Engineer_Mode_Typedef Engineer_Mode=this->DrivingMode;
+  
+ 
 };
 
 extern CEngineer TigerArm;
@@ -62,6 +63,7 @@ void Offline_Ctrl(void*arg);
 void Gamepad_Ctrl(void*arg);
 void Camera_Ctrl(void*arg);
 void Chassis_Ctrl(void *arg);
+void Keyboard_Ctrl(void *arg);
 
 
 #ifdef __cplusplus
