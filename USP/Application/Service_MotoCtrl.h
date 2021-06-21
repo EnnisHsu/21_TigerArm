@@ -75,7 +75,10 @@ public:
   {
     max_accer = val;
   }
-  void setCurveType(Curve_Typedef type);
+  void setCurveType(Curve_Typedef type)
+	{
+		this->Curve_Type=type;
+	}
   float getSteppingTarget()
   {
     return stepping_target;
@@ -199,12 +202,14 @@ template <class motor>
 class Godzilla_Joint_Controller{
 public:
   Godzilla_Joint_Controller(int id, float speed, float i_min,float i_max,float reduction) : joint_motor(id){
+		this->async_controller.setCurveType(Cubic_Polynomial);
     this->async_controller.setSpeedConstrain(speed);
 		this->o_min=i_min;
 		this->o_max=i_max;
 		this->reduction_ratio=reduction;
   }
   Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : joint_motor(id, hcan){
+		this->async_controller.setCurveType(Cubic_Polynomial);
     this->async_controller.setSpeedConstrain(speed);
 		this->o_min=i_min;
 		this->o_max=i_max;

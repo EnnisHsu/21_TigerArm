@@ -240,13 +240,13 @@ void Tigerarm_Space_Displacement()
 				if (DR16.IsKeyPress(DR16_KEY_Z) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))
 				{
 					TigerArm.Switch_Mode(TigerArm.GoldenMineral);
-					Send_Command_To_NUC(114);
+					Send_Command_To_NUC(113);
 					continue;
 				}
 				if (DR16.IsKeyPress(DR16_KEY_C) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
 				{
 					TigerArm.Switch_Mode(TigerArm.ExchangeMode);
-					Send_Command_To_NUC(114);
+					Send_Command_To_NUC(113);
 					continue;
 				}
 				switch (TigerArm.Get_Current_Mode())
