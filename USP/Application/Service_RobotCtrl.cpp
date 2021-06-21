@@ -170,13 +170,39 @@ void Task_ROSCtrl(void *arg)
 			//{
 				if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 				{
-					memcpy(deg,_buffer.address,_buffer.len);
-					yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
-					arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
-					elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
-					wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
-					wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
-					wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
+					if (_buffer.len==24)
+					{
+						memcpy(deg,_buffer.address,_buffer.len);
+						yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
+						arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
+						elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
+						wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
+						wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
+						wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
+					}
+					if (_buffer.len==2)
+					{
+						static int8_t ros_command[2];
+						memcpy(ros_command,_buffer.address,_buffer.len);
+						ros_command[0]==1?pump_controller.SetRelayStatus(pump_controller.Relay_Off):(void)NULL;
+						ros_command[1]==1?TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait):(void)NULL;
+					}
+					if (_buffer.len==26)
+					{
+						static int8_t ros_command[2];
+						static uint8_t msg_buff[26];
+						memcpy(msg_buff,_buffer.address,_buffer.len);
+						memcpy(deg,msg_buff,24);
+						yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+deg[0]*yaw_controller.getReductionRatio());
+						arm_controller.setStepTarget(arm_controller.getZeroOffset()+deg[1]*arm_controller.getReductionRatio());
+						elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+deg[2]*elbow_controller.getReductionRatio());
+						wristroll_controller.SetTargetAngle(rad2deg(deg[3]));
+						wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
+						wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
+						memcpy(ros_command,msg_buff+24,2);
+						ros_command[0]==1?pump_controller.SetRelayStatus(pump_controller.Relay_Off):(void)NULL;
+						ros_command[1]==1?TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait):(void)NULL;
+					}
 				}
 			//}
 	    /* Pass control to the next task */
@@ -186,18 +212,21 @@ void Task_ROSCtrl(void *arg)
 
 void Send_Command_To_NUC(uint32_t command)
 {
-	static uint32_t Msg=command;
+	static uint32_t Msg;
+	Msg=command;
+	TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandLock);
+	(command==82)?pump_controller.SetRelayStatus(pump_controller.Relay_On):(void)NULL;
 	Usart_Tx_Pack(USART_TxPort,4,sizeof(Msg),&Msg);
 }
 
 void Tigerarm_Space_Displacement()
 {
-	(DR16.IsKeyPress(DR16_KEY_W) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(119):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_A) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(97):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_S) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(115):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_D) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(100):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_Q) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(87):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_C) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(83):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_W) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(119):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_A) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(97):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_S) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(115):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_D) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(100):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_Q) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(87):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_C) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(83):(void)NULL;
 }
 
 
@@ -225,25 +254,25 @@ void Tigerarm_Space_Displacement()
 				{
 					continue;
 				}
-				if (DR16.IsKeyPress(DR16_KEY_Q) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				if (DR16.IsKeyPress(DR16_KEY_Q) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
 				{
 					TigerArm.Switch_Mode(TigerArm.DrivingMode);
-					Send_Command_To_NUC(104);
+					Send_Command_To_NUC(114);
 					continue;
 				}
-				if (DR16.IsKeyPress(DR16_KEY_E) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				if (DR16.IsKeyPress(DR16_KEY_E) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
 				{
 					TigerArm.Switch_Mode(TigerArm.TaskingMode);
-					Send_Command_To_NUC(104);
+					Send_Command_To_NUC(114);
 					continue;
 				}
-				if (DR16.IsKeyPress(DR16_KEY_Z) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))
+				if (DR16.IsKeyPress(DR16_KEY_Z) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)
 				{
 					TigerArm.Switch_Mode(TigerArm.GoldenMineral);
 					Send_Command_To_NUC(113);
 					continue;
 				}
-				if (DR16.IsKeyPress(DR16_KEY_C) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT)) 
+				if (DR16.IsKeyPress(DR16_KEY_C) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
 				{
 					TigerArm.Switch_Mode(TigerArm.ExchangeMode);
 					Send_Command_To_NUC(113);
@@ -253,25 +282,26 @@ void Tigerarm_Space_Displacement()
 				{
 					case CEngineer::GoldenMineral:
 						Tigerarm_Space_Displacement();
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(84):(void)NULL;
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(118):(void)NULL;
-						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//左pia
-						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//右pia
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(82):(void)NULL;
+							(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(122):(void)NULL;
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(118):(void)NULL;
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//左pia
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//右pia
 						break;
 					case CEngineer::ExchangeMode:
 						/* Tigerarm Exchange Control */
 						Tigerarm_Space_Displacement();
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(32):(void)NULL;//拿出矿舱矿石准备兑换
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(120):(void)NULL;//兑换矿石
-						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//fuck一下
-						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT))?Send_Command_To_NUC(0):(void)NULL;//翻转一下
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(32):(void)NULL;//拿出矿舱矿石准备兑换
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(120):(void)NULL;//兑换矿石
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//fuck一下
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//翻转一下
 						break;
 					case CEngineer::Rescure:
 							
 						break;
 					case CEngineer::Obstacles:
-						(DR16.IsKeyPress(DR16_KEY_Z))?Send_Command_To_NUC(116):(void)NULL;
-						(DR16.IsKeyPress(DR16_KEY_X))?Send_Command_To_NUC(113):(void)NULL;
+						//(DR16.IsKeyPress(DR16_KEY_Z) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(116):(void)NULL;
+						//(DR16.IsKeyPress(DR16_KEY_X) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(113):(void)NULL;
 						break;
 					default:
 						break;
@@ -280,7 +310,7 @@ void Tigerarm_Space_Displacement()
 			}
 
 	    /* Pass control to the next task */
-	    vTaskDelayUntil(&xLastWakeTime_t,50);
+	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
  }
  

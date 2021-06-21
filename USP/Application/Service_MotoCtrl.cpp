@@ -1,7 +1,6 @@
 #include "Service_MotoCtrl.h" 
 #include "Service_RobotCtrl.h"
 #define Fast_Mode 
-#define _DebugAutoMode_
 
 #ifdef Fast_Mode
 	#define Yaw_Limit_Spd 9.42f
@@ -29,13 +28,14 @@ float Motor_Max_Speed=10.0f;
 TaskHandle_t ServiceMotoCtrl_Handle;
 TaskHandle_t MotorInit_Handle;
 TaskHandle_t ServoCtrl_Handle;
-TaskHandle_t ServiceMotorCtrlInit_Handle;
 
 void Service_MotoCtrl_Init()
 {
   //ArmMotorInit();
   xTaskCreate(Task_ArmMotorCtrl, "ArmMotorCtrl", Normal_Stack_Size, NULL, PriorityNormal, &ServiceMotoCtrl_Handle);
-  xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
+  #ifndef _IngoreInit
+		xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
+	#endif
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityNormal,&ServoCtrl_Handle);
 }
 
@@ -68,14 +68,17 @@ void Task_ArmMotorInit(void *arg)
 	yaw_controller.setCurrentAsTarget();
 	
 	/* Turn to Prepare Position */
-	vTaskResume(ServiceMotorCtrlInit_Handle);
+	yaw_controller.async_controller.setCubicConfig_tf(1000);
+	elbow_controller.async_controller.setCubicConfig_tf(1000);
+	arm_controller.async_controller.setCubicConfig_tf(1000);
+	vTaskResume(ServiceMotoCtrl_Handle);
 	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
 	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
 	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
 	vTaskDelay(1500);
 	
 	/* Set Prepare Postion as Target & Zero */
-	vTaskSuspend(ServiceMotorCtrlInit_Handle);
+	vTaskSuspend(ServiceMotoCtrl_Handle);
 	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
 	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
 	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
@@ -85,6 +88,9 @@ void Task_ArmMotorInit(void *arg)
 	elbow_controller.setCurrentAsTarget();
 	arm_controller.setCurrentAsTarget();
 	yaw_controller.setCurrentAsTarget();	
+	yaw_controller.async_controller.setCubicConfig_tf(100);
+	elbow_controller.async_controller.setCubicConfig_tf(100);
+	arm_controller.async_controller.setCubicConfig_tf(100);
 	vTaskDelay(100);
 	vTaskResume(ServiceMotoCtrl_Handle);
 	
@@ -125,9 +131,13 @@ void Task_ServoCtrl(void *arg)
 
 void Task_ArmMotorCtrl(void *arg)
 {
-	
-	vTaskSuspend(ServiceMotoCtrl_Handle);
-  
+	#ifndef _IngoreInit
+		vTaskSuspend(ServiceMotoCtrl_Handle);
+  #else
+		yaw_controller.async_controller.setCubicConfig_tf(100);
+		elbow_controller.async_controller.setCubicConfig_tf(100);
+		arm_controller.async_controller.setCubicConfig_tf(100);
+	#endif
 	/* Cache for Task */
   Motor_CAN_COB Motor_TxMsg;
 

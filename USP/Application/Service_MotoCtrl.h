@@ -13,7 +13,6 @@
 #include "System_DataPool.h"
 
 #endif
-void Task_ArmMotorInitCtrl(void *arg);
 void Service_MotoCtrl_Init();
 void Task_ArmMotorInit(void *arg);
 void Task_ArmMotorCtrl(void *arg);
@@ -96,6 +95,10 @@ public:
     actual_current = val;
     stepping_target = val;
   }
+	void setCubicConfig_tf(uint32_t time_p)
+	{
+		this->CubicPoly_Config.tf=time_p;
+	}
 private:
 	float LinearSpin(uint32_t time_stamp)
   {
@@ -116,7 +119,13 @@ private:
 	float CubicPolySpin(uint32_t time_stamp)
 	{
 		uint32_t interval_time = time_stamp - set_time_stamp;
-		stepping_target = CubicPoly_Config.a0+CubicPoly_Config.a1*interval_time+CubicPoly_Config.a2*interval_time*interval_time+CubicPoly_Config.a3*interval_time*interval_time*interval_time;
+		interval_time=(interval_time>this->CubicPoly_Config.tf)?this->CubicPoly_Config.tf:interval_time;
+		float stepping_target_temp;
+		stepping_target_temp = CubicPoly_Config.a0+CubicPoly_Config.a1*interval_time+CubicPoly_Config.a2*interval_time*interval_time+CubicPoly_Config.a3*interval_time*interval_time*interval_time;
+		if (stepping_target>=set_target && stepping_target_temp<=set_target)
+      stepping_target=set_target;
+    else if (stepping_target<=set_target && stepping_target_temp>=set_target)
+      stepping_target=set_target;
 		last_time_stamp = time_stamp;
 		return stepping_target;
 	}

@@ -18,6 +18,8 @@ extern "C"
 {
 #endif
 	
+//#define _IngoreInit
+	
 extern float deg[6];
 extern TaskHandle_t Robot_ROSCtrl;
 	
@@ -35,6 +37,11 @@ class CEngineer
 					Rescure =0xd5,
 					Obstacles =0xd6,
 		};
+		enum Engineer_ComStatus_Typedef
+		{
+			Engineer_CommandWait=0x01,
+			Engineer_CommandLock,
+		};
 		void Switch_Mode(Engineer_Mode_Typedef Target_Mode)
 		{
 			this->Engineer_Mode=Target_Mode;
@@ -43,9 +50,17 @@ class CEngineer
 		{
 			return this->Engineer_Mode;
 		}
+		void Switch_CommandStatus(Engineer_ComStatus_Typedef command_status)
+		{
+			this->Engineer_ComStatus=command_status;
+		}
+		Engineer_ComStatus_Typedef Get_Current_CommandStatus()
+		{
+			return this->Engineer_ComStatus;
+		}
 	private:
 		Engineer_Mode_Typedef Engineer_Mode=this->DrivingMode;
-		
+		Engineer_ComStatus_Typedef Engineer_ComStatus=this->Engineer_CommandWait;
 	
 };
 
