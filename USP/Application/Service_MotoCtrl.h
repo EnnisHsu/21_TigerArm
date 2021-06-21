@@ -138,7 +138,7 @@ private:
   float max_speed;		//速度限制
   float max_accer;		//加速度限制
 	CubicPoly_Param_Typedef CubicPoly_Config;
-	Curve_Typedef Curve_Type;
+	Curve_Typedef Curve_Type=Cubic_Polynomial;
   uint32_t last_time_stamp;	//ms
 	uint32_t set_time_stamp;
 };
@@ -202,14 +202,12 @@ template <class motor>
 class Godzilla_Joint_Controller{
 public:
   Godzilla_Joint_Controller(int id, float speed, float i_min,float i_max,float reduction) : joint_motor(id){
-		this->async_controller.setCurveType(Cubic_Polynomial);
     this->async_controller.setSpeedConstrain(speed);
 		this->o_min=i_min;
 		this->o_max=i_max;
 		this->reduction_ratio=reduction;
   }
   Godzilla_Joint_Controller(int id, CAN_HandleTypeDef* hcan, float speed, float i_min,float i_max,float reduction) : joint_motor(id, hcan){
-		this->async_controller.setCurveType(Cubic_Polynomial);
     this->async_controller.setSpeedConstrain(speed);
 		this->o_min=i_min;
 		this->o_max=i_max;
