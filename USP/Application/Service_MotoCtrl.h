@@ -120,12 +120,17 @@ private:
 	{
 		uint32_t interval_time = time_stamp - set_time_stamp;
 		interval_time=(interval_time>this->CubicPoly_Config.tf)?this->CubicPoly_Config.tf:interval_time;
-		float stepping_target_temp;
-		stepping_target_temp = CubicPoly_Config.a0+CubicPoly_Config.a1*interval_time+CubicPoly_Config.a2*interval_time*interval_time+CubicPoly_Config.a3*interval_time*interval_time*interval_time;
-		if (stepping_target>=set_target && stepping_target_temp<=set_target)
-      stepping_target=set_target;
-    else if (stepping_target<=set_target && stepping_target_temp>=set_target)
-      stepping_target=set_target;
+		float stepping_target_temp,stepping_cubic_target;
+		stepping_cubic_target = CubicPoly_Config.a0+CubicPoly_Config.a1*interval_time+CubicPoly_Config.a2*interval_time*interval_time+CubicPoly_Config.a3*interval_time*interval_time*interval_time;
+		if (stepping_target>=set_target && stepping_cubic_target<=set_target)
+      stepping_target_temp=set_target;
+    else if (stepping_target<=set_target && stepping_cubic_target>=set_target)
+      stepping_target_temp=set_target;
+		else stepping_target_temp=stepping_cubic_target;
+		target_delta = getSpeedWithDirection() * (float)(time_stamp-last_time_stamp) / 1000.0f; 
+		if (Spd_Limit && stepping_target_temp-stepping_target>target_delta)
+			stepping_target=stepping_target+target_delta;
+		else stepping_target=stepping_target_temp;
 		last_time_stamp = time_stamp;
 		return stepping_target;
 	}
@@ -148,6 +153,9 @@ private:
   float max_accer;		//加速度限制
 	CubicPoly_Param_Typedef CubicPoly_Config;
 	Curve_Typedef Curve_Type=Cubic_Polynomial;
+public:
+	bool Spd_Limit = 0;
+	float target_delta;
   uint32_t last_time_stamp;	//ms
 	uint32_t set_time_stamp;
 };
@@ -354,6 +362,15 @@ class Godzilla_Elbow_Controller : public Godzilla_Joint_Controller<AK80_V3>
 			mot_kp=kp;
 			mot_kd=kd;
 		}*/
+		void setStepTarget(float target)
+		{
+			if (target>=this->zero_offset+this->o_min && target<=this->zero_offset+this->o_max)
+			{
+				this->async_controller.resetStepTarget(target, this->async_controller.getSteppingTarget());
+				this->current_target=target;
+			}
+			else return;
+		}
 		float getCurrentAngle()
 		{
 			return this->joint_motor.get_current_position();

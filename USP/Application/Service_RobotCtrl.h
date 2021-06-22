@@ -59,7 +59,7 @@ class CEngineer
 			return this->Engineer_ComStatus;
 		}
 	private:
-		Engineer_Mode_Typedef Engineer_Mode=this->DrivingMode;
+		Engineer_Mode_Typedef Engineer_Mode=this->TigerarmNone;
 		Engineer_ComStatus_Typedef Engineer_ComStatus=this->Engineer_CommandWait;
 	
 };

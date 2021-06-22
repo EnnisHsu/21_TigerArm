@@ -71,12 +71,17 @@ void Task_ArmMotorInit(void *arg)
 	yaw_controller.async_controller.setCubicConfig_tf(1000);
 	elbow_controller.async_controller.setCubicConfig_tf(1000);
 	arm_controller.async_controller.setCubicConfig_tf(1000);
+	yaw_controller.async_controller.Spd_Limit=1;
+	arm_controller.async_controller.Spd_Limit=1;
+	elbow_controller.async_controller.Spd_Limit=1;
 	vTaskResume(ServiceMotoCtrl_Handle);
 	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
 	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
 	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
 	vTaskDelay(1500);
-	
+	yaw_controller.async_controller.Spd_Limit=0;
+	arm_controller.async_controller.Spd_Limit=0;
+	elbow_controller.async_controller.Spd_Limit=0;
 	/* Set Prepare Postion as Target & Zero */
 	vTaskSuspend(ServiceMotoCtrl_Handle);
 	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());

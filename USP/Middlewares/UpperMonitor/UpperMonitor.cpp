@@ -137,7 +137,9 @@ void UpperMonitor_Sent_Choose(float * data)
 				break;
 			case 17:data[i] = wristyaw_controller.GetCurrentAngle();
 				break;
-			case 18:data[i] = error_flag;
+			case 18:data[i] = elbow_controller.async_controller.target_delta;
+				break;
+			case 19:data[i] = elbow_controller.async_controller.getTarget();
 				break;
       default:break;
 	  /* 以上部分用于观察参数曲线 */
