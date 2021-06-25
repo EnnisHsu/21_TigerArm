@@ -44,7 +44,7 @@ CAnalyzer Analyzer;
 
 _BoardComRx BoardComRxData;
 
-
+bool TurnBack;
 
 /* Function ------------------------------------------------------------------*/
 float rad2deg(float x)

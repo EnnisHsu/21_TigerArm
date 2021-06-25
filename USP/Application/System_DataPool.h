@@ -98,7 +98,7 @@ typedef struct BoardComRx_Typedef
 	uint8_t TarSpdZ;
 }_BoardComRx;
 
-
+extern bool TurnBack;
 //暂时被遗忘在这,统一标准接口制定后再集中回收
 //#ifndef __UUCOBTypeDef_DEFINED
 //#define __UUCOBTypeDef_DEFINED

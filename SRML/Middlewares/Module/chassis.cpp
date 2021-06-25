@@ -206,9 +206,8 @@ uint8_t CChassis::attitude_control()
 {
   static float locked_yaw = 0;
   static _chassis_Velocity* Attitude_Compensation;
-  
   /*Check Postion controller*/
-//  if(position_controller == NULL) return 0;
+  if(attitude_controller == NULL) return 0;
   
   if(Target_Velocity.z_speed != 0)
     locked_yaw = Current_Pos.yaw;

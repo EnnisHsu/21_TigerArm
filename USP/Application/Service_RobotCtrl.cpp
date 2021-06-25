@@ -40,6 +40,7 @@ float TargetVelocity_X,TargetVelocity_Y,TargetVelocity_Z;
 myPID Chassis_Spd[4];
 myPID Chassis_Pos[4];
 myPID Chassis_Attitude_Yaw;
+myPID TurnBack_Yaw;
 
 TaskHandle_t Robot_ChassisCtrl;
 TaskHandle_t Robot_OfflineCtrl;
@@ -75,6 +76,7 @@ void Controller_PID_ParamTnit()
 
 	/* attitude controller */
 	Chassis_Attitude_Yaw.SetPIDParam(80.0f,0,0,0,1000);
+	TurnBack_Yaw.SetPIDParam(0.8f,0,0,0,1000);
 
 }
 
@@ -113,6 +115,13 @@ _chassis_Velocity* AttitudeController(const _chassis_GlobalPos* Current_Pos,cons
 	Chassis_Attitude_Yaw.Adjust();
 	_chassis_Velocity_Attitude.z_speed=std_lib::constrain((float)Chassis_Attitude_Yaw.Out,-1000.0f,1000.0f);
 	return &_chassis_Velocity_Attitude;
+}
+float TurnBackController(float CurYaw,float TarYaw)
+{
+	TurnBack_Yaw.Current=CurYaw;
+	TurnBack_Yaw.Target=TarYaw;
+	TurnBack_Yaw.Adjust();
+	return std_lib::constrain((float)TurnBack_Yaw.Out,-0.1f,0.1f);
 }
 
 _chassis_Velocity* PositionController(const _chassis_GlobalPos Current,const _chassis_GlobalPos Target)
@@ -180,21 +189,20 @@ void Keyboard_Ctrl(void*arg)
 	static TickType_t _xPreviousWakeTime = xTaskGetTickCount();
   static TickType_t _xTimeIncrement = pdMS_TO_TICKS(1);
 	
+	static float RecordYaw;
+	static float TarYaw;
 	static bool CameraisForward = false;
 	static CEngineer::Engineer_Mode_Typedef DirMode;
 	 for (;;)
   {
 			vTaskDelayUntil(&_xPreviousWakeTime, _xTimeIncrement);
-		  if(DR16.GetS1()==DR16_SW_DOWN && DR16.GetS2()==DR16_SW_DOWN)
+		  if((DR16.GetS1()==DR16_SW_DOWN && DR16.GetS2()==DR16_SW_DOWN))
 			{
-				
-			static float Speed_Gear=0.2;
-			static float Mouse_Sensitivity_Gear=0.1;
-			static uint8_t F_KeyFlag=0;
-			static uint8_t G_KeyFlag=0;
-			static uint8_t Z_KeyFlag=0;
-			static uint8_t F_Ctrl_KeyFlag=0;
-			static uint8_t G_Ctrl_KeyFlag=0;
+			static float Speed_Fast_Gear=1.5;
+			static float Speed_Gear=1.2;
+			static float Speed_Slow_Gear=0.1;
+			static float Mouse_Sensitivity_Gear=0.2;
+			
 			if(DR16.IsKeyPress(DR16_KEY_Q)){
 				TigerArm.Switch_Mode(CEngineer::DrivingMode);
 				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,1550);
@@ -203,23 +211,66 @@ void Keyboard_Ctrl(void*arg)
 				TigerArm.Switch_Mode(CEngineer::BackMode);
 				__HAL_TIM_SET_COMPARE(&htim2,TIM_CHANNEL_2,580);
 			}
+			
 			DirMode = TigerArm.Get_Current_Mode() == CEngineer::DrivingMode?CEngineer::DrivingMode:CEngineer::BackMode;
 			if(DirMode==TigerArm.DrivingMode)
 			{
+				
 				DR16.IsKeyPress(DR16_KEY_S) ? (TargetVelocity_Y=-Speed_Gear):(TargetVelocity_Y=0);                  /*后*/
 				DR16.IsKeyPress(DR16_KEY_W) ? (TargetVelocity_Y=Speed_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
 				DR16.IsKeyPress(DR16_KEY_A) ? (TargetVelocity_X=-Speed_Gear):(TargetVelocity_X=0);                  /*左*/
 				DR16.IsKeyPress(DR16_KEY_D) ? (TargetVelocity_X=Speed_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
-			}else if(DirMode==TigerArm.BackMode)
+				
+				(DR16.IsKeyPress(DR16_KEY_S)&&DR16.IsKeyPress(DR16_KEY_SHIFT)) ? (TargetVelocity_Y=-Speed_Slow_Gear):(TargetVelocity_Y=TargetVelocity_Y);                  /*后*/
+				(DR16.IsKeyPress(DR16_KEY_W)&&DR16.IsKeyPress(DR16_KEY_SHIFT)) ? (TargetVelocity_Y=Speed_Slow_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
+				(DR16.IsKeyPress(DR16_KEY_A)&&DR16.IsKeyPress(DR16_KEY_SHIFT)) ? (TargetVelocity_X=-Speed_Slow_Gear):(TargetVelocity_X=TargetVelocity_X);                  /*左*/
+				(DR16.IsKeyPress(DR16_KEY_D)&&DR16.IsKeyPress(DR16_KEY_SHIFT)) ? (TargetVelocity_X=Speed_Slow_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+			
+				(DR16.IsKeyPress(DR16_KEY_S)&&DR16.IsKeyPress(DR16_KEY_CTRL)) ? (TargetVelocity_Y=-Speed_Fast_Gear):(TargetVelocity_Y=TargetVelocity_Y);                  /*后*/
+				(DR16.IsKeyPress(DR16_KEY_W)&&DR16.IsKeyPress(DR16_KEY_CTRL)) ? (TargetVelocity_Y=Speed_Fast_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
+				(DR16.IsKeyPress(DR16_KEY_A)&&DR16.IsKeyPress(DR16_KEY_CTRL)) ? (TargetVelocity_X=-Speed_Fast_Gear):(TargetVelocity_X=TargetVelocity_X);                  /*左*/
+				(DR16.IsKeyPress(DR16_KEY_D)&&DR16.IsKeyPress(DR16_KEY_CTRL)) ? (TargetVelocity_X=Speed_Fast_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+				
+			}else if(TigerArm.Get_Current_Mode()==TigerArm.BackMode||TigerArm.TaskingMode||DirMode==TigerArm.GoldenMineral||DirMode==TigerArm.SilverMineral||DirMode==TigerArm.ExchangeMode||DirMode==TigerArm.Rescure||DirMode==TigerArm.Obstacles)
 			{
+				
 				DR16.IsKeyPress(DR16_KEY_S) ? (TargetVelocity_Y=Speed_Gear):(TargetVelocity_Y=0);                  /*后*/
 				DR16.IsKeyPress(DR16_KEY_W) ? (TargetVelocity_Y=-Speed_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
 				DR16.IsKeyPress(DR16_KEY_A) ? (TargetVelocity_X=Speed_Gear):(TargetVelocity_X=0);                  /*左*/
 				DR16.IsKeyPress(DR16_KEY_D) ? (TargetVelocity_X=-Speed_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+				
+				DR16.IsKeyPress(DR16_KEY_S)&&DR16.IsKeyPress(DR16_KEY_SHIFT) ? (TargetVelocity_Y=Speed_Slow_Gear):(TargetVelocity_Y=TargetVelocity_Y);                  /*后*/
+				DR16.IsKeyPress(DR16_KEY_W)&&DR16.IsKeyPress(DR16_KEY_SHIFT) ? (TargetVelocity_Y=-Speed_Slow_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
+				DR16.IsKeyPress(DR16_KEY_A)&&DR16.IsKeyPress(DR16_KEY_SHIFT) ? (TargetVelocity_X=Speed_Slow_Gear):(TargetVelocity_X=TargetVelocity_X);                  /*左*/
+				DR16.IsKeyPress(DR16_KEY_D)&&DR16.IsKeyPress(DR16_KEY_SHIFT) ? (TargetVelocity_X=-Speed_Slow_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+				
+				DR16.IsKeyPress(DR16_KEY_S)&&DR16.IsKeyPress(DR16_KEY_CTRL) ? (TargetVelocity_Y=Speed_Fast_Gear):(TargetVelocity_Y=TargetVelocity_Y);                  /*后*/
+				DR16.IsKeyPress(DR16_KEY_W)&&DR16.IsKeyPress(DR16_KEY_CTRL) ? (TargetVelocity_Y=-Speed_Fast_Gear):(TargetVelocity_Y=TargetVelocity_Y);    /*前*/
+				DR16.IsKeyPress(DR16_KEY_A)&&DR16.IsKeyPress(DR16_KEY_CTRL) ? (TargetVelocity_X=Speed_Fast_Gear):(TargetVelocity_X=TargetVelocity_X);                  /*左*/
+				DR16.IsKeyPress(DR16_KEY_D)&&DR16.IsKeyPress(DR16_KEY_CTRL) ? (TargetVelocity_X=-Speed_Fast_Gear):(TargetVelocity_X=TargetVelocity_X);    /*右*/	
+				
 			}
-
-
+			
 			TargetVelocity_Z=2.5f*DR16.Get_MouseX_Norm()*Mouse_Sensitivity_Gear;                        /*旋转*/
+			
+//			if(DR16.IsKeyPress(DR16_KEY_B)){
+//				TurnBack = ~TurnBack;
+//			}
+//			if(DR16.IsKeyPress(DR16_KEY_B)){
+//				TurnBack = true;
+//				RecordYaw = MPUData.yaw;
+//				TarYaw = RecordYaw>180?RecordYaw-180:RecordYaw+180;
+//			}
+//			if(TurnBack){
+//				
+//				TargetVelocity_Z = TurnBackController(MPUData.yaw, TarYaw);
+//				if(MPUData.yaw+180 >= TarYaw+170 && MPUData.yaw+180 <= TarYaw+190){
+//					TurnBack = false;
+//					TargetVelocity_Z = 0;
+//				}
+//			}
+			
+			
 			//DR16.IsKeyPress(_V) ? (TargetVelocity_Z=TargetVelocity_Z-Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制逆时针旋转*/
 			//DR16.IsKeyPress(_B) ? (TargetVelocity_Z=TargetVelocity_Z+Mouse_Sensitivity_Gear):(TargetVelocity_Z=TargetVelocity_Z); /*按键控制顺时针旋转*/
 //      TargetVelocity_Z=std_lib::constrain(TargetVelocity_Z,1.0f,-1.0f);
@@ -233,8 +284,8 @@ void Keyboard_Ctrl(void*arg)
 				}
 		  //if(DR16.IsKeyPress(_Z)&&!DR16.IsKeyPress(_CTRL)) {Z_KeyFlag=1;}
 
-			
-    }
+			}
+    
 		
 	}
 }

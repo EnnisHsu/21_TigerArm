@@ -126,7 +126,8 @@ void Device_Sensors(void *arg)
   {
     /* Read IMU Message */
     mpu_dmp_get_data(&MPUData.roll,&MPUData.pitch,&MPUData.yaw);
-		
+		if(TurnBack)
+			MPUData.yaw+=180;
 		MPU_Get_Accelerometer(&MPU6050_IIC_PIN,&MPUData.ax,&MPUData.ay,&MPUData.az);
 		if (!MPU_Get_Gyroscope(&MPU6050_IIC_PIN,&MPUData.gx,&MPUData.gy,&MPUData.gz))
 		{
