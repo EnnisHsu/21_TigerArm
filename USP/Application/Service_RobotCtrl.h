@@ -35,7 +35,7 @@ class CEngineer
 					SilverMineral =0xd3,
 					ExchangeMode = 0xd4,
 					Rescure =0xd5,
-					Obstacles =0xd6,
+					GroundObject =0xd6,
 		};
 		enum Engineer_ComStatus_Typedef
 		{
