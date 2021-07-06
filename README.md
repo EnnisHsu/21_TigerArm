@@ -37,7 +37,9 @@
 | Usart2 | Dr16 | DBUS |
 | Usart4 | NUC通信 | 串口 |
 | Usart6 | 与陀螺仪板板间通信 | 串口 |
-
+| TIM2_CH2 | Roll轴舵机 | PWM |
+| TIM3_CH1 | Pitch轴舵机 | PWM |
+| TIM3_CH2 | Yaw轴舵机 | PWM |
 
 
 
