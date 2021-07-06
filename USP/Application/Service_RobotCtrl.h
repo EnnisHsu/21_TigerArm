@@ -71,7 +71,9 @@ void Task_ArmSingleCtrl(void *arg);
 void Task_DR16Ctrl(void *arg);
 void Task_ROSCtrl(void *arg);
 void Task_KeyboardCtrl(void *arg);
- void Task_BoardCommunication(void *arg);
+
+void Send_Command_To_NUC(uint32_t command);
+void Tigerarm_Space_Displacement();
 
 #ifdef __cplusplus
 }

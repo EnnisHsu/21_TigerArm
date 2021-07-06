@@ -47,6 +47,7 @@ void Task_ArmMotorInit(void *arg)
 	{
 		/* Tigerarm Motor Init */
 		vTaskSuspend(ServiceMotoCtrl_Handle);
+		pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 		elbow_controller.joint_motor.To_Exit_Control();
 		arm_controller.joint_motor.To_Exit_Control();
 		vTaskDelay(2000);
@@ -122,7 +123,7 @@ void Task_ServoCtrl(void *arg)
   for(;;)
   {
 		error_flag=70;
-    wristroll_controller.Output();
+    	wristroll_controller.Output();
 		//vTaskDelayUntil(&xLastWakeTime_t, 20);
 		wristpitch_controller.Output();
 		//vTaskDelayUntil(&xLastWakeTime_t, 20);
@@ -154,12 +155,12 @@ void Task_ArmMotorCtrl(void *arg)
   {
     /* Spin linear interpolation */
 		error_flag=75;
-    yaw_controller.spinOnce();
+    	yaw_controller.spinOnce();
 		arm_controller.spinOnce();
 		elbow_controller.spinOnce();
 
-    MotorMsgPack(Motor_TxMsg, yaw_controller.joint_motor);
-    xQueueSendFromISR(CAN2_TxPort, &Motor_TxMsg.Low, 0);
+    	MotorMsgPack(Motor_TxMsg, yaw_controller.joint_motor);
+    	xQueueSendFromISR(CAN2_TxPort, &Motor_TxMsg.Low, 0);
 		elbow_controller.Output=elbow_controller.async_controller.getSteppingTarget()-(arm_controller.async_controller.getSteppingTarget()-arm_controller.getZeroOffset());
 		arm_controller.joint_motor.Out_Mixed_Control(arm_controller.async_controller.getSteppingTarget(),Motor_Max_Speed,arm_kp,arm_kd);
 		elbow_controller.joint_motor.Out_Mixed_Control(elbow_controller.Output,Motor_Max_Speed,elbow_kp,elbow_kd);
