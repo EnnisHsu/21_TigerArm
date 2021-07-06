@@ -41,72 +41,70 @@ void Service_MotoCtrl_Init()
 
 void Task_ArmMotorInit(void *arg)
 {
-	error_flag=80;
-	/* Tigerarm Motor Init */
-	vTaskDelay(2000);
-  PID_Param_Typedef spd_pid_param = {70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
-  PID_Param_Typedef ang_pid_param = { 50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
-  yaw_controller.init(spd_pid_param, ang_pid_param);
-	elbow_controller.init();
-	vTaskDelay(100);
-	arm_controller.init(&elbow_controller);
-	
-	/* Slowly Move to Limit */
-	arm_controller.slowlyMoveToLimit();
-	elbow_controller.slowlyMoveToLimit();
-  yaw_controller.slowlyMoveToLimit();
 
-	/* Set Limit as Target & Zero */
-	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
-	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
-	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
-	yaw_controller.setCurrentAsZero();
-	elbow_controller.setCurrentAsZero();
-	arm_controller.setCurrentAsZero();
-	elbow_controller.setCurrentAsTarget();
-	arm_controller.setCurrentAsTarget();
-	yaw_controller.setCurrentAsTarget();
 	
-	/* Turn to Prepare Position */
-	yaw_controller.async_controller.setCubicConfig_tf(1000);
-	elbow_controller.async_controller.setCubicConfig_tf(1000);
-	arm_controller.async_controller.setCubicConfig_tf(1000);
-	yaw_controller.async_controller.Spd_Limit=1;
-	arm_controller.async_controller.Spd_Limit=1;
-	elbow_controller.async_controller.Spd_Limit=1;
-	vTaskResume(ServiceMotoCtrl_Handle);
-	elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
-	arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
-	yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
-	vTaskDelay(1500);
-	yaw_controller.async_controller.Spd_Limit=0;
-	arm_controller.async_controller.Spd_Limit=0;
-	elbow_controller.async_controller.Spd_Limit=0;
-	/* Set Prepare Postion as Target & Zero */
-	vTaskSuspend(ServiceMotoCtrl_Handle);
-	yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
-	elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
-	arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
-	yaw_controller.setCurrentAsZero();
-	elbow_controller.setCurrentAsZero();
-	arm_controller.setCurrentAsZero();
-	elbow_controller.setCurrentAsTarget();
-	arm_controller.setCurrentAsTarget();
-	yaw_controller.setCurrentAsTarget();	
-	yaw_controller.async_controller.setCubicConfig_tf(100);
-	elbow_controller.async_controller.setCubicConfig_tf(100);
-	arm_controller.async_controller.setCubicConfig_tf(100);
-	vTaskDelay(100);
-	vTaskResume(ServiceMotoCtrl_Handle);
-	
-	#ifdef _DebugAutoMode_
-		
-	#endif
-	
-	vTaskDelete(MotorInit_Handle);
 	for (;;)
 	{
-		vTaskDelay(1);
+		/* Tigerarm Motor Init */
+		vTaskSuspend(ServiceMotoCtrl_Handle);
+		elbow_controller.joint_motor.To_Exit_Control();
+		arm_controller.joint_motor.To_Exit_Control();
+		vTaskDelay(2000);
+		PID_Param_Typedef spd_pid_param = {70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+		PID_Param_Typedef ang_pid_param = { 50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+		yaw_controller.init(spd_pid_param, ang_pid_param);
+		elbow_controller.init();
+		vTaskDelay(100);
+		arm_controller.init(&elbow_controller);
+	
+		/* Slowly Move to Limit */
+		arm_controller.slowlyMoveToLimit();
+		elbow_controller.slowlyMoveToLimit();
+		yaw_controller.slowlyMoveToLimit();
+
+		/* Set Limit as Target & Zero */
+		yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+		arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
+		elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
+		yaw_controller.setCurrentAsZero();
+		elbow_controller.setCurrentAsZero();
+		arm_controller.setCurrentAsZero();
+		elbow_controller.setCurrentAsTarget();
+		arm_controller.setCurrentAsTarget();
+		yaw_controller.setCurrentAsTarget();
+	
+		/* Turn to Prepare Position */
+		yaw_controller.async_controller.setCubicConfig_tf(1000);
+		elbow_controller.async_controller.setCubicConfig_tf(1000);
+		arm_controller.async_controller.setCubicConfig_tf(1000);
+		yaw_controller.async_controller.Spd_Limit=1;
+		arm_controller.async_controller.Spd_Limit=1;
+		elbow_controller.async_controller.Spd_Limit=1;
+		vTaskResume(ServiceMotoCtrl_Handle);
+		elbow_controller.setStepTarget(elbow_controller.getCurrentAngle()-2.2f);
+		arm_controller.setStepTarget(arm_controller.getCurrentAngle()-2.4f);
+		yaw_controller.setStepTarget(yaw_controller.getCurrentAngle()+4.71f);
+		vTaskDelay(1500);
+		yaw_controller.async_controller.Spd_Limit=0;
+		arm_controller.async_controller.Spd_Limit=0;
+		elbow_controller.async_controller.Spd_Limit=0;
+		/* Set Prepare Postion as Target & Zero */
+		vTaskSuspend(ServiceMotoCtrl_Handle);
+		yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
+		elbow_controller.async_controller.setCurrent(elbow_controller.getCurrentAngle());
+		arm_controller.async_controller.setCurrent(arm_controller.getCurrentAngle());
+		yaw_controller.setCurrentAsZero();
+		elbow_controller.setCurrentAsZero();
+		arm_controller.setCurrentAsZero();
+		elbow_controller.setCurrentAsTarget();
+		arm_controller.setCurrentAsTarget();
+		yaw_controller.setCurrentAsTarget();	
+		yaw_controller.async_controller.setCubicConfig_tf(100);
+		elbow_controller.async_controller.setCubicConfig_tf(100);
+		arm_controller.async_controller.setCubicConfig_tf(100);
+		vTaskDelay(10);
+		vTaskResume(ServiceMotoCtrl_Handle);
+		vTaskSuspend(MotorInit_Handle);
 	}
 }
 
