@@ -97,7 +97,7 @@ void Task_ArmSingleCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-		  if (DR16.GetStatus()==DR16_ESTABLISHED)
+		  if (DR16.GetStatus()==DR16_ESTABLISHED && TigerArm.Get_Current_Mode()!=TigerArm.TigerarmNone)
 		  {
 				switch (DR16.GetS2())
 				{
@@ -139,7 +139,7 @@ void Task_ArmSingleCtrl(void *arg)
 						}
 						break;
 					case DR16_SW_DOWN:
-						
+						TigerArm.Switch_Mode(TigerArm.DrivingMode);
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
@@ -176,8 +176,8 @@ void Task_ROSCtrl(void *arg)
 	  for(;;)
 	  {
 			error_flag=99;
-			//if (TigerArm.Get_Current_Mode()==TigerArm.AutoCatch)
-			//{
+			if (TigerArm.Get_Current_Mode()!=TigerArm.TigerarmNone)
+			{
 				if (xQueueReceive(NUC_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
 				{
 					if (_buffer.len==24)
@@ -214,7 +214,7 @@ void Task_ROSCtrl(void *arg)
 						ros_command[1]==1?TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait):(void)NULL;
 					}
 				}
-			//}
+			}
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }	
