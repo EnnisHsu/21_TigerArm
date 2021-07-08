@@ -2,56 +2,6 @@
 *** Warning: You are compiling one or more files of source type C++ and have selected 'use MicroLIB'. MicroLIB does not support C++!
   
 Build target '21_TigerArm'
-compiling Service_Communication.cpp...
-..\USP\Application\Service_MotoCtrl.h(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  		if (fabs(set_target-stepping_target)>1e-5)
-..\USP\Application\Service_MotoCtrl.h(304): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-    float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(374): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(427): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_Communication.cpp(285): warning:  #940-D: missing return statement at end of non-void function "Usart_Tx_Pack" 
-  }
-..\USP\Application\Service_Communication.cpp: 5 warnings, 0 errors
-compiling Service_Devices.cpp...
-..\USP\Application\Service_Devices.cpp(111): warning:  #550-D: variable "Usart_RxCOB"  was set but never used
-  			USART_COB Usart_RxCOB;
-..\USP\Application\Service_Devices.cpp: 1 warning, 0 errors
-compiling UpperMonitor.cpp...
-..\USP\Application\Service_MotoCtrl.h(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  		if (fabs(set_target-stepping_target)>1e-5)
-..\USP\Application\Service_MotoCtrl.h(304): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-    float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(374): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(427): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Middlewares\UpperMonitor\UpperMonitor.cpp: 4 warnings, 0 errors
-compiling System_Config.cpp...
-..\USP\Application\Service_MotoCtrl.h(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  		if (fabs(set_target-stepping_target)>1e-5)
-..\USP\Application\Service_MotoCtrl.h(304): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-    float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(374): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(427): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\System_Config.cpp: 4 warnings, 0 errors
-compiling Service_RobotCtrl.cpp...
-..\USP\Application\Service_MotoCtrl.h(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  		if (fabs(set_target-stepping_target)>1e-5)
-..\USP\Application\Service_MotoCtrl.h(304): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-    float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(374): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.h(427): warning:  #1300-D: getCurrentAngle inherits implicit virtual
-  		float getCurrentAngle()
-..\USP\Application\Service_RobotCtrl.cpp(57): warning:  #177-D: variable "move_step"  was declared but never referenced
-  		float move_step=0.02f;
-..\USP\Application\Service_RobotCtrl.cpp(340): warning:  #1-D: last line of file ends without a newline
-   
-..\USP\Application\Service_RobotCtrl.cpp: 6 warnings, 0 errors
 compiling Service_MotoCtrl.cpp...
 ..\USP\Application\Service_MotoCtrl.h(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   		if (fabs(set_target-stepping_target)>1e-5)
@@ -61,11 +11,13 @@ compiling Service_MotoCtrl.cpp...
   		float getCurrentAngle()
 ..\USP\Application\Service_MotoCtrl.h(427): warning:  #1300-D: getCurrentAngle inherits implicit virtual
   		float getCurrentAngle()
-..\USP\Application\Service_MotoCtrl.cpp(153): warning:  #177-D: variable "cnt"  was declared but never referenced
+..\USP\Application\Service_RelayCtrl.h(62): warning:  #1-D: last line of file ends without a newline
+  extern Godzilla_Relay_Controller clamp_controller,hook_controller,card_controller;
+..\USP\Application\Service_MotoCtrl.cpp(154): warning:  #177-D: variable "cnt"  was declared but never referenced
   	static int cnt = 0;
-..\USP\Application\Service_MotoCtrl.cpp: 5 warnings, 0 errors
+..\USP\Application\Service_MotoCtrl.cpp: 6 warnings, 0 errors
 linking...
-Program Size: Code=64360 RO-data=4304 RW-data=508 ZI-data=27172  
+Program Size: Code=64480 RO-data=4308 RW-data=508 ZI-data=27204  
 FromELF: creating hex file...
-"21_TigerArm\21_TigerArm.axf" - 0 Error(s), 25 Warning(s).
-Build Time Elapsed:  00:00:09
+"21_TigerArm\21_TigerArm.axf" - 0 Error(s), 6 Warning(s).
+Build Time Elapsed:  00:00:03

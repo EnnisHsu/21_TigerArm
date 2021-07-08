@@ -31,6 +31,7 @@
   */
 #include "Service_RobotCtrl.h"
 #include "Service_MotoCtrl.h"
+#include "Service_RelayCtrl.h"
 #include "Service_Communication.h"
 
 

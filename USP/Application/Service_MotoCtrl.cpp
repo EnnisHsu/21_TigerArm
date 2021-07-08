@@ -1,5 +1,6 @@
 #include "Service_MotoCtrl.h" 
 #include "Service_RobotCtrl.h"
+#include "Service_RelayCtrl.h"
 #define Fast_Mode 
 
 #ifdef Fast_Mode
@@ -18,7 +19,7 @@ Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,Elbow_Limit_Spd,-4.53f,1.
 Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360,1583),
 		wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180),
 		wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1440);
-Godzilla_Pump_Controller pump_controller(GPIOC,GPIO_PIN_5);
+
 
 
 
