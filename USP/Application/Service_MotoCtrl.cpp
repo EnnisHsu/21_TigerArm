@@ -49,6 +49,9 @@ void Task_ArmMotorInit(void *arg)
 		/* Tigerarm Motor Init */
 		vTaskSuspend(ServiceMotoCtrl_Handle);
 		pump_controller.SetRelayStatus(pump_controller.Relay_Off);
+		clamp_controller.SetRelayStatus(clamp_controller.Relay_Off);
+		hook_controller.SetRelayStatus(hook_controller.Relay_Off);
+		card_controller.SetRelayStatus(card_controller.Relay_Off);
 		elbow_controller.joint_motor.To_Exit_Control();
 		arm_controller.joint_motor.To_Exit_Control();
 		vTaskDelay(2000);
