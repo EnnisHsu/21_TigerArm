@@ -44,5 +44,7 @@ sys_log.txt
 *.TMP
 EventRecorderStub.scvd
 RTE
+
+#vscode 
 .vscode/
 MDK-ARM/.vscode/
