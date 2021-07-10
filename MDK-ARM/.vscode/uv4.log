@@ -1,3 +1,15 @@
-Load "21_TigerArm\\21_TigerArm.axf" 
-Erase Done.Programming Done.Verify OK.Application running ...
-Flash Load finished at 08:26:34
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Program Files\Keil_v5\ARM\ARMCC\Bin'
+*** Warning: You are compiling one or more files of source type C++ and have selected 'use MicroLIB'. MicroLIB does not support C++!
+  
+Build target '21_TigerArm'
+compiling Service_RelayCtrl.cpp...
+..\USP\Application\Service_RelayCtrl.h(62): warning:  #1-D: last line of file ends without a newline
+  extern Godzilla_Relay_Controller clamp_controller,hook_controller,card_controller;
+..\USP\Application\Service_RelayCtrl.cpp(5): warning:  #1-D: last line of file ends without a newline
+  		card_controller(GPIOC,GPIO_PIN_4);
+..\USP\Application\Service_RelayCtrl.cpp: 2 warnings, 0 errors
+linking...
+Program Size: Code=64580 RO-data=4308 RW-data=508 ZI-data=27204  
+FromELF: creating hex file...
+"21_TigerArm\21_TigerArm.axf" - 0 Error(s), 2 Warning(s).
+Build Time Elapsed:  00:00:04

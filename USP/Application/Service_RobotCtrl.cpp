@@ -97,7 +97,7 @@ void Task_ArmSingleCtrl(void *arg)
 	  xLastWakeTime_t = xTaskGetTickCount();
 	  for(;;)
 	  {
-		  if (DR16.GetStatus()==DR16_ESTABLISHED && TigerArm.Get_Current_Mode()!=TigerArm.TigerarmNone)
+		  if (DR16.GetStatus()==DR16_ESTABLISHED/* && TigerArm.Get_Current_Mode()!=TigerArm.TigerarmNone*/)
 		  {
 				switch (DR16.GetS2())
 				{
@@ -129,6 +129,8 @@ void Task_ArmSingleCtrl(void *arg)
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
+								elbow_controller.joint_motor.To_Exit_Control();
+								arm_controller.joint_motor.To_Exit_Control();
 								break;
 							case DR16_SW_MID:
 								break;
@@ -139,10 +141,13 @@ void Task_ArmSingleCtrl(void *arg)
 						}
 						break;
 					case DR16_SW_DOWN:
-						TigerArm.Switch_Mode(TigerArm.DrivingMode);
+						
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
+								if (TigerArm.Get_Current_Mode()!=TigerArm.DrivingMode) Send_Command_To_NUC(114);
+								TigerArm.Switch_Mode(TigerArm.DrivingMode);
+								
 								break;
 							case DR16_SW_MID:
 								break;
@@ -265,7 +270,7 @@ void Tigerarm_Space_Displacement()
 					TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait);
 					continue;
 				}
-				if(DR16.IsKeyPress(DR16_MOUSE_R))
+				if(DR16.IsKeyTriggered(DR16_MOUSE_R))
 				{
 					pump_controller.GetRelayStatus()==pump_controller.Relay_On?pump_controller.SetRelayStatus(pump_controller.Relay_Off):pump_controller.SetRelayStatus(pump_controller.Relay_On);
 					continue;

@@ -55,7 +55,7 @@ void Task_ArmMotorInit(void *arg)
 		elbow_controller.joint_motor.To_Exit_Control();
 		arm_controller.joint_motor.To_Exit_Control();
 		vTaskDelay(2000);
-		PID_Param_Typedef spd_pid_param = {100.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+		PID_Param_Typedef spd_pid_param = {70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
 		PID_Param_Typedef ang_pid_param = { 50.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
 		yaw_controller.init(spd_pid_param, ang_pid_param);
 		elbow_controller.init();
