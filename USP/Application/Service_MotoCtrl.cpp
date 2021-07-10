@@ -22,7 +22,6 @@ Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_co
 
 
 
-
 float arm_kp=100.0f,arm_kd=2.5f,elbow_kp=100.0f,elbow_kd=2.0f;
 float Motor_Max_Speed=10.0f;
 

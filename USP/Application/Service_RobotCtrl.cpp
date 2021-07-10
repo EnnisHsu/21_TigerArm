@@ -103,12 +103,12 @@ void Task_ArmSingleCtrl(void *arg)
 				{
 					case DR16_SW_UP:
 						TigerArm.Switch_Mode(TigerArm.GoldenMineral);
-						DR16.Get_LY_Norm()>0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(119):(void)NULL;
-						DR16.Get_LY_Norm()<-0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(97):(void)NULL;
-						DR16.Get_LX_Norm()<-0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(115):(void)NULL;
-						DR16.Get_LX_Norm()>0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(100):(void)NULL;
-						DR16.Get_RY_Norm()>0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(87):(void)NULL;
-						DR16.Get_RY_Norm()<-0.5f || TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(83):(void)NULL;				
+						DR16.Get_LY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(119):(void)NULL;
+						DR16.Get_LY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(97):(void)NULL;
+						DR16.Get_LX_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(115):(void)NULL;
+						DR16.Get_LX_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(100):(void)NULL;
+						DR16.Get_RY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(87):(void)NULL;
+						DR16.Get_RY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(83):(void)NULL;				
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
@@ -230,18 +230,18 @@ void Send_Command_To_NUC(uint32_t command)
 	static uint32_t Msg;
 	Msg=command;
 	TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandLock);
-	(command==82 || command==32)?pump_controller.SetRelayStatus(pump_controller.Relay_On):(void)NULL;
+	(command==82 || command==32 || command==102)?pump_controller.SetRelayStatus(pump_controller.Relay_On):(void)NULL;
 	Usart_Tx_Pack(USART_TxPort,4,sizeof(Msg),&Msg);
 }
 
 void Tigerarm_Space_Displacement()
 {
-	(DR16.IsKeyPress(DR16_KEY_W) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(119):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_A) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(97):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_S) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(115):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_D) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(100):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_Q) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(87):(void)NULL;
-	(DR16.IsKeyPress(DR16_KEY_C) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(83):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_W) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(119):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_A) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(97):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_S) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(115):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_D) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(100):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_Q) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(87):(void)NULL;
+	(DR16.IsKeyPress(DR16_KEY_C) && DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(83):(void)NULL;
 }
 
 
@@ -294,9 +294,27 @@ void Tigerarm_Space_Displacement()
 					
 					continue;
 				}
+				if (DR16.IsKeyPress(DR16_KEY_X) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
+				{
+					TigerArm.Switch_Mode(TigerArm.SilverMineral);
+					Send_Command_To_NUC(102);
+					continue;
+				}
 				if (DR16.IsKeyPress(DR16_KEY_C) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
 				{
 					TigerArm.Switch_Mode(TigerArm.ExchangeMode);
+					//Send_Command_To_NUC(113);
+					continue;
+				}
+				if (DR16.IsKeyPress(DR16_KEY_V) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
+				{
+					TigerArm.Switch_Mode(TigerArm.GroundObject);
+					//Send_Command_To_NUC(113);
+					continue;
+				}
+				if (DR16.IsKeyPress(DR16_KEY_R) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
+				{
+					TigerArm.Switch_Mode(TigerArm.Rescure);
 					//Send_Command_To_NUC(113);
 					continue;
 				}
@@ -304,21 +322,26 @@ void Tigerarm_Space_Displacement()
 				{
 					case CEngineer::GoldenMineral:
 						Tigerarm_Space_Displacement();
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(82):(void)NULL;		//ֱ��ȡ��ʯ
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(122):(void)NULL;		//�ջؿ��
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(118):(void)NULL;	//ȡ���ջ�����
-						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(107):(void)NULL;	//��һȭ
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(82):(void)NULL;		//取矿
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(122):(void)NULL;		//收回矿舱
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(118):(void)NULL;	//取矿收回手上
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(107):(void)NULL;	//挥一拳
 						//(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//��pia
 						break;
 					case CEngineer::SilverMineral:
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(102):(void)NULL;//直接取矿
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//收回矿舱
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(101):(void)NULL;//抬高
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//收回手上
 						break;
 					case CEngineer::ExchangeMode:
 						/* Tigerarm Exchange Control */
 						Tigerarm_Space_Displacement();
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(32):(void)NULL;//�ó���տ�ʯ׼���һ�
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//�һ���ʯ
-						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(120):(void)NULL;//fuckһ��
-						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(106):(void)NULL;//��תһ��
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(32):(void)NULL;//矿舱里放到兑换位置
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(118):(void)NULL;//手上放到兑换位置
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(120):(void)NULL;//放下去兑换
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(106):(void)NULL;//转一圈兑换
+						(DR16.IsKeyPress(DR16_MOUSE_L) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(117):(void)NULL;//推进兑换区
 						break;
 					case CEngineer::Rescure:
 						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//��צ��Ԯ
@@ -327,11 +350,11 @@ void Tigerarm_Space_Displacement()
 						break;
 					case CEngineer::GroundObject:
 						Tigerarm_Space_Displacement();
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//���ã�׼��ȡ�����
-						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//�ջ�����
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//�ջؿ��
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//���ã�׼��ȡ�ϰ���	
-						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//�ջ�ǰ��λ��
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//准备取地面矿
+						(DR16.IsKeyPress(DR16_KEY_F) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//收回手上
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//收回矿舱
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(99):(void)NULL;//准备取障碍块	
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(116):(void)NULL;//收回前面位置
 						break;
 					default:
 						break;
