@@ -310,10 +310,11 @@ public:
     this->async_controller.spinOnce(xTaskGetTickCount());
 		
 		#ifdef _USE_ASYNCHRONOUS_
-			this->Yaw_MF << rad2deg(this->async_controller.getSteppingTarget());
-			static float joint_target;
-			this->Yaw_MF >> joint_target;
-			this->joint_ctrl.setTarget(joint_target);
+				this->Yaw_MF << rad2deg(this->async_controller.getSteppingTarget());
+				static float joint_target;
+				this->Yaw_MF >> joint_target;
+				this->joint_ctrl.setTarget(joint_target);
+
 		#else
 			this->Yaw_MF << rad2deg(this->current_target);
 			static float joint_target;
