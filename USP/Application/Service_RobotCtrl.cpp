@@ -270,11 +270,11 @@ void Tigerarm_Space_Displacement()
 					TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait);
 					continue;
 				}
-				if(DR16.IsKeyTriggered(DR16_MOUSE_R))
+				/*if(DR16.IsKeyTriggered(DR16_MOUSE_R))
 				{
 					pump_controller.GetRelayStatus()==pump_controller.Relay_On?pump_controller.SetRelayStatus(pump_controller.Relay_Off):pump_controller.SetRelayStatus(pump_controller.Relay_On);
 					continue;
-				}
+				}*/
 				if (DR16.IsKeyPress(DR16_KEY_Q) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait) 
 				{
 					TigerArm.Switch_Mode(TigerArm.DrivingMode);
@@ -344,9 +344,9 @@ void Tigerarm_Space_Displacement()
 						(DR16.IsKeyPress(DR16_MOUSE_L) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(117):(void)NULL;//推进兑换区
 						break;
 					case CEngineer::Rescure:
-						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//��צ��Ԯ
-						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//��צ��Ԯ	
-						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?Send_Command_To_NUC(0):(void)NULL;//ˢ����Ԯ
+						(DR16.IsKeyPress(DR16_KEY_F) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?(void)clamp_controller.SetRelayStatus(clamp_controller.Relay_On):(void)NULL;//夹爪
+						(DR16.IsKeyPress(DR16_KEY_G) && !DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?(void)hook_controller.SetRelayStatus(hook_controller.Relay_On):(void)NULL;//钩爪	
+						(DR16.IsKeyPress(DR16_KEY_G) && DR16.IsKeyPress(DR16_KEY_CTRL) && !DR16.IsKeyPress(DR16_KEY_SHIFT) && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)?(void)card_controller.SetRelayStatus(card_controller.Relay_On):(void)NULL;//刷卡
 						break;
 					case CEngineer::GroundObject:
 						Tigerarm_Space_Displacement();
