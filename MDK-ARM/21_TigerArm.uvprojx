@@ -339,7 +339,7 @@
               <MiscControls>--cpp11</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx,ARM_MATH_CM4,__CC_ARM,USE_MY_ASSERT</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;            ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;            ../Drivers/STM32F4xx_HAL_Driver/Inc;            ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;            ../Middlewares/Third_Party/FreeRTOS/Source/include;            ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;            ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;            ../Drivers/CMSIS/Include;            ..\USP\Application;            ..\USP\Drivers;            ..\USP\Middlewares\UpperMonitor;            ..\USP\Middlewares\Systemview;            ..\USP\Middlewares\Robot_Template;            ..\USP;            ..\SRML;            ..\Drivers\CMSIS\DSP\Include;            ..\USP\Middlewares\DogMotor</IncludePath>
+              <IncludePath>../Core/Inc;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\USP\Application;..\USP\Drivers;..\USP\Middlewares\UpperMonitor;..\USP\Middlewares\Systemview;..\USP\Middlewares\Robot_Template;..\USP;..\SRML;..\Drivers\CMSIS\DSP\Include;..\USP\Middlewares\DogMotor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -909,6 +909,11 @@
               <FileName>BezierCurve.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USP\Application\BezierCurve.h</FilePath>
+            </File>
+            <File>
+              <FileName>Indicator.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\USP\Application\Indicator.cpp</FilePath>
             </File>
           </Files>
         </Group>

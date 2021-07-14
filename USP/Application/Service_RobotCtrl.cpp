@@ -38,10 +38,12 @@
 
 float deg[6];
 CEngineer TigerArm;
+Indicator_Classdef indicator(&htim4,&hdma_tim4_up,TIM_CHANNEL_4);
 TaskHandle_t Robot_ROSCtrl;
 TaskHandle_t Robot_ArmSingleCtrl;
 TaskHandle_t Robot_DR16Ctrl;
-TaskHandle_t Robot_KeyboardCtrl; 
+TaskHandle_t Robot_KeyboardCtrl;
+TaskHandle_t Robot_Indicator;
 
 void Service_RobotCtrl_Init()
 {
@@ -50,6 +52,7 @@ void Service_RobotCtrl_Init()
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 	xTaskCreate(Task_KeyboardCtrl,"Robot.KeyboardCtrl",Tiny_Stack_Size,NULL,PrioritySuperHigh,&Robot_KeyboardCtrl);
+	xTaskCreate(Device_Indicator,"Robot.Indicator",Tiny_Stack_Size,NULL,PriorityHigh,&Robot_Indicator);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -367,3 +370,54 @@ void Tigerarm_Space_Displacement()
 	  }
  }
  
+ void Device_Indicator(void *arg)
+ {
+	/* Cache for Task */
+	static TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
+	/* Pre-Load for task */
+
+	/* Infinite loop */
+	TickType_t xLastWakeTime_t;
+	xLastWakeTime_t = xTaskGetTickCount();
+	for(;;)
+	{
+		/* LED 5 Below red:Lock green:Wait */
+		(TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandLock)?(void)indicator.Change_Singal_RGB(5,0xff,0,0,150):(void)indicator.Change_Singal_RGB(5,0,0xff,0,150);
+	  	/* LED 6 Below
+		  	orange:DrivingMode		Yellow:TaskingMode
+			Golden:GoldenMineral	Sliver:SliverMode
+			Pink:ExchangeMode		Purple:Rescure
+			Blue:GroundObject		red:error */
+		switch (TigerArm.Get_Current_Mode())
+		{
+			case CEngineer::DrivingMode:
+				indicator.Change_Singal_RGB(6,0xff,0xa5,0,150);
+				break;
+		  	case CEngineer::TaskingMode:
+			  	indicator.Change_Singal_RGB(6,0xff,0xff,0,150);
+				break;
+			case CEngineer::GoldenMineral:
+				indicator.Change_Singal_RGB(6,0xff,0xd7,0,150);
+				break;
+			case CEngineer::SilverMineral:
+				indicator.Change_Singal_RGB(6,0xc0,0xc0,0xc0,150);
+				break;
+			case CEngineer::ExchangeMode:
+				indicator.Change_Singal_RGB(6,0xff,0xb6,0xc1,150);
+				break;
+			case CEngineer::Rescure:
+				indicator.Change_Singal_RGB(6,0x94,0,0xd3,150);
+				break;
+			case CEngineer::GroundObject:
+				indicator.Change_Singal_RGB(6,0,0,0xff,150);
+				break;
+		  	default:
+				indicator.Change_Singal_RGB(6,0xff,0,0,150);
+			  	break;
+		}
+		indicator.Update();
+		/* Pass control to the next task */
+	    vTaskDelayUntil(&xLastWakeTime_t,10);
+	}
+
+ }
