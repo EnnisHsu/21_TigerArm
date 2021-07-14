@@ -40,8 +40,8 @@ class Godzilla_Pump_Controller : public Godzilla_Relay_Controller{
 public:
 	enum Negetive_Pressure_Typedef
 	{
-		Negetive,
-		Positive,
+		NoneObject,
+		SomeObject,
 	};
 	Godzilla_Pump_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase) : Godzilla_Relay_Controller(IOBase,IOPinBase){};
 	void Update_PressureValve(Negetive_Pressure_Typedef Valve_Status)

@@ -18,6 +18,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Devices.h"
 #include "Service_RobotCtrl.h"
+#include "Service_RelayCtrl.h"
 
 /* Private define ------------------------------------------------------------*/
 TaskHandle_t DeviceActuators_Handle;
@@ -48,7 +49,7 @@ void Device_DR16(void *arg);
 */
 void Service_Devices_Init(void)
 {
-  //xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &DeviceActuators_Handle);
+  xTaskCreate(Device_Actuators, "Dev.Actuator" , Tiny_Stack_Size,    NULL, PriorityHigh,   &DeviceActuators_Handle);
   xTaskCreate(Device_DR16,      "Dev.DR16"     , Normal_Stack_Size,    NULL, PriorityHigh,        &DeviceDR16_Handle);
   //xTaskCreate(Device_Sensors,   "Dev.Sensors"  , Tiny_Stack_Size,    NULL, PriorityHigh,        &DeviceSensors_Handle);
 }
@@ -71,7 +72,7 @@ void Device_Actuators(void *arg)
     /* Connection check */
 
     /* Read Message */
-
+		HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_9)==GPIO_PIN_SET?pump_controller.Update_PressureValve(pump_controller.SomeObject):pump_controller.Update_PressureValve(pump_controller.NoneObject);
     
 
     /* Send Message */

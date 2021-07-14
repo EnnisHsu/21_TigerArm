@@ -52,7 +52,7 @@ void Service_RobotCtrl_Init()
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 	xTaskCreate(Task_KeyboardCtrl,"Robot.KeyboardCtrl",Tiny_Stack_Size,NULL,PrioritySuperHigh,&Robot_KeyboardCtrl);
-	xTaskCreate(Device_Indicator,"Robot.Indicator",Tiny_Stack_Size,NULL,PriorityHigh,&Robot_Indicator);
+	//xTaskCreate(Device_Indicator,"Robot.Indicator",Tiny_Stack_Size,NULL,PriorityHigh,&Robot_Indicator);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -381,8 +381,9 @@ void Tigerarm_Space_Displacement()
 	xLastWakeTime_t = xTaskGetTickCount();
 	for(;;)
 	{
+		pump_controller.Get_PressureValve()==pump_controller.SomeObject?indicator.Change_Singal_RGB(LED_4,0xff,0,0xff,150):indicator.Change_Singal_RGB(LED_4,0xff,0xff,0,150);
 		/* LED 5 Below red:Lock green:Wait */
-		(TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandLock)?(void)indicator.Change_Singal_RGB(5,0xff,0,0,150):(void)indicator.Change_Singal_RGB(5,0,0xff,0,150);
+		(TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandLock)?(void)indicator.Change_Singal_RGB(LED_5,0xff,0,0,150):(void)indicator.Change_Singal_RGB(LED_5,0,0xff,0,150);
 	  	/* LED 6 Below
 		  	orange:DrivingMode		Yellow:TaskingMode
 			Golden:GoldenMineral	Sliver:SliverMode
@@ -391,28 +392,28 @@ void Tigerarm_Space_Displacement()
 		switch (TigerArm.Get_Current_Mode())
 		{
 			case CEngineer::DrivingMode:
-				indicator.Change_Singal_RGB(6,0xff,0xa5,0,150);
+				indicator.Change_Singal_RGB(LED_6,0xff,0xa5,0,150);
 				break;
 		  	case CEngineer::TaskingMode:
-			  	indicator.Change_Singal_RGB(6,0xff,0xff,0,150);
+			  	indicator.Change_Singal_RGB(LED_6,0xff,0xff,0,150);
 				break;
 			case CEngineer::GoldenMineral:
-				indicator.Change_Singal_RGB(6,0xff,0xd7,0,150);
+				indicator.Change_Singal_RGB(LED_6,0xff,0xd7,0,150);
 				break;
 			case CEngineer::SilverMineral:
-				indicator.Change_Singal_RGB(6,0xc0,0xc0,0xc0,150);
+				indicator.Change_Singal_RGB(LED_6,0xc0,0xc0,0xc0,150);
 				break;
 			case CEngineer::ExchangeMode:
-				indicator.Change_Singal_RGB(6,0xff,0xb6,0xc1,150);
+				indicator.Change_Singal_RGB(LED_6,0xff,0xb6,0xc1,150);
 				break;
 			case CEngineer::Rescure:
-				indicator.Change_Singal_RGB(6,0x94,0,0xd3,150);
+				indicator.Change_Singal_RGB(LED_6,0x94,0,0xd3,150);
 				break;
 			case CEngineer::GroundObject:
-				indicator.Change_Singal_RGB(6,0,0,0xff,150);
+				indicator.Change_Singal_RGB(LED_6,0,0,0xff,150);
 				break;
 		  	default:
-				indicator.Change_Singal_RGB(6,0xff,0,0,150);
+				indicator.Change_Singal_RGB(LED_6,0xff,0,0,150);
 			  	break;
 		}
 		indicator.Update();
