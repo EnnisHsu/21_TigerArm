@@ -119,9 +119,9 @@ void Task_ArmSingleCtrl(void *arg)
 								break;
 							case DR16_SW_MID:
 								//TigerArm.Switch_Mode(TigerArm.ManualCatch);
-								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_DOWN:
+								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							default:
 								break;
@@ -131,10 +131,12 @@ void Task_ArmSingleCtrl(void *arg)
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
-								elbow_controller.joint_motor.To_Exit_Control();
-								arm_controller.joint_motor.To_Exit_Control();
+								//elbow_controller.joint_motor.To_Exit_Control();
+								//arm_controller.joint_motor.To_Exit_Control();
+								//pump_controller.SetRelayStatus(pump_controller.Relay_On);
 								break;
 							case DR16_SW_MID:
+								//pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_DOWN:
 								break;
@@ -172,6 +174,8 @@ void Task_ArmSingleCtrl(void *arg)
 
 void Task_PumpCtrl(void *arg)
 {
+	uint32_t Msg = 301;
+	static uint8_t send_flag = 1;
 	TickType_t xLastWakeTime_t;
 	xLastWakeTime_t = xTaskGetTickCount();
 	
@@ -179,7 +183,15 @@ void Task_PumpCtrl(void *arg)
 	for(;;)
 	{
 		vTaskDelayUntil(&xLastWakeTime_t,1);
-		
+		if(pump_controller.Check_CatchState() == GPIO_PIN_SET)
+		{
+			if(send_flag)
+			{
+				Usart_Tx_Pack(USART_TxPort,4,sizeof(Msg),&Msg);
+				send_flag = 0;
+			}
+		}	
+		else    send_flag = 1;
 	}
 }
 
@@ -230,7 +242,13 @@ void Task_ROSCtrl(void *arg)
 						wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
 						wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
 						memcpy(ros_command,msg_buff+24,2);
-						ros_command[0]==1?pump_controller.SetRelayStatus(pump_controller.Relay_Off):(void)NULL;
+						
+						if(ros_command[0]==1)
+							pump_controller.SetRelayStatus(pump_controller.Relay_Off);
+						else
+							pump_controller.SetRelayStatus(pump_controller.Relay_On);
+						
+						//:(void)NULL;
 						ros_command[1]==1?TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait):(void)NULL;
 					}
 				}
