@@ -16,11 +16,14 @@
 Godzilla_Yaw_Controller yaw_controller(1,Yaw_Limit_Spd,-4.71f,12.56f,3.0f);
 Godzilla_Arm_Controller arm_controller(0x02,&hcan2,Arm_Limit_Spd,-5.25f,2.25f,65.0f/30.0f);
 Godzilla_Elbow_Controller elbow_controller(0x01,&hcan2,Elbow_Limit_Spd,-4.53f,1.32f,65.0f/30.0f);
-Godzilla_Servo_Controller wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360),
-		wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180,1190),
-		wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1450);
+Godzilla_Servo_Controller 	wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_controller.Servo360),
+							wristpitch_controller(&htim3,TIM_CHANNEL_1,wristpitch_controller.Servo180,1190),
+							wristyaw_controller(&htim3,TIM_CHANNEL_2,wristyaw_controller.Servo180,1450);
 
 
+PID_Param_Typedef spd_pid;
+PID_Param_Typedef ang_pid;
+float angTarget = 0;
 
 float arm_kp=100.0f,arm_kd=2.5f,elbow_kp=100.0f,elbow_kd=2.0f;
 float Motor_Max_Speed=10.0f;
@@ -28,6 +31,7 @@ float Motor_Max_Speed=10.0f;
 TaskHandle_t ServiceMotoCtrl_Handle;
 TaskHandle_t MotorInit_Handle;
 TaskHandle_t ServoCtrl_Handle;
+TaskHandle_t PID_Handle;
 
 void Service_MotoCtrl_Init()
 {
@@ -37,6 +41,36 @@ void Service_MotoCtrl_Init()
 		xTaskCreate(Task_ArmMotorInit,"ArmMotorInit", Normal_Stack_Size, NULL, PriorityAboveNormal, &MotorInit_Handle);
 	#endif
   xTaskCreate(Task_ServoCtrl,"Servo.Ctrl",Normal_Stack_Size,NULL,PriorityNormal,&ServoCtrl_Handle);
+  //xTaskCreate(Task_PIDCtrl,"pid.Ctrl",Normal_Stack_Size,NULL,PriorityLow,&PID_Handle);
+}
+
+void Task_PIDCtrl(void *arg)
+{
+	TickType_t xLastWakeTime_t;
+	xLastWakeTime_t = xTaskGetTickCount();
+	
+	spd_pid.kp = 70.0f;//16
+	spd_pid.ki = 0.0f;//0.3
+	spd_pid.kd = 0.0f;
+	spd_pid.p_term_max = 0.0f;
+	spd_pid.i_term_max = 1000.0f;
+	spd_pid.d_term_max = 0.0f;
+	spd_pid.o_max = 30000.0f;
+	
+	ang_pid.kp = 70.0f;
+	ang_pid.ki = 0.0f;
+	ang_pid.kd = 0.0f;
+	ang_pid.p_term_max = 0.0f;
+	ang_pid.i_term_max = 1000.0f;
+	ang_pid.d_term_max = 0.0f;
+	ang_pid.o_max = 30000.0f;
+	for(;;)
+	{
+		vTaskDelayUntil(&xLastWakeTime_t, 10);
+		yaw_controller.init_debug(spd_pid, ang_pid);
+		yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+angTarget*yaw_controller.getReductionRatio());
+		
+	}
 }
 
 void Task_ArmMotorInit(void *arg)
@@ -47,24 +81,32 @@ void Task_ArmMotorInit(void *arg)
 	{
 		/* Tigerarm Motor Init */
 		vTaskSuspend(ServiceMotoCtrl_Handle);
+		//vTaskSuspend(PID_Handle);
 		pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 		clamp_controller.SetRelayStatus(clamp_controller.Relay_Off);
 		hook_controller.SetRelayStatus(hook_controller.Relay_Off);
 		card_controller.SetRelayStatus(card_controller.Relay_Off);
-		elbow_controller.joint_motor.To_Exit_Control();
-		arm_controller.joint_motor.To_Exit_Control();
+		//elbow_controller.joint_motor.To_Exit_Control();
+		//arm_controller.joint_motor.To_Exit_Control();
 		vTaskDelay(2000);
-		PID_Param_Typedef spd_pid_param = {70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+		//PID_Param_Typedef spd_pid_param = {70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+		//PID_Param_Typedef ang_pid_param = { 70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
+
+		PID_Param_Typedef spd_pid_param = {50.0f, 0.00f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
 		PID_Param_Typedef ang_pid_param = { 70.0f, 0.0f, 0.0f, 0.0f, 1000.0f, 0.0f, 30000.0f};
 		yaw_controller.init(spd_pid_param, ang_pid_param);
 		elbow_controller.init();
-		vTaskDelay(100);
+		vTaskDelay(1000);
 		arm_controller.init(&elbow_controller);
+		vTaskDelay(1000);
 	
 		/* Slowly Move to Limit */
 		arm_controller.slowlyMoveToLimit();
+		vTaskDelay(1000);
 		elbow_controller.slowlyMoveToLimit();
+		vTaskDelay(1000);
 		yaw_controller.slowlyMoveToLimit();
+		vTaskDelay(1000);
 
 		/* Set Limit as Target & Zero */
 		yaw_controller.async_controller.setCurrent(yaw_controller.getCurrentAngle());
@@ -108,6 +150,7 @@ void Task_ArmMotorInit(void *arg)
 		arm_controller.async_controller.setCubicConfig_tf(100);
 		vTaskDelay(10);
 		vTaskResume(ServiceMotoCtrl_Handle);
+		//vTaskResume(PID_Handle);
 		vTaskSuspend(MotorInit_Handle);
 	}
 }
@@ -140,22 +183,23 @@ void Task_ArmMotorCtrl(void *arg)
 {
 	#ifndef _IngoreInit
 		vTaskSuspend(ServiceMotoCtrl_Handle);
-  #else
+	#else
 		yaw_controller.async_controller.setCubicConfig_tf(100);
 		elbow_controller.async_controller.setCubicConfig_tf(100);
 		arm_controller.async_controller.setCubicConfig_tf(100);
 	#endif
 	/* Cache for Task */
-  Motor_CAN_COB Motor_TxMsg;
+	Motor_CAN_COB Motor_TxMsg;
 
-  /* Pre-Load for task */
-
+  /* Pre-Load for task */		
   /* Infinite loop */
-  TickType_t xLastWakeTime_t;
-  xLastWakeTime_t = xTaskGetTickCount();
+	TickType_t xLastWakeTime_t;
+	xLastWakeTime_t = xTaskGetTickCount();
 	static int cnt = 0;
-  for(;;)
-  {
+	for(;;)
+	{
+		//yaw_controller.init_debug(spd_pid, ang_pid);
+		//yaw_controller.setStepTarget(yaw_controller.getZeroOffset()+angTarget*yaw_controller.getReductionRatio());
     /* Spin linear interpolation */
 		error_flag=75;
     	yaw_controller.spinOnce();
@@ -171,4 +215,3 @@ void Task_ArmMotorCtrl(void *arg)
     vTaskDelayUntil(&xLastWakeTime_t, 1);
   }
 }
-

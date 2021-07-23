@@ -89,8 +89,16 @@ public:
         SpeedPID.Current = motor->getSpeed();
         AnglePID.Current = motor->getAngle();
         SpeedPID.Target = AnglePID.Adjust();
-        motor->Out = SpeedPID.Adjust();
+		motor->Out = SpeedPID.Adjust();
+        //motor->Out = LPF(SpeedPID.Adjust(), motor->Out, 0.02);
     }
+	//为滤除高频信号，alpha取小点
+	float LPF(float x, float y, float alpha)
+	{
+		y = alpha * x + (1 - alpha) * y;
+		return y;
+	}
+	
     AnglePIDType AnglePID;
     SpeedPIDType SpeedPID;
 

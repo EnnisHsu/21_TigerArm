@@ -34,8 +34,6 @@
 #include "Service_RelayCtrl.h"
 #include "Service_Communication.h"
 
-
-
 float deg[6];
 CEngineer TigerArm;
 Indicator_Classdef indicator(&htim4,&hdma_tim4_up,TIM_CHANNEL_4);
@@ -44,15 +42,16 @@ TaskHandle_t Robot_ArmSingleCtrl;
 TaskHandle_t Robot_DR16Ctrl;
 TaskHandle_t Robot_KeyboardCtrl;
 TaskHandle_t Robot_Indicator;
+TaskHandle_t Robot_Pump;
 
 void Service_RobotCtrl_Init()
 {
-	
 	//xTaskCreate(Task_ArmSingleCtrl, "Robot.ArmSingleCtrl", Tiny_Stack_Size, NULL, PriorityNormal, &Robot_ArmSingleCtrl);
 	xTaskCreate(Task_DR16Ctrl, "Robot.DR16Ctrl", Tiny_Stack_Size, NULL, PrioritySuperHigh, &Robot_DR16Ctrl);
 	xTaskCreate(Task_ROSCtrl, "Robot.ROSCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_ROSCtrl);
 	xTaskCreate(Task_KeyboardCtrl,"Robot.KeyboardCtrl",Tiny_Stack_Size,NULL,PrioritySuperHigh,&Robot_KeyboardCtrl);
 	//xTaskCreate(Device_Indicator,"Robot.Indicator",Tiny_Stack_Size,NULL,PriorityHigh,&Robot_Indicator);
+	xTaskCreate(Task_PumpCtrl, "Robot.PumpCtrl", Normal_Stack_Size, NULL, PrioritySuperHigh, &Robot_Pump);
 }
 
 void Task_ArmSingleCtrl(void *arg)
@@ -162,13 +161,26 @@ void Task_ArmSingleCtrl(void *arg)
 						}			
 						break;
 						default:
-							break;
+						break;
 				}
 		  }
 
 	    /* Pass control to the next task */
 	    vTaskDelayUntil(&xLastWakeTime_t,1);
 	  }
+}
+
+void Task_PumpCtrl(void *arg)
+{
+	TickType_t xLastWakeTime_t;
+	xLastWakeTime_t = xTaskGetTickCount();
+	
+	pump_controller.Valve_Init(GPIOB,GPIO_PIN_8);
+	for(;;)
+	{
+		vTaskDelayUntil(&xLastWakeTime_t,1);
+		
+	}
 }
 
 void Task_ROSCtrl(void *arg)

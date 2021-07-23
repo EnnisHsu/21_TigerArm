@@ -7,3 +7,12 @@ elb目标	0	2
 wrol目标	0	6
 wpit目标	0	7
 wyaw目标	0	8
+angOmax	0	9
+spdOmax	0	10
+angKp	0	11
+angKi	0	12
+spdKp	0	13
+spdKi	0	14
+angImax	0	15
+spdImax	0	16
+angTar	0	17

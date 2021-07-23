@@ -101,47 +101,59 @@ void UpperMonitor_Sent_Choose(float * data)
         break;
       case 2:data[i] = yaw_controller.async_controller.getSteppingTarget();
         break;*/
-			case 0:data[i] = yaw_controller.async_controller.getTarget();
-				break;
-			case 1:data[i] = yaw_controller.async_controller.getSteppingTarget();
-				break;
-			case 2:data[i] = yaw_controller.getCurrentAngle();
-				break;
-			case 3:data[i] = deg[0];
-				break;
-			case 4:data[i] = yaw_controller.getZeroOffset();
-				break;
-			case 5:data[i] = arm_controller.async_controller.getTarget();
-				break;
-			case 6:data[i] = arm_controller.async_controller.getSteppingTarget();
-				break;
-			case 7:data[i] = arm_controller.getCurrentAngle();
-				break;
-			case 8:data[i] = deg[1];
-				break;
-			case 9:data[i] = arm_controller.getZeroOffset();
-				break;
-			case 10:data[i] = elbow_controller.Output;
-				break;
-			case 11:data[i] = elbow_controller.async_controller.getSteppingTarget();
-				break;
-			case 12:data[i] = elbow_controller.getCurrentAngle();
-				break;
-			case 13:data[i] = deg[2];
-				break;
-			case 14:data[i] = elbow_controller.getZeroOffset();
-				break;
-			case 15:data[i] = wristroll_controller.GetCurrentAngle();
-				break;
-			case 16:data[i] = wristpitch_controller.GetCurrentAngle();
-				break;
-			case 17:data[i] = wristyaw_controller.GetCurrentAngle();
-				break;
-			case 18:data[i] = elbow_controller.async_controller.target_delta;
-				break;
-			case 19:data[i] = elbow_controller.async_controller.getTarget();
-				break;
-      default:break;
+		case 0:data[i] = yaw_controller.async_controller.getTarget();
+			break;
+		case 1:data[i] = yaw_controller.async_controller.getSteppingTarget();
+			break;
+		case 2:data[i] = yaw_controller.getCurrentAngle();
+			break;
+		case 3:data[i] = deg[0];
+			break;
+		case 4:data[i] = yaw_controller.getZeroOffset();
+			break;
+		case 5:data[i] = arm_controller.async_controller.getTarget();
+			break;
+		case 6:data[i] = arm_controller.async_controller.getSteppingTarget();
+			break;
+		case 7:data[i] = arm_controller.getCurrentAngle();
+			break;
+		case 8:data[i] = deg[1];
+			break;
+		case 9:data[i] = arm_controller.getZeroOffset();
+			break;
+		case 10:data[i] = elbow_controller.Output;
+			break;
+		case 11:data[i] = elbow_controller.async_controller.getSteppingTarget();
+			break;
+		case 12:data[i] = elbow_controller.getCurrentAngle();
+			break;
+		case 13:data[i] = deg[2];
+			break;
+		case 14:data[i] = elbow_controller.getZeroOffset();
+			break;
+		case 15:data[i] = wristroll_controller.GetCurrentAngle();
+			break;
+		case 16:data[i] = wristpitch_controller.GetCurrentAngle();
+			break;
+		case 17:data[i] = wristyaw_controller.GetCurrentAngle();
+			break;
+		case 18:data[i] = elbow_controller.async_controller.target_delta;
+			break;
+		case 19:data[i] = elbow_controller.async_controller.getTarget();
+			break;
+		case 20:data[i] = yaw_controller.joint_ctrl.AnglePID.Target;
+			break;
+		case 21:data[i] = yaw_controller.joint_ctrl.AnglePID.Current;
+			break;
+		case 22:data[i] = yaw_controller.joint_ctrl.AnglePID.Out;
+			break;
+		case 23:data[i] = yaw_controller.joint_ctrl.SpeedPID.Target;
+			break;
+		case 24:data[i] = yaw_controller.joint_ctrl.SpeedPID.Current;
+			break;
+		case 25:data[i] = yaw_controller.joint_ctrl.SpeedPID.Out;
+			break;
+		default:break;
 	  /* 以上部分用于观察参数曲线 */
     }
   }
@@ -170,7 +182,6 @@ void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 			arm_controller.setStepTarget(arm_controller.getZeroOffset()+arm_controller.getReductionRatio()*float_param);
 			break;
 		case 0x02:
-			
 			float_param = PARAMETER_Change_float(PARAMETER+1);
 			elbow_controller.setStepTarget(elbow_controller.getZeroOffset()+elbow_controller.getReductionRatio()*float_param);
 			break;
@@ -194,6 +205,33 @@ void PARAMETER_MODIFICATION(uint8_t * PARAMETER)
 		case 0x08:
 			float_param = PARAMETER_Change_float(PARAMETER+1);
 			wristyaw_controller.SetTargetAngle(float_param);
+			break;
+		case 0x09:
+			ang_pid.o_max = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0A:
+			spd_pid.o_max = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0B:
+			ang_pid.kp= PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0C:
+			ang_pid.ki= PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0D:
+			spd_pid.kp = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0E:
+			spd_pid.ki = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x0F:
+			ang_pid.i_term_max = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x10:
+			spd_pid.i_term_max = PARAMETER_Change_float(PARAMETER+1);
+			break;
+		case 0x11:
+			angTarget = PARAMETER_Change_float(PARAMETER+1);
 			break;
 	  default:
 	    break;

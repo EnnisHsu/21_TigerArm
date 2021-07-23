@@ -25,6 +25,7 @@ public:
 		this->Relay_Status=Target_Status;
 		HAL_GPIO_WritePin(this->GPIO_Base,this->GPIO_PIN_Base,(GPIO_PinState)this->Relay_Status);
 	}
+	
 	Relay_Status_Typedef GetRelayStatus()
 	{
 		return this->Relay_Status;
@@ -44,6 +45,17 @@ public:
 		SomeObject,
 	};
 	Godzilla_Pump_Controller(GPIO_TypeDef* IOBase,uint16_t IOPinBase) : Godzilla_Relay_Controller(IOBase,IOPinBase){};
+	
+	void Valve_Init(GPIO_TypeDef* valveIO,uint16_t valveIOPin)
+	{
+		this->Valve_GPIO_Base = valveIO;
+		this->Valve_GPIO_PIN_Base = valveIOPin;
+	}
+	
+	GPIO_PinState Check_CatchState()
+	{
+		return HAL_GPIO_ReadPin(this->Valve_GPIO_Base, this->Valve_GPIO_PIN_Base);
+	}	
 	void Update_PressureValve(Negetive_Pressure_Typedef Valve_Status)
 	{
 		this->negetive_pressure_signal=Valve_Status;
@@ -53,6 +65,8 @@ public:
 		return this->negetive_pressure_signal;
 	}
 private:
+	GPIO_TypeDef* Valve_GPIO_Base;
+	uint16_t Valve_GPIO_PIN_Base;
 	Negetive_Pressure_Typedef negetive_pressure_signal;
 };
 

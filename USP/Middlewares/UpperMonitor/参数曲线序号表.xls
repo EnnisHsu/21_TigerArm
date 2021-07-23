@@ -18,3 +18,9 @@ wpit目标	16
 wyaw目标	17
 error	18
 elb插补t	19
+angTarget	20
+angCurrent	21
+angOut	22
+spdTarget	23
+spdCurrent	24
+spdOut	25

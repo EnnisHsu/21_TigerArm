@@ -17,6 +17,7 @@ void Service_MotoCtrl_Init();
 void Task_ArmMotorInit(void *arg);
 void Task_ArmMotorCtrl(void *arg);
 void Task_ServoCtrl(void *arg);
+void Task_PIDCtrl(void *arg);
 
 class Asynchronous_Controller;
 	
@@ -279,6 +280,15 @@ public:
     this->joint_ctrl.AnglePID.SetPIDParam(ang_pid_param.kp, ang_pid_param.ki, ang_pid_param.kd, \
                                           ang_pid_param.i_term_max, ang_pid_param.o_max);
   }
+  
+   void init_debug(PID_Param_Typedef spd_pid_param, PID_Param_Typedef ang_pid_param)
+  {
+    this->joint_ctrl.SpeedPID.SetPIDParam(spd_pid_param.kp, spd_pid_param.ki, spd_pid_param.kd, \
+                                          spd_pid_param.i_term_max, spd_pid_param.o_max);
+    this->joint_ctrl.AnglePID.SetPIDParam(ang_pid_param.kp, ang_pid_param.ki, ang_pid_param.kd, \
+                                          ang_pid_param.i_term_max, ang_pid_param.o_max);
+  }
+  
   void slowlyMoveToLimit()
   {
     float slowly_moving_target = this->getCurrentAngle();
@@ -441,8 +451,9 @@ class Godzilla_Arm_Controller : public Godzilla_Joint_Controller<AK80_V3>
 };
 
 
-
-
+extern float angTarget;
+extern PID_Param_Typedef spd_pid;
+extern PID_Param_Typedef ang_pid;
 
 extern Godzilla_Yaw_Controller yaw_controller;
 extern Godzilla_Arm_Controller arm_controller;
