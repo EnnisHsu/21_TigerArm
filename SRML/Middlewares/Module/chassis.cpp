@@ -309,6 +309,7 @@ void CChassis::Set_Target(float target_X, float target_Y ,float target_Z)
     Command_Velocity.x_speed = std_lib::constrain(target_X,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
     Command_Velocity.y_speed = std_lib::constrain(target_Y,-1.0f,1.0f)*Co_limit*Param.wheel_max_speed;
     Command_Velocity.z_speed = std_lib::constrain(target_Z,-1.0f,1.0f)*Param.coefficient_z*Param.wheel_max_speed;
+	
   }
   
   /* Set command pose */

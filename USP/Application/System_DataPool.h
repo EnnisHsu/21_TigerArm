@@ -91,12 +91,20 @@ float deg2rad(float x);
 
 typedef struct BoardComRx_Typedef
 {
-  DR16_DataPack_Typedef dr16Data;
+	DR16_DataPack_Typedef dr16Data;
 	uint8_t CtrlMode;
 	uint8_t TarSpdX;
 	uint8_t TarSpdY;
 	uint8_t TarSpdZ;
 }_BoardComRx;
+
+typedef struct NUCComRx_Typedef
+{
+	float ROS_Target_X;
+	float ROS_Target_Y;
+	float ROS_Target_W;
+	short flag;
+}_NUCComRx;
 
 extern bool TurnBack;
 //暂时被遗忘在这,统一标准接口制定后再集中回收

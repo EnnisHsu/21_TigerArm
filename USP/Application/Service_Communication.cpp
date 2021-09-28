@@ -20,11 +20,14 @@
 #include "Service_RobotCtrl.h"
 #include <vector>
 /* Private define ------------------------------------------------------------*/
+#define ENABLE_DR16_CtrlChassis  1
+
 void Task_CAN1Transmit(void *arg);
 void Task_CAN2Transmit(void *arg);
 void Task_UsartTransmit(void *arg);
 void Task_CANReceive(void *arg);
 void Task_BoardComRx(void *arg);
+
 /**
 * @brief  Initialization of communication service
 * @param  None.
@@ -38,11 +41,11 @@ void Service_Communication_Init(void)
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_15|CanFifo_0|Can_STDID|Can_DataType,0x002,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 //  CAN_Filter_Mask_Config(&hcan2, CanFilter_14|CanFifo_0|Can_STDID|Can_DataType,0x003,0x3ff);//筛选器:|编号|FIFOx|ID类型|帧类型|ID|屏蔽位(0x3ff,0x1FFFFFFF)|
 	CAN_Filter_Mask_Config(&hcan1, CanFilter_0|CanFifo_0|Can_STDID|Can_DataType, 0x200, 0x3f0);
-  xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
+	xTaskCreate(Task_UsartTransmit,"Com.Usart TxPort" , Tiny_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
 	xTaskCreate(Task_BoardComRx,"Com.Board Commu" , Normal_Stack_Size,    NULL, PriorityHigh,   &UartTransmitPort_Handle);
-  xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
-  xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
-  xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
+	xTaskCreate(Task_CAN1Transmit, "Com.CAN1 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN1SendPort_Handle);
+	xTaskCreate(Task_CAN2Transmit, "Com.CAN2 TxPort"  , Tiny_Stack_Size,    NULL, PrioritySuperHigh,   &CAN2SendPort_Handle); 
+	xTaskCreate(Task_CANReceive, "Com.CAN RxPort", Tiny_Stack_Size, NULL, PrioritySuperHigh, &CANReceivePort_Handle);
 }
 
 /*----------------------------------------------- CAN Manager ---------------------------------------------*/
@@ -117,8 +120,6 @@ void Task_CANReceive(void *arg)
 	{
 		while (xQueueReceive(RMMotor_QueueHandle, &RX_COB, 0)==pdPASS)
 		{
-			
-
 		}
 
 		vTaskDelayUntil(&xLastWakeTime, 1);
@@ -136,9 +137,10 @@ void Task_BoardComRx(void *arg)
   TickType_t xLastWakeTime_t;
   xLastWakeTime_t = xTaskGetTickCount();
 	extern _BoardComRx BoardComRxData;
+	
   for(;;)
   {
-   
+
 		if(Get_SystemTimer()-LastTime < 500000)
 		{
 			Engineer_chassis.Switch_Mode(Normal_Speed);
@@ -146,15 +148,15 @@ void Task_BoardComRx(void *arg)
 			Engineer_chassis.Switch_Mode(Halt);
 		}
 		
+#if  	ENABLE_DR16_CtrlChassis
 		if (xQueueReceive(BodCom_QueueHandle, &_buffer, _xTicksToWait) == pdTRUE)
-    {
-
+		{
 			memcpy(&BoardComRxData,_buffer.address,22);
-    	DR16.DataCapture(&BoardComRxData.dr16Data);
-//			TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
+			DR16.DataCapture(&BoardComRxData.dr16Data);
+			//TigerArm.Switch_Mode((CEngineer::Engineer_Mode_Typedef)BoardComRxData.CtrlMode);
 			LastTime = Get_SystemTimer();
-			
 		}
+#endif
     /* Pass control to the next task */
     vTaskDelayUntil(&xLastWakeTime_t,1);
   }
@@ -177,7 +179,6 @@ void Update_ChassisCurrent(uint8_t *msg_rece,uint8_t motor)
 			Engineer_chassis.wheel_rpm[motor] = (short)((unsigned char)msg_rece[2]<<8|(unsigned char)msg_rece[3]);	
 			Engineer_chassis.wheel_torque[motor] = (short)((unsigned char)msg_rece[4]<<8|(unsigned char)msg_rece[5]);			
 		}
-
 }
 
 /**
@@ -248,6 +249,8 @@ void Task_UsartTransmit(void *arg)
   /* Infinite loop */
   for(;;)
   {
+	  
+	 
     /* Usart Receive Port*/
     if(xQueueReceive(USART_TxPort,&Usart_TxCOB,portMAX_DELAY) == pdPASS)
     {
@@ -285,6 +288,15 @@ uint32_t User_UART3_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART4_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
+	static USART_COB NUC_COB;
+	//Send To UART Receive Queue
+	if( NUC_QueueHandle != NULL )
+	{
+		NUC_COB.port_num = 4;
+		NUC_COB.len      = ReceiveLen;
+		NUC_COB.address  = Recv_Data;
+		xQueueSendFromISR(NUC_QueueHandle,&NUC_COB,0);
+	}
 	return 0;
 }
 
@@ -295,15 +307,15 @@ uint32_t User_UART5_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 
 uint32_t User_UART6_RxCpltCallback(uint8_t* Recv_Data, uint16_t ReceiveLen)
 {
-		static USART_COB Usart_RxCOB;
+	static USART_COB Usart_RxCOB;
   //Send To UART Receive Queue
   if(ReceiveLen==22 && BodCom_QueueHandle != NULL)
   {
-    Usart_RxCOB.port_num = 6;
-    Usart_RxCOB.len      = ReceiveLen;
-    Usart_RxCOB.address  = Recv_Data;
-    xQueueSendFromISR(BodCom_QueueHandle,&Usart_RxCOB,0);
-  }
+		Usart_RxCOB.port_num = 6;
+		Usart_RxCOB.len      = ReceiveLen;
+		Usart_RxCOB.address  = Recv_Data;
+		xQueueSendFromISR(BodCom_QueueHandle,&Usart_RxCOB,0);
+	}
   return 0;
 }
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

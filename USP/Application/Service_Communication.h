@@ -16,7 +16,6 @@ extern TaskHandle_t CAN1SendPort_Handle;
 extern TaskHandle_t CAN2SendPort_Handle;
 extern TaskHandle_t CANReceivePort_Handle;
 extern TaskHandle_t UartTransmitPort_Handle;
-
 /*------------------------------Function prototypes ---------------------------*/
 void User_CAN1_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage);
 void User_CAN2_RxCpltCallback(CAN_RxBuffer *CAN_RxMessage);

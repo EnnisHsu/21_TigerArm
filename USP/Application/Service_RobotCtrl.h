@@ -47,10 +47,14 @@ class CEngineer
 };
 
 extern CEngineer TigerArm;
-	
+extern _NUCComRx NUCComRxData;
 extern CChassis Engineer_chassis;
-	
+
+extern float _x_vel_div;
+extern float _y_vel_div;
+extern float _div;
 extern float TargetVelocity_X,TargetVelocity_Y,TargetVelocity_Z;
+extern int is_RxNuc;
 
 void Service_RobotCtrl_Init();
 void Controller_PID_ParamTnit();
@@ -64,7 +68,7 @@ void Gamepad_Ctrl(void*arg);
 void Camera_Ctrl(void*arg);
 void Chassis_Ctrl(void *arg);
 void Keyboard_Ctrl(void *arg);
-
+void NUC_Ctrl(void *arg);
 
 #ifdef __cplusplus
 }
