@@ -36,7 +36,7 @@ CChassis Engineer_chassis(0,0,76,16000,9000);
 CEngineer TigerArm;
 
 float TargetVelocity_X,TargetVelocity_Y,TargetVelocity_Z;
-float _div = 15.0f;
+float _div = 50.0f;
 float _x_vel_div = 7000.0f;
 float _y_vel_div = 7000.0f;
 int is_RxNuc = 0;
@@ -159,16 +159,19 @@ void NUC_Ctrl(void *arg)
 			{
 				memcpy(longBuff, _buffer.address, _buffer.len);
 				memcpy(&NUCComRxData, longBuff, 14);//收12个 即为3*4个字节
+				overtime = 500;
 			}
 			else if(_buffer.len == 0x1c) //28
 			{
 				memcpy(shortBuff, _buffer.address, _buffer.len);
 				memcpy(&NUCComRxData, shortBuff, 14);
+				overtime = 500;
 			}
 			else if(_buffer.len == 0x0e) //14
 			{
 				memcpy(normalBuff, _buffer.address, _buffer.len);
 				memcpy(&NUCComRxData, normalBuff, 14);
+				overtime = 500;
 			}
 		}
 		else
@@ -176,7 +179,7 @@ void NUC_Ctrl(void *arg)
 			overtime--;
 			if(overtime <= 0)
 			{
-				overtime = 30;
+				overtime = 500;
 				is_RxNuc = 0;
 			}
 		}
