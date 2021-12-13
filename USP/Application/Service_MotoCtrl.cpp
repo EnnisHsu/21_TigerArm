@@ -24,8 +24,10 @@ Godzilla_Servo_Controller 	wristroll_controller(&htim2,TIM_CHANNEL_2,wristroll_c
 PID_Param_Typedef spd_pid;
 PID_Param_Typedef ang_pid;
 float angTarget = 0;
+//edited
+//float arm_kp=100.0f,arm_kd=2.5f,elbow_kp=100.0f,elbow_kd=2.0f;
 
-float arm_kp=100.0f,arm_kd=2.5f,elbow_kp=100.0f,elbow_kd=2.0f;
+float arm_kp=50.0f,arm_kd=1.0f,elbow_kp=50.0f,elbow_kd=1.0f;
 float Motor_Max_Speed=10.0f;
 
 TaskHandle_t ServiceMotoCtrl_Handle;

@@ -91,7 +91,7 @@ void Task_ArmSingleCtrl(void *arg)
  void Task_DR16Ctrl(void *arg)
 {
 	  /* Cache for Task */
-
+	  uint8_t flag = 0;
 	  /* Pre-Load for task */
 
 	  /* Infinite loop */
@@ -104,39 +104,39 @@ void Task_ArmSingleCtrl(void *arg)
 				switch (DR16.GetS2())
 				{
 					case DR16_SW_UP:
+						pump_controller.SetRelayStatus(pump_controller.Relay_On);
 						TigerArm.Switch_Mode(TigerArm.GoldenMineral);
-						DR16.Get_LY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(119):(void)NULL;
-						DR16.Get_LY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(97):(void)NULL;
-						DR16.Get_LX_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(115):(void)NULL;
-						DR16.Get_LX_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(100):(void)NULL;
-						DR16.Get_RY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(87):(void)NULL;
-						DR16.Get_RY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(83):(void)NULL;				
+//						DR16.Get_LY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(119):(void)NULL;
+//						DR16.Get_LY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(97):(void)NULL;
+//						DR16.Get_LX_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(115):(void)NULL;
+//						DR16.Get_LX_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(100):(void)NULL;
+//						DR16.Get_RY_Norm()>0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(87):(void)NULL;
+//						DR16.Get_RY_Norm()<-0.5f && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait?Send_Command_To_NUC(83):(void)NULL;				
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
 								//TigerArm.Switch_Mode(TigerArm.ManualCatch);
-								pump_controller.SetRelayStatus(pump_controller.Relay_On);
 								break;
 							case DR16_SW_MID:
-								//TigerArm.Switch_Mode(TigerArm.ManualCatch);
+								
 								break;
 							case DR16_SW_DOWN:
-								pump_controller.SetRelayStatus(pump_controller.Relay_Off);
+								//pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							default:
 								break;
 						}
 						break;
 					case DR16_SW_MID:
+						pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
 								//elbow_controller.joint_motor.To_Exit_Control();
 								//arm_controller.joint_motor.To_Exit_Control();
-								//pump_controller.SetRelayStatus(pump_controller.Relay_On);
+								//pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_MID:
-								//pump_controller.SetRelayStatus(pump_controller.Relay_Off);
 								break;
 							case DR16_SW_DOWN:
 								break;
@@ -145,18 +145,32 @@ void Task_ArmSingleCtrl(void *arg)
 						}
 						break;
 					case DR16_SW_DOWN:
-						
 						switch (DR16.GetS1())
 						{
 							case DR16_SW_UP:
-								if (TigerArm.Get_Current_Mode()!=TigerArm.DrivingMode) Send_Command_To_NUC(114);
-								TigerArm.Switch_Mode(TigerArm.DrivingMode);
-								
+								TigerArm.Switch_Mode(TigerArm.GoldenMineral);
+								if(TigerArm.Get_Current_Mode()==TigerArm.GoldenMineral && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)
+								{	
+									(flag == 0) ? Send_Command_To_NUC(122):(void)NULL;
+									flag = 1;
+								}
 								break;
-							case DR16_SW_MID:
+							case DR16_SW_MID://catch
+								TigerArm.Switch_Mode(TigerArm.GoldenMineral);
+								if(TigerArm.Get_Current_Mode()==TigerArm.GoldenMineral && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)
+								{	
+									(flag == 1) ? Send_Command_To_NUC(101):(void)NULL;
+									flag = 0;
+								}
 								break;
-							case DR16_SW_DOWN:
-								xTaskNotify(Robot_KeyboardCtrl,NULL,eNoAction);
+							case DR16_SW_DOWN://go back
+								TigerArm.Switch_Mode(TigerArm.GoldenMineral);
+								if(TigerArm.Get_Current_Mode()==TigerArm.GoldenMineral && TigerArm.Get_Current_CommandStatus()==TigerArm.Engineer_CommandWait)
+								{	
+									(flag == 0) ? Send_Command_To_NUC(107):(void)NULL;
+									flag = 1;
+								}								
+								//xTaskNotify(Robot_KeyboardCtrl,NULL,eNoAction);
 								break;
 							default:
 								break;
@@ -242,12 +256,6 @@ void Task_ROSCtrl(void *arg)
 						wristpitch_controller.SetTargetAngle(rad2deg(deg[4]));
 						wristyaw_controller.SetTargetAngle(rad2deg(deg[5]));
 						memcpy(ros_command,msg_buff+24,2);
-						
-						if(ros_command[0]==1)
-							pump_controller.SetRelayStatus(pump_controller.Relay_Off);
-						else
-							pump_controller.SetRelayStatus(pump_controller.Relay_On);
-						
 						//:(void)NULL;
 						ros_command[1]==1?TigerArm.Switch_CommandStatus(TigerArm.Engineer_CommandWait):(void)NULL;
 					}
